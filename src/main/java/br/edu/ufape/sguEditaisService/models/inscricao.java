@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor
@@ -18,6 +19,8 @@ public class inscricao {
 
     @Enumerated(EnumType.STRING)
     private status status;
+
+    private UUID idUsuario;
 
     @OneToMany(mappedBy = "inscricao", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<documento> documentos;

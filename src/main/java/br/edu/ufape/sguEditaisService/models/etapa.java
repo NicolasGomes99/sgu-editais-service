@@ -22,6 +22,7 @@ public class etapa {
     private LocalDateTime dataInicio;
     private LocalDateTime dataFim;
     private boolean obrigatoria;
+    private int ordem;
 
     @Enumerated(EnumType.STRING)
     private statusEtapa status;
@@ -34,4 +35,7 @@ public class etapa {
 
     @ManyToOne
     private edital edital;
+
+    @OneToMany(mappedBy = "etapa", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PermissaoEtapa> permissaoEtapa;
 }

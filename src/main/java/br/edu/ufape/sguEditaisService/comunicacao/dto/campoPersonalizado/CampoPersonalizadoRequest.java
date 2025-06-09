@@ -1,7 +1,7 @@
 package br.edu.ufape.sguEditaisService.comunicacao.dto.campoPersonalizado;
 
 import br.edu.ufape.sguEditaisService.models.enums.tipoCampo;
-import br.edu.ufape.sguEditaisService.models.campoPersonalizado;
+import br.edu.ufape.sguEditaisService.models.CampoPersonalizado;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import org.modelmapper.ModelMapper;
@@ -17,7 +17,7 @@ public class CampoPersonalizadoRequest {
     @NotBlank(message = "opcoes é obrigatório")
     private String opcoes;
 
-    public campoPersonalizado convertToEntity(CampoPersonalizadoRequest request, ModelMapper modelMapper) {
-        return modelMapper.map(request, campoPersonalizado.class);
+    public CampoPersonalizado convertToEntity(CampoPersonalizadoRequest request, ModelMapper modelMapper) {
+        return modelMapper.map(request, CampoPersonalizado.class);
     }
 }

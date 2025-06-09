@@ -1,7 +1,7 @@
 package br.edu.ufape.sguEditaisService.comunicacao.dto.campoPersonalizado;
 
 import br.edu.ufape.sguEditaisService.models.enums.tipoCampo;
-import br.edu.ufape.sguEditaisService.models.campoPersonalizado;
+import br.edu.ufape.sguEditaisService.models.CampoPersonalizado;
 import lombok.*;
 import org.modelmapper.ModelMapper;
 
@@ -14,7 +14,7 @@ public class CampoPersonalizadoResponse {
     private tipoCampo tipoCampo;
     private String opcoes;
 
-    public CampoPersonalizadoResponse(campoPersonalizado entity, ModelMapper modelMapper) {
+    public CampoPersonalizadoResponse(CampoPersonalizado entity, ModelMapper modelMapper) {
         if (entity == null) throw new IllegalArgumentException("campoPersonalizado não pode ser nulo");
         else modelMapper.map(entity, this);
     }

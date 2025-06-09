@@ -1,6 +1,6 @@
 package br.edu.ufape.sguEditaisService.comunicacao.dto.etapa;
 
-import br.edu.ufape.sguEditaisService.models.etapa;
+import br.edu.ufape.sguEditaisService.models.Etapa;
 import br.edu.ufape.sguEditaisService.models.enums.statusEtapa;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -20,7 +20,7 @@ public class EtapaRequest {
     private int ordem;
     private statusEtapa status;
 
-    public etapa convertToEntity(EtapaRequest request, ModelMapper modelMapper) {
-        return modelMapper.map(request, etapa.class);
+    public Etapa convertToEntity(EtapaRequest request, ModelMapper modelMapper) {
+        return modelMapper.map(request, Etapa.class);
     }
 }

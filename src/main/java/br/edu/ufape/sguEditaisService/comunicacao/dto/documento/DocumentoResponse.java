@@ -1,6 +1,6 @@
 package br.edu.ufape.sguEditaisService.comunicacao.dto.documento;
 
-import br.edu.ufape.sguEditaisService.models.documento;
+import br.edu.ufape.sguEditaisService.models.Documento;
 import lombok.*;
 import org.modelmapper.ModelMapper;
 
@@ -11,7 +11,7 @@ public class DocumentoResponse {
     private String caminho;
     private java.time.LocalDateTime dataUpload;
 
-    public DocumentoResponse(documento entity, ModelMapper modelMapper) {
+    public DocumentoResponse(Documento entity, ModelMapper modelMapper) {
         if (entity == null) throw new IllegalArgumentException("documento não pode ser nulo");
         else modelMapper.map(entity, this);
     }

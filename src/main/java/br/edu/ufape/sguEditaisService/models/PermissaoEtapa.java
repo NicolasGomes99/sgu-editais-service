@@ -17,5 +17,5 @@ public class PermissaoEtapa {
     private String perfil;
 
     @ManyToOne
-    private etapa etapa;
+    private Etapa etapa;
 }

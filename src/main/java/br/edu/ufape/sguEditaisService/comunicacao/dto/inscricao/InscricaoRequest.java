@@ -1,8 +1,7 @@
 package br.edu.ufape.sguEditaisService.comunicacao.dto.inscricao;
 
 import br.edu.ufape.sguEditaisService.models.enums.status;
-import br.edu.ufape.sguEditaisService.models.inscricao;
-import jakarta.validation.constraints.*;
+import br.edu.ufape.sguEditaisService.models.Inscricao;
 import lombok.*;
 import org.modelmapper.ModelMapper;
 
@@ -11,7 +10,7 @@ public class InscricaoRequest {
 
     private status status;
 
-    public inscricao convertToEntity(InscricaoRequest request, ModelMapper modelMapper) {
-        return modelMapper.map(request, inscricao.class);
+    public Inscricao convertToEntity(InscricaoRequest request, ModelMapper modelMapper) {
+        return modelMapper.map(request, Inscricao.class);
     }
 }

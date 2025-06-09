@@ -1,6 +1,6 @@
 package br.edu.ufape.sguEditaisService.comunicacao.dto.etapa;
 
-import br.edu.ufape.sguEditaisService.models.etapa;
+import br.edu.ufape.sguEditaisService.models.Etapa;
 import br.edu.ufape.sguEditaisService.models.enums.statusEtapa;
 import lombok.*;
 import org.modelmapper.ModelMapper;
@@ -19,7 +19,7 @@ public class EtapaResponse {
     private int ordem;
     private statusEtapa status;
 
-    public EtapaResponse(etapa entity, ModelMapper modelMapper) {
+    public EtapaResponse(Etapa entity, ModelMapper modelMapper) {
         if (entity == null) throw new IllegalArgumentException("etapa não pode ser nulo");
         else modelMapper.map(entity, this);
     }

@@ -11,7 +11,7 @@ import java.util.List;
 
 @Entity
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor
-public class inscricao {
+public class Inscricao {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,11 +20,11 @@ public class inscricao {
     private status status;
 
     @OneToMany(mappedBy = "inscricao", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<documento> documentos;
+    private List<Documento> documentos;
 
     @OneToMany(mappedBy = "inscricao", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<valorCampo> valoresCampo;
+    private List<ValorCampo> valoresCampo;
 
     @ManyToOne
-    private edital edital;
+    private Edital edital;
 }

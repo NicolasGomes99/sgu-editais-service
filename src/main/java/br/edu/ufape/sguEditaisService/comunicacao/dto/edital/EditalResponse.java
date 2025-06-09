@@ -1,6 +1,6 @@
 package br.edu.ufape.sguEditaisService.comunicacao.dto.edital;
 
-import br.edu.ufape.sguEditaisService.models.edital;
+import br.edu.ufape.sguEditaisService.models.Edital;
 import br.edu.ufape.sguEditaisService.models.enums.status;
 import lombok.*;
 import org.modelmapper.ModelMapper;
@@ -15,7 +15,7 @@ public class EditalResponse {
     private java.time.LocalDateTime fimIncricao;
     private status status;
 
-    public EditalResponse(edital entity, ModelMapper modelMapper) {
+    public EditalResponse(Edital entity, ModelMapper modelMapper) {
         if (entity == null) throw new IllegalArgumentException("edital não pode ser nulo");
         else modelMapper.map(entity, this);
     }

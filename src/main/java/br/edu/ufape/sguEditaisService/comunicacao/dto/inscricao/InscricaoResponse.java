@@ -1,7 +1,7 @@
 package br.edu.ufape.sguEditaisService.comunicacao.dto.inscricao;
 
 import br.edu.ufape.sguEditaisService.models.enums.status;
-import br.edu.ufape.sguEditaisService.models.inscricao;
+import br.edu.ufape.sguEditaisService.models.Inscricao;
 import lombok.*;
 import org.modelmapper.ModelMapper;
 
@@ -10,7 +10,7 @@ public class InscricaoResponse {
     private Long id;
     private status status;
 
-    public InscricaoResponse(inscricao entity, ModelMapper modelMapper) {
+    public InscricaoResponse(Inscricao entity, ModelMapper modelMapper) {
         if (entity == null) throw new IllegalArgumentException("inscricao não pode ser nulo");
         else modelMapper.map(entity, this);
     }

@@ -1,6 +1,6 @@
 package br.edu.ufape.sguEditaisService.comunicacao.dto.tipoEdital;
 
-import br.edu.ufape.sguEditaisService.models.tipoEdital;
+import br.edu.ufape.sguEditaisService.models.TipoEdital;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import org.modelmapper.ModelMapper;
@@ -11,7 +11,7 @@ public class TipoEditalRequest {
     @NotBlank(message = "descricao é obrigatória")
     private String descricao;
 
-    public tipoEdital convertToEntity(TipoEditalRequest request, ModelMapper modelMapper) {
-        return modelMapper.map(request, tipoEdital.class);
+    public TipoEdital convertToEntity(TipoEditalRequest request, ModelMapper modelMapper) {
+        return modelMapper.map(request, TipoEdital.class);
     }
 }

@@ -1,6 +1,6 @@
 package br.edu.ufape.sguEditaisService.comunicacao.dto.edital;
 
-import br.edu.ufape.sguEditaisService.models.edital;
+import br.edu.ufape.sguEditaisService.models.Edital;
 import br.edu.ufape.sguEditaisService.models.enums.status;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -18,7 +18,7 @@ public class EditalRequest {
     private java.time.LocalDateTime fimIncricao;
     private status status;
 
-    public edital convertToEntity(EditalRequest request, ModelMapper modelMapper) {
-        return modelMapper.map(request, edital.class);
+    public Edital convertToEntity(EditalRequest request, ModelMapper modelMapper) {
+        return modelMapper.map(request, Edital.class);
     }
 }

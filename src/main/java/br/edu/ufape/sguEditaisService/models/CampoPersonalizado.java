@@ -11,7 +11,7 @@ import java.util.List;
 
 @Entity
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor
-public class campoPersonalizado {
+public class CampoPersonalizado {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,12 +27,12 @@ public class campoPersonalizado {
     private String opcoes;
 
     @OneToMany(mappedBy = "campoPersonalizado", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<valorCampo> valoresCampo;
+    private List<ValorCampo> valoresCampo;
 
     @ManyToOne
-    private etapa etapa;
+    private Etapa etapa;
 
     @ManyToOne
-    private edital edital;
+    private Edital edital;
 
 }

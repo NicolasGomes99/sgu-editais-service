@@ -6,21 +6,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor
-public class documento {
+public class ValorCampo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String nome;
-    private String caminho;
-    private LocalDateTime dataUpload;
+    private String valor;
+
 
     @ManyToOne
-    private etapa etapa;
+    private Inscricao inscricao;
     @ManyToOne
-    private inscricao inscricao;
+    private CampoPersonalizado campoPersonalizado;
+
 }

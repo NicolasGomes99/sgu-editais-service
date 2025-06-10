@@ -1,6 +1,6 @@
 package br.edu.ufape.sguEditaisService.comunicacao.dto.documentoEdital;
 
-import br.edu.ufape.sguEditaisService.models.documentoEdital;
+import br.edu.ufape.sguEditaisService.models.DocumentoEdital;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import org.modelmapper.ModelMapper;
@@ -14,7 +14,7 @@ public class DocumentoEditalRequest {
     private String caminho;
     private java.time.LocalDateTime dataUpload;
 
-    public documentoEdital convertToEntity(DocumentoEditalRequest request, ModelMapper modelMapper) {
-        return modelMapper.map(request, documentoEdital.class);
+    public DocumentoEdital convertToEntity(DocumentoEditalRequest request, ModelMapper modelMapper) {
+        return modelMapper.map(request, DocumentoEdital.class);
     }
 }

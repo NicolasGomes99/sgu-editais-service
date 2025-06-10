@@ -23,10 +23,10 @@ public class HistoricoEtapaInscricao {
     private String observacao;
 
     @ManyToOne
-    private inscricao inscricao;
+    private Inscricao inscricao;
 
     @ManyToOne
-    private etapa etapa;
+    private Etapa etapa;
 
 
 }

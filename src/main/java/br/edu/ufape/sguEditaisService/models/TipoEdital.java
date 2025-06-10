@@ -8,17 +8,13 @@ import lombok.Setter;
 
 @Entity
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor
-public class valorCampo {
+public class TipoEdital {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String valor;
+    private String descricao;
 
-
-    @ManyToOne
-    private inscricao inscricao;
-    @ManyToOne
-    private campoPersonalizado campoPersonalizado;
-
+    @OneToOne
+    private Edital edital;
 }

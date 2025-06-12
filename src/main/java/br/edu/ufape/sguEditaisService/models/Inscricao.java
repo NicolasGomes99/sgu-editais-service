@@ -27,4 +27,7 @@ public class Inscricao {
 
     @ManyToOne
     private Edital edital;
+
+    @OneToMany(mappedBy = "inscricao", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<HistoricoEtapaInscricao> historicoEtapaInscricao;
 }

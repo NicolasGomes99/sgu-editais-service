@@ -1,5 +1,7 @@
 package br.edu.ufape.sguEditaisService.comunicacao.dto.documento;
 
+import br.edu.ufape.sguEditaisService.comunicacao.dto.etapa.EtapaResponse;
+import br.edu.ufape.sguEditaisService.comunicacao.dto.inscricao.InscricaoResponse;
 import br.edu.ufape.sguEditaisService.models.Documento;
 import lombok.*;
 import org.modelmapper.ModelMapper;
@@ -10,6 +12,8 @@ public class DocumentoResponse {
     private String nome;
     private String caminho;
     private java.time.LocalDateTime dataUpload;
+    private EtapaResponse etapa;
+    private InscricaoResponse inscricao;
 
     public DocumentoResponse(Documento entity, ModelMapper modelMapper) {
         if (entity == null) throw new IllegalArgumentException("documento não pode ser nulo");

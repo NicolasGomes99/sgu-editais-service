@@ -38,4 +38,7 @@ public class Etapa {
 
     @OneToMany(mappedBy = "etapa", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PermissaoEtapa> permissaoEtapa;
+
+    @OneToMany(mappedBy = "etapa", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<HistoricoEtapaInscricao> historicoEtapaInscricao;
 }

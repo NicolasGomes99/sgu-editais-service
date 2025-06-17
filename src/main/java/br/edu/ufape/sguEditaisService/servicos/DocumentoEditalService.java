@@ -4,12 +4,12 @@ import br.edu.ufape.sguEditaisService.dados.DocumentoEditalRepository;
 import br.edu.ufape.sguEditaisService.exceptions.DocumentoEditalNotFoundException;
 import br.edu.ufape.sguEditaisService.models.DocumentoEdital;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @RequiredArgsConstructor
-@Repository
+@Service
 public class DocumentoEditalService implements br.edu.ufape.sguEditaisService.servicos.interfaces.DocumentoEditalService {
     private final DocumentoEditalRepository repository;
 

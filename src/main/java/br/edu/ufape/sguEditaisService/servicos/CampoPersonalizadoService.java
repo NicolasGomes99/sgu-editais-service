@@ -19,7 +19,7 @@ public class CampoPersonalizadoService implements br.edu.ufape.sguEditaisService
     }
 
     @Override
-    public CampoPersonalizado buscar(Long id) {
+    public CampoPersonalizado buscar(Long id) throws  CampoPersonalizadoNotFoundException{
         return repository.findById(id).orElseThrow(CampoPersonalizadoNotFoundException::new);
     }
 
@@ -29,7 +29,7 @@ public class CampoPersonalizadoService implements br.edu.ufape.sguEditaisService
     }
 
     @Override
-    public CampoPersonalizado editar(Long id, CampoPersonalizado entity) throws CampoPersonalizadoNotFoundException {
+    public CampoPersonalizado editar(Long id, CampoPersonalizado entity) throws CampoPersonalizadoNotFoundException{
        CampoPersonalizado campoExistente = buscar(id);
     campoExistente.setNome(entity.getNome());
     campoExistente.setRotulo(entity.getRotulo());
@@ -42,7 +42,7 @@ public class CampoPersonalizadoService implements br.edu.ufape.sguEditaisService
     }
 
     @Override
-    public void deletar(Long id) throws CampoPersonalizadoNotFoundException {
+    public void deletar(Long id) throws CampoPersonalizadoNotFoundException{
         CampoPersonalizado campoExistente = repository.findById(id).orElseThrow(CampoPersonalizadoNotFoundException::new);
         repository.delete(campoExistente);
     }

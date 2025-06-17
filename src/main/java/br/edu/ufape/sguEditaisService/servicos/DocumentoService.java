@@ -11,7 +11,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 public class DocumentoService implements br.edu.ufape.sguEditaisService.servicos.interfaces.DocumentoInterface{
-    private DocumentoRepository repository;
+    private final DocumentoRepository repository;
 
     @Override
     public Documento salvar(Documento entity) {

@@ -4,6 +4,7 @@ import br.edu.ufape.sguEditaisService.dados.CampoPersonalizadoRepository;
 import br.edu.ufape.sguEditaisService.exceptions.notFound.CampoPersonalizadoNotFoundException;
 import br.edu.ufape.sguEditaisService.models.CampoPersonalizado;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,7 +12,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 public class CampoPersonalizadoService implements br.edu.ufape.sguEditaisService.servicos.interfaces.CampoPersonalizadoService {
-    private final CampoPersonalizadoRepository repository;
+    private final CampoPersonalizadoRepository campoPersonalizadoRepository;
+    private final ModelMapper modelMapper;
 
     @Override
     public CampoPersonalizado salvarCampoPersonalizado(CampoPersonalizado entity) {

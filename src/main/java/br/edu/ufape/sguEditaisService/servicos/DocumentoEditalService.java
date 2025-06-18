@@ -4,6 +4,7 @@ import br.edu.ufape.sguEditaisService.dados.DocumentoEditalRepository;
 import br.edu.ufape.sguEditaisService.exceptions.notFound.DocumentoEditalNotFoundException;
 import br.edu.ufape.sguEditaisService.models.DocumentoEdital;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,7 +12,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 public class DocumentoEditalService implements br.edu.ufape.sguEditaisService.servicos.interfaces.DocumentoEditalService {
-    private final DocumentoEditalRepository repository;
+    private final DocumentoEditalRepository documentoEditalRepository;
+    private final ModelMapper modelMapper;
 
     @Override
     public DocumentoEdital salvarDocumetoEdial(DocumentoEdital entity) {
@@ -29,13 +31,10 @@ public class DocumentoEditalService implements br.edu.ufape.sguEditaisService.se
     }
 
     @Override
-    public DocumentoEdital editar(Long id, DocumentoEdital entity) throws  DocumentoEditalNotFoundException{
-        DocumentoEdital documentoExistente = buscar(id);
-        documentoExistente.setNome(entity.getNome());
-        documentoExistente.setCaminho(entity.getCaminho());
-        documentoExistente.setDataUpload(entity.getDataUpload());
-        documentoExistente.setEdital(entity.getEdital());
-        return repository.save(documentoExistente);
+    public DocumentoEdital editarDocumentoEdital(Long id, DocumentoEdital entity) throws  DocumentoEditalNotFoundException{
+        DocumentoEdital documentoEdital = documentoEditalRepository.findById(id).orElseThrow(DocumentoEditalNotFoundException::new);
+        modelMapper.map(entity, documentoEdital);
+        return documentoEditalRepository.save(documentoEdital);
     }
 
     @Override

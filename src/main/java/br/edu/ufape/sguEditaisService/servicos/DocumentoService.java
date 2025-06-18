@@ -1,9 +1,10 @@
 package br.edu.ufape.sguEditaisService.servicos;
 
 import br.edu.ufape.sguEditaisService.dados.DocumentoRepository;
-import br.edu.ufape.sguEditaisService.exceptions.DocumentoNotFoundException;
+import br.edu.ufape.sguEditaisService.exceptions.notFound.DocumentoNotFoundException;
 import br.edu.ufape.sguEditaisService.models.Documento;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,34 +15,30 @@ public class DocumentoService implements br.edu.ufape.sguEditaisService.servicos
     private final DocumentoRepository repository;
 
     @Override
-    public Documento salvar(Documento entity) {
-        return repository.save(entity);
+    public Documento salvarDocumento(Documento entity) {
+        return documentoRepository.save(entity);
     }
 
     @Override
-    public Documento buscar(Long id) throws DocumentoNotFoundException {
-        return repository.findById(id).orElseThrow(DocumentoNotFoundException::new);
+    public Documento buscarPorIdDocumento(Long id) throws DocumentoNotFoundException {
+        return documentoRepository.findById(id).orElseThrow(DocumentoNotFoundException::new);
     }
 
     @Override
-    public List<Documento> listar() {
-        return repository.findAll();
+    public List<Documento> listarDocumento() {
+        return documentoRepository.findAll();
     }
 
     @Override
-    public Documento editar(Long id, Documento entity) throws DocumentoNotFoundException{
-        Documento documentoExistente = buscar(id);
-        documentoExistente.setNome(entity.getNome());
-        documentoExistente.setCaminho(entity.getCaminho());
-        documentoExistente.setDataUpload(entity.getDataUpload());
-        documentoExistente.setEtapa(entity.getEtapa());
-        documentoExistente.setInscricao(entity.getInscricao());
-        return repository.save(documentoExistente);
+    public Documento editarDocumento(Long id, Documento entity) throws DocumentoNotFoundException {
+        Documento documento = documentoRepository.findById(id).orElseThrow(DocumentoNotFoundException::new);
+        modelMapper.map(entity, documento);
+        return documentoRepository.save(documento);
     }
 
     @Override
-    public void deletar(Long id) throws DocumentoNotFoundException{
-        Documento documentoExistente = repository.findById(id).orElseThrow(DocumentoNotFoundException::new);
-        repository.delete(documentoExistente);
+    public void deletarDocumento(Long id) throws DocumentoNotFoundException{
+        Documento documento = documentoRepository.findById(id).orElseThrow(DocumentoNotFoundException::new);
+        documentoRepository.delete(documento);
     }
 }

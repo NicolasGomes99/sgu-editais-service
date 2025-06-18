@@ -1,7 +1,7 @@
 package br.edu.ufape.sguEditaisService.servicos;
 
 import br.edu.ufape.sguEditaisService.dados.DocumentoEditalRepository;
-import br.edu.ufape.sguEditaisService.exceptions.DocumentoEditalNotFoundException;
+import br.edu.ufape.sguEditaisService.exceptions.notFound.DocumentoEditalNotFoundException;
 import br.edu.ufape.sguEditaisService.models.DocumentoEdital;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,18 +14,18 @@ public class DocumentoEditalService implements br.edu.ufape.sguEditaisService.se
     private final DocumentoEditalRepository repository;
 
     @Override
-    public DocumentoEdital salvar(DocumentoEdital entity) {
-        return  repository.save(entity);
+    public DocumentoEdital salvarDocumetoEdial(DocumentoEdital entity) {
+        return  documentoEditalRepository.save(entity);
     }
 
     @Override
-    public DocumentoEdital buscar(Long id) throws DocumentoEditalNotFoundException{
-        return repository.findById(id).orElseThrow(DocumentoEditalNotFoundException::new);
+    public DocumentoEdital buscarPorIdDocumentoEdital(Long id) throws DocumentoEditalNotFoundException{
+        return documentoEditalRepository.findById(id).orElseThrow(DocumentoEditalNotFoundException::new);
     }
 
     @Override
-    public List<DocumentoEdital> listar() {
-        return repository.findAll();
+    public List<DocumentoEdital> listarDocumentoEdital() {
+        return documentoEditalRepository.findAll();
     }
 
     @Override
@@ -39,8 +39,8 @@ public class DocumentoEditalService implements br.edu.ufape.sguEditaisService.se
     }
 
     @Override
-    public void deletar(Long id) throws DocumentoEditalNotFoundException {
-        DocumentoEdital documentoExistente = repository.findById(id).orElseThrow(DocumentoEditalNotFoundException::new);
-        repository.delete(documentoExistente);
+    public void deletarDocumentoEdital(Long id) throws DocumentoEditalNotFoundException {
+        DocumentoEdital documentoEdital = documentoEditalRepository.findById(id).orElseThrow(DocumentoEditalNotFoundException::new);
+        documentoEditalRepository.delete(documentoEdital);
     }
 }

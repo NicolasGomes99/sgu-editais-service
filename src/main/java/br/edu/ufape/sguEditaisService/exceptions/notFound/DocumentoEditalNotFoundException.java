@@ -1,4 +1,4 @@
-package br.edu.ufape.sguEditaisService.exceptions;
+package br.edu.ufape.sguEditaisService.exceptions.notFound;
 
 public class DocumentoEditalNotFoundException extends RuntimeException {
     public DocumentoEditalNotFoundException() {

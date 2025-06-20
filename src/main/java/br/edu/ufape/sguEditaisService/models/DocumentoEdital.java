@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor
-public class documentoEdital {
+public class DocumentoEdital {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,5 +20,5 @@ public class documentoEdital {
     private LocalDateTime dataUpload;
 
     @ManyToOne
-    private edital edital;
+    private Edital edital;
 }

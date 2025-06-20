@@ -12,7 +12,7 @@ import java.util.List;
 
 @Entity
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor
-public class edital {
+public class Edital {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,19 +27,19 @@ public class edital {
     private status status;
 
     @OneToOne
-    private tipoEdital tipoEdital;
+    private TipoEdital tipoEdital;
 
     private Long idUnidadeAdministrativa;
 
     @OneToMany(mappedBy = "edital", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<etapa> etapas;
+    private List<Etapa> etapas;
 
     @OneToMany(mappedBy = "edital", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<inscricao> inscricoes;
+    private List<Inscricao> inscricoes;
 
     @OneToMany(mappedBy = "edital", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<documentoEdital> documentosEdital;
+    private List<DocumentoEdital> documentosEdital;
 
     @OneToMany(mappedBy = "edital", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<campoPersonalizado> camposPersonalizados;
+    private List<CampoPersonalizado> camposPersonalizados;
 }

@@ -2,14 +2,12 @@ package br.edu.ufape.sguEditaisService.models;
 
 import br.edu.ufape.sguEditaisService.models.enums.status;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Date;
 @Entity
-@RequiredArgsConstructor @NoArgsConstructor @Getter @Setter
+@AllArgsConstructor
+@NoArgsConstructor @Getter @Setter
 public class HistoricoEtapaInscricao {
 
     @Id

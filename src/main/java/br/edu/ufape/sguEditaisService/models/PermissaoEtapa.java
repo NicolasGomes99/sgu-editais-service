@@ -1,13 +1,11 @@
 package br.edu.ufape.sguEditaisService.models;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
-@RequiredArgsConstructor @NoArgsConstructor @Getter @Setter
+@AllArgsConstructor
+@NoArgsConstructor @Getter @Setter
 public class PermissaoEtapa {
 
     @Id

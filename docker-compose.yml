@@ -1,0 +1,35 @@
+services:
+  app:
+    build: .
+    container_name: sgu-editais-service
+    ports:
+      - "8083:8080"
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/banco
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 123123
+    networks:
+      - sgu-network
+
+  db:
+    image: postgres:15
+    container_name: sgu-db
+    restart: always
+    environment:
+      POSTGRES_DB: banco
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123123
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - sgu-network
+
+volumes:
+  pgdata:
+
+networks:
+  sgu-network:

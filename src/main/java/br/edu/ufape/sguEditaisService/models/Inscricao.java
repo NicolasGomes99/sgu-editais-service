@@ -1,6 +1,6 @@
 package br.edu.ufape.sguEditaisService.models;
 
-import br.edu.ufape.sguEditaisService.models.enums.status;
+import br.edu.ufape.sguEditaisService.models.enums.Status;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,7 +18,7 @@ public class Inscricao {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    private status status;
+    private Status status;
 
     private UUID idUsuario;
 

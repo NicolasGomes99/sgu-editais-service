@@ -1,6 +1,6 @@
 package br.edu.ufape.sguEditaisService.models;
 
-import br.edu.ufape.sguEditaisService.models.enums.tipoCampo;
+import br.edu.ufape.sguEditaisService.models.enums.TipoCampo;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,7 +21,7 @@ public class CampoPersonalizado {
     private boolean obrigatorio;
 
     @Enumerated(EnumType.STRING)
-    private tipoCampo tipoCampo;
+    private TipoCampo tipoCampo;
 
     @Column(columnDefinition = "jsonb")
     private String opcoes;

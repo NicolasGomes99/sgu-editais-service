@@ -3,7 +3,7 @@ package br.edu.ufape.sguEditaisService.comunicacao.dto.campoPersonalizado;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.edital.EditalRequest;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.etapa.EtapaRequest;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.valorCampo.ValorCampoRequest;
-import br.edu.ufape.sguEditaisService.models.enums.tipoCampo;
+import br.edu.ufape.sguEditaisService.models.enums.TipoCampo;
 import br.edu.ufape.sguEditaisService.models.CampoPersonalizado;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -17,7 +17,7 @@ public class CampoPersonalizadoRequest {
     @NotBlank(message = "rotulo é obrigatório")
     private String rotulo;
     private boolean obrigatorio;
-    private tipoCampo tipoCampo;
+    private TipoCampo tipoCampo;
     @NotBlank(message = "opcoes é obrigatório")
     private String opcoes;
     private List<ValorCampoRequest> valoresCampo;

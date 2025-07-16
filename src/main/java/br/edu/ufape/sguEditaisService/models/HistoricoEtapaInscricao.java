@@ -1,6 +1,5 @@
 package br.edu.ufape.sguEditaisService.models;
 
-import br.edu.ufape.sguEditaisService.models.enums.status;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,8 +14,8 @@ public class HistoricoEtapaInscricao {
     private Long id;
     private Date dataAacao;
 
-    @Enumerated(EnumType.STRING)
-    private status status;
+    @OneToOne(mappedBy = "historicoEtapaInscricao")
+    private StatusPersonalizado statusPersonalizado;
 
     private String observacao;
 

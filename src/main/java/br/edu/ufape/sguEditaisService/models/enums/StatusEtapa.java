@@ -1,6 +1,6 @@
 package br.edu.ufape.sguEditaisService.models.enums;
 
-public enum statusEtapa {
+public enum StatusEtapa {
     PEDENTE,
     EM_ANDAMENTO,
     CONCLUIDA,

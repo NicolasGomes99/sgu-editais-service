@@ -1,6 +1,6 @@
 package br.edu.ufape.sguEditaisService.models;
 
-import br.edu.ufape.sguEditaisService.models.enums.statusEtapa;
+import br.edu.ufape.sguEditaisService.models.enums.StatusEtapa;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,7 +25,7 @@ public class Etapa {
     private int ordem;
 
     @Enumerated(EnumType.STRING)
-    private statusEtapa status;
+    private StatusEtapa status;
 
     @OneToMany(mappedBy = "etapa", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Documento> documentos;

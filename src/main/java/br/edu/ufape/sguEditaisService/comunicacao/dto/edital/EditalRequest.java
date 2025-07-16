@@ -6,7 +6,7 @@ import br.edu.ufape.sguEditaisService.comunicacao.dto.etapa.EtapaRequest;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.inscricao.InscricaoRequest;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.tipoEdital.TipoEditalRequest;
 import br.edu.ufape.sguEditaisService.models.*;
-import br.edu.ufape.sguEditaisService.models.enums.status;
+import br.edu.ufape.sguEditaisService.models.enums.Status;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import org.modelmapper.ModelMapper;
@@ -22,7 +22,7 @@ public class EditalRequest {
     private java.time.LocalDateTime dataPublicacao;
     private java.time.LocalDateTime inicioInscricao;
     private java.time.LocalDateTime fimIncricao;
-    private status status;
+    private Status status;
     private TipoEditalRequest tipoEdital;
     private List<EtapaRequest> etapas;
     private List<InscricaoRequest> inscricao;

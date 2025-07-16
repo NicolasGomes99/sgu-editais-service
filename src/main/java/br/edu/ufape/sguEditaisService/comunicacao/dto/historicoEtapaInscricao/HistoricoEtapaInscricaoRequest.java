@@ -3,7 +3,7 @@ package br.edu.ufape.sguEditaisService.comunicacao.dto.historicoEtapaInscricao;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.etapa.EtapaRequest;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.inscricao.InscricaoRequest;
 import br.edu.ufape.sguEditaisService.models.HistoricoEtapaInscricao;
-import br.edu.ufape.sguEditaisService.models.enums.status;
+import br.edu.ufape.sguEditaisService.models.enums.Status;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import org.modelmapper.ModelMapper;
@@ -14,7 +14,7 @@ public class HistoricoEtapaInscricaoRequest {
     @NotNull(message = "Data da ação é obrigatória")
     private Date dataAacao;
     @NotNull(message = "Status é obrigatório")
-    private status status;
+    private Status status;
     @NotBlank(message = "Descrição é obrigatória")
     private String observacao;
     private InscricaoRequest inscricao;

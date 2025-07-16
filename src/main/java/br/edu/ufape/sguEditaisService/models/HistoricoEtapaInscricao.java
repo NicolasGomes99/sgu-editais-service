@@ -1,6 +1,6 @@
 package br.edu.ufape.sguEditaisService.models;
 
-import br.edu.ufape.sguEditaisService.models.enums.status;
+import br.edu.ufape.sguEditaisService.models.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,7 +16,7 @@ public class HistoricoEtapaInscricao {
     private Date dataAacao;
 
     @Enumerated(EnumType.STRING)
-    private status status;
+    private Status status;
 
     private String observacao;
 

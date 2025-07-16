@@ -32,14 +32,14 @@ public class ValorCampoService implements br.edu.ufape.sguEditaisService.servico
 
     @Override
     public ValorCampo editarValorCampo(Long id, ValorCampo entity) throws ValorCampoNotFoundException {
-        ValorCampo original = buscarPorIdValorCampo(id);
+        ValorCampo original = repository.findById(id).orElseThrow(ValorCampoNotFoundException::new);
         modelMapper.map(entity, original);
         return repository.save(original);
     }
 
     @Override
     public void deletarValorCampo(Long id) throws ValorCampoNotFoundException {
-        ValorCampo entity = buscarPorIdValorCampo(id);
+        ValorCampo entity = repository.findById(id).orElseThrow(ValorCampoNotFoundException::new);
         repository.delete(entity);
     }
 }

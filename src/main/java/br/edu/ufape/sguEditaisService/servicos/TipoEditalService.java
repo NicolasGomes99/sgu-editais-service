@@ -32,14 +32,14 @@ public class TipoEditalService implements br.edu.ufape.sguEditaisService.servico
 
     @Override
     public TipoEdital editarTipoEdital(Long id, TipoEdital entity) throws TipoEditalNotFoundException {
-        TipoEdital original = buscarPorIdTipoEdital(id);
+        TipoEdital original = repository.findById(id).orElseThrow(TipoEditalNotFoundException::new);
         modelMapper.map(entity, original);
         return repository.save(original);
     }
 
     @Override
     public void deletarTipoEdital(Long id) throws TipoEditalNotFoundException {
-        TipoEdital entity = buscarPorIdTipoEdital(id);
+        TipoEdital entity = repository.findById(id).orElseThrow(TipoEditalNotFoundException::new);
         repository.delete(entity);
     }
 }

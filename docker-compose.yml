@@ -7,7 +7,7 @@ services:
     depends_on:
       - db
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/banco
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/banco?stringtype=unspecified
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: 123123
     networks:

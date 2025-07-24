@@ -4,13 +4,14 @@ import br.edu.ufape.sguEditaisService.comunicacao.dto.edital.EditalResponse;
 import br.edu.ufape.sguEditaisService.models.DocumentoEdital;
 import lombok.*;
 import org.modelmapper.ModelMapper;
+import java.time.LocalDateTime;
 
 @Getter @Setter
 public class DocumentoEditalResponse {
     private Long id;
     private String nome;
     private String caminho;
-    private java.time.LocalDateTime dataUpload;
+    private LocalDateTime dataUpload;
     private EditalResponse edital;
 
     public DocumentoEditalResponse(DocumentoEdital entity, ModelMapper modelMapper) {

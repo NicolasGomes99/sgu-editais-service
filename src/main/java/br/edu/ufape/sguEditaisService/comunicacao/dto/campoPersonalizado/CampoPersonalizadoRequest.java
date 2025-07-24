@@ -24,13 +24,12 @@ public class CampoPersonalizadoRequest {
     @NotNull(message = "opcoes é obrigatório")
     private Map<String, Object> opcoes;
     private List<ValorCampoRequest> valoresCampo;
-    private EtapaRequest etapa;
-    private EditalRequest edital;
+    private Long etapaId;
+    private Long editalId;
 
     public CampoPersonalizado convertToEntity(CampoPersonalizadoRequest request, ModelMapper modelMapper) {
         CampoPersonalizado entity = modelMapper.map(request, CampoPersonalizado.class);
 
-        // Conversão segura de Map para JSON string
         try {
             ObjectMapper mapper = new ObjectMapper();
             entity.setOpcoes(mapper.writeValueAsString(request.getOpcoes()));

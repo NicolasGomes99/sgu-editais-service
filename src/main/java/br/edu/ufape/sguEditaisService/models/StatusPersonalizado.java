@@ -2,7 +2,6 @@ package br.edu.ufape.sguEditaisService.models;
 
 
 import br.edu.ufape.sguEditaisService.models.enums.TipoStatus;
-import br.edu.ufape.sguEditaisService.models.enums.tipoCampo;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

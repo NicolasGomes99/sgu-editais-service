@@ -2,7 +2,6 @@ package br.edu.ufape.sguEditaisService.comunicacao.dto.statusPersonalizado;
 
 import br.edu.ufape.sguEditaisService.models.*;
 import br.edu.ufape.sguEditaisService.models.enums.TipoStatus;
-import br.edu.ufape.sguEditaisService.models.enums.tipoCampo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -1,6 +1,5 @@
 package br.edu.ufape.sguEditaisService.models;
 
-import br.edu.ufape.sguEditaisService.models.enums.StatusEtapa;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,9 +25,6 @@ public class Etapa {
 
     @OneToOne(mappedBy = "etapa")
     private StatusPersonalizado statusPersonalizado;
-  
-    @Enumerated(EnumType.STRING)
-    private StatusEtapa status;
 
     @OneToMany(mappedBy = "etapa", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Documento> documentos;

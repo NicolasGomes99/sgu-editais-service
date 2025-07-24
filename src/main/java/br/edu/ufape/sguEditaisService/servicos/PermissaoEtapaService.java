@@ -32,14 +32,14 @@ public class PermissaoEtapaService implements br.edu.ufape.sguEditaisService.ser
 
     @Override
     public PermissaoEtapa editarPermissaoEtapa(Long id, PermissaoEtapa entity) throws PermissaoEtapaNotFoundException {
-        PermissaoEtapa original = buscarPorIdPermissaoEtapa(id);
+        PermissaoEtapa original = repository.findById(id).orElseThrow(PermissaoEtapaNotFoundException::new);
         modelMapper.map(entity, original);
         return repository.save(original);
     }
 
     @Override
     public void deletarPermissaoEtapa(Long id) throws PermissaoEtapaNotFoundException {
-        PermissaoEtapa entity = buscarPorIdPermissaoEtapa(id);
+        PermissaoEtapa entity = repository.findById(id).orElseThrow(PermissaoEtapaNotFoundException::new);
         repository.delete(entity);
     }
 }

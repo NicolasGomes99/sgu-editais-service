@@ -1,5 +1,6 @@
 package br.edu.ufape.sguEditaisService.models;
 
+import br.edu.ufape.sguEditaisService.models.enums.Status;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,6 +25,9 @@ public class Edital {
 
     @OneToOne(mappedBy = "edital")
     private StatusPersonalizado statusPersonalizado;
+  
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     @OneToOne
     private TipoEdital tipoEdital;

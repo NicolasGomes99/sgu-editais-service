@@ -5,6 +5,7 @@ import br.edu.ufape.sguEditaisService.comunicacao.dto.edital.EditalResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.historicoEtapaInscricao.HistoricoEtapaInscricaoResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.valorCampo.ValorCampoResponse;
 import br.edu.ufape.sguEditaisService.models.StatusPersonalizado;
+import br.edu.ufape.sguEditaisService.models.enums.Status;
 import br.edu.ufape.sguEditaisService.models.Inscricao;
 import lombok.*;
 import org.modelmapper.ModelMapper;
@@ -14,6 +15,7 @@ import java.util.List;
 public class InscricaoResponse {
     private Long id;
     private StatusPersonalizado statusPersonalizado;
+    private Status status;
     private List<DocumentoResponse> documentos;
     private List<ValorCampoResponse> valoresCampos;
     private EditalResponse edital;

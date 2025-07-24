@@ -6,6 +6,7 @@ import br.edu.ufape.sguEditaisService.comunicacao.dto.edital.EditalResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.historicoEtapaInscricao.HistoricoEtapaInscricaoResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.permissaoEtapa.PermissaoEtapaResponse;
 import br.edu.ufape.sguEditaisService.models.*;
+import br.edu.ufape.sguEditaisService.models.enums.StatusEtapa;
 import lombok.*;
 import org.modelmapper.ModelMapper;
 import java.time.LocalDateTime;
@@ -22,6 +23,7 @@ public class EtapaResponse {
     private boolean obrigatoria;
     private int ordem;
     private StatusPersonalizado statusPersonalizado;
+    private StatusEtapa status;
     private List<DocumentoResponse> documentos;
     private List<CampoPersonalizadoResponse> camposPersonalizados;
     private EditalResponse edital;

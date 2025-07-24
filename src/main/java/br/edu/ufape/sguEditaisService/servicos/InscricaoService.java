@@ -32,14 +32,14 @@ public class InscricaoService implements br.edu.ufape.sguEditaisService.servicos
 
     @Override
     public Inscricao editarInscricao(Long id, Inscricao entity) throws InscricaoNotFoundException {
-        Inscricao original = buscarPorIdInscricao(id);
+        Inscricao original = repository.findById(id).orElseThrow(InscricaoNotFoundException::new);
         modelMapper.map(entity, original);
         return repository.save(original);
     }
 
     @Override
     public void deletarInscricao(Long id) throws InscricaoNotFoundException {
-        Inscricao entity = buscarPorIdInscricao(id);
+        Inscricao entity = repository.findById(id).orElseThrow(InscricaoNotFoundException::new);
         repository.delete(entity);
     }
 }

@@ -4,6 +4,7 @@ import br.edu.ufape.sguEditaisService.comunicacao.dto.etapa.EtapaRequest;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.inscricao.InscricaoRequest;
 import br.edu.ufape.sguEditaisService.models.HistoricoEtapaInscricao;
 import br.edu.ufape.sguEditaisService.models.StatusPersonalizado;
+import br.edu.ufape.sguEditaisService.models.enums.Status;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import org.modelmapper.ModelMapper;
@@ -15,6 +16,8 @@ public class HistoricoEtapaInscricaoRequest {
     private Date dataAacao;
     @NotNull(message = "Status personalizado é obrigatório")
     private StatusPersonalizado statusPersonalizado;
+    @NotNull(message = "Status é obrigatório")
+    private Status status;
     @NotBlank(message = "Descrição é obrigatória")
     private String observacao;
     private InscricaoRequest inscricao;

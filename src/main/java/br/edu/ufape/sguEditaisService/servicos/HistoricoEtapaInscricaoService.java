@@ -32,14 +32,14 @@ public class HistoricoEtapaInscricaoService implements br.edu.ufape.sguEditaisSe
 
     @Override
     public HistoricoEtapaInscricao editarHistoricoEtapaInscricao(Long id, HistoricoEtapaInscricao entity) throws HistoricoEtapaInscricaoNotFoundException {
-        HistoricoEtapaInscricao original = buscarPorIdHistoricoEtapaInscricao(id);
+        HistoricoEtapaInscricao original = repository.findById(id).orElseThrow(HistoricoEtapaInscricaoNotFoundException::new);
         modelMapper.map(entity, original);
         return repository.save(original);
     }
 
     @Override
     public void deletarHistoricoEtapaInscricao(Long id) throws HistoricoEtapaInscricaoNotFoundException {
-        HistoricoEtapaInscricao entity = buscarPorIdHistoricoEtapaInscricao(id);
+        HistoricoEtapaInscricao entity = repository.findById(id).orElseThrow(HistoricoEtapaInscricaoNotFoundException::new);
         repository.delete(entity);
     }
 }

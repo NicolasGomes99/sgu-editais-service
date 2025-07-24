@@ -23,6 +23,7 @@ public class EtapaRequest {
     private LocalDateTime dataFim;
     private boolean obrigatoria;
     private int ordem;
+    private StatusPersonalizado statusPersonalizado;
     private StatusEtapa status;
     private List<DocumentoRequest> documentos;
     private List<CampoPersonalizadoRequest> camposPersonalizados;

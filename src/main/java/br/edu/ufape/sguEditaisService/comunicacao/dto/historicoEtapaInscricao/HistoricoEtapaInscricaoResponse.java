@@ -3,6 +3,7 @@ package br.edu.ufape.sguEditaisService.comunicacao.dto.historicoEtapaInscricao;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.etapa.EtapaResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.inscricao.InscricaoResponse;
 import br.edu.ufape.sguEditaisService.models.HistoricoEtapaInscricao;
+import br.edu.ufape.sguEditaisService.models.StatusPersonalizado;
 import br.edu.ufape.sguEditaisService.models.enums.Status;
 import lombok.*;
 import org.modelmapper.ModelMapper;
@@ -12,6 +13,7 @@ import java.util.Date;
 public class HistoricoEtapaInscricaoResponse {
     private Long id;
     private Date dataAacao;
+    private StatusPersonalizado statusPersonalizado;
     private Status status;
     private String observacao;
     private InscricaoResponse inscricao;

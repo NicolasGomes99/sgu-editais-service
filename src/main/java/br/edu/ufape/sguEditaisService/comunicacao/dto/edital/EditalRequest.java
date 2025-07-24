@@ -22,6 +22,7 @@ public class EditalRequest {
     private java.time.LocalDateTime dataPublicacao;
     private java.time.LocalDateTime inicioInscricao;
     private java.time.LocalDateTime fimIncricao;
+    private StatusPersonalizado statusPersonalizado;
     private Status status;
     private TipoEditalRequest tipoEdital;
     private List<EtapaRequest> etapas;

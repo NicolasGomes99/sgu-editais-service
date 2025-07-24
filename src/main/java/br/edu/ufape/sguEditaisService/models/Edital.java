@@ -23,6 +23,9 @@ public class Edital {
     private LocalDateTime inicioInscricao;
     private LocalDateTime fimIncricao;
 
+    @OneToOne(mappedBy = "edital")
+    private StatusPersonalizado statusPersonalizado;
+  
     @Enumerated(EnumType.STRING)
     private Status status;
 

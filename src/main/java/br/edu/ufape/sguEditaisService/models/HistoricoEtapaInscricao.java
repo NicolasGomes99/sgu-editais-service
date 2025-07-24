@@ -15,6 +15,9 @@ public class HistoricoEtapaInscricao {
     private Long id;
     private Date dataAacao;
 
+    @OneToOne(mappedBy = "historicoEtapaInscricao")
+    private StatusPersonalizado statusPersonalizado;
+  
     @Enumerated(EnumType.STRING)
     private Status status;
 

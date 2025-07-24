@@ -24,6 +24,9 @@ public class Etapa {
     private boolean obrigatoria;
     private int ordem;
 
+    @OneToOne(mappedBy = "etapa")
+    private StatusPersonalizado statusPersonalizado;
+  
     @Enumerated(EnumType.STRING)
     private StatusEtapa status;
 

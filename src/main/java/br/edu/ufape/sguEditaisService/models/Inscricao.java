@@ -22,6 +22,9 @@ public class Inscricao {
 
     private UUID idUsuario;
 
+    @OneToOne(mappedBy = "inscricao")
+    private StatusPersonalizado statusPersonalizado;
+
     @OneToMany(mappedBy = "inscricao", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Documento> documentos;
 

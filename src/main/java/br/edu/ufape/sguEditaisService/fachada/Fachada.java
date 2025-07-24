@@ -21,6 +21,7 @@ public class Fachada {
     private final PermissaoEtapaService permissaoEtapaService;
     private final TipoEditalService tipoEditalService;
     private final ValorCampoService valorCampoService;
+    private final StatusPersonalizadoService salvarStatusPersonalizadoService;
 
 
     // =================== CampoPersonalizado ===================
@@ -241,5 +242,27 @@ public class Fachada {
 
     public void deletarValorCampo(Long id) {
         valorCampoService.deletarValorCampo(id);
+    }
+
+    // =================== StatusPersonalizado ===================
+
+    public StatusPersonalizado salvarStatusPersonalizado(StatusPersonalizado statusPersonalizado) {
+        return salvarStatusPersonalizadoService.salvarStatusPersonalizado(statusPersonalizado);
+    }
+
+    public  StatusPersonalizado buscarPorIdStatusPersonalizado(Long id) {
+        return salvarStatusPersonalizadoService.buscarPorIdStatusPersonalizado(id);
+    }
+
+    public  List<StatusPersonalizado> listarStatusPersonalizado() {
+        return salvarStatusPersonalizadoService.listarStatusPersonalizados();
+    }
+
+    public  StatusPersonalizado editarStatusPersonalizado(Long id, StatusPersonalizado statusPersonalizado) {
+        return salvarStatusPersonalizadoService.editarStatusPersonalizado(id, statusPersonalizado);
+    }
+
+    public  void deletarStatusPersonalizado(Long id){
+        salvarStatusPersonalizadoService.deletarStatusPersonalizado(id);
     }
 }

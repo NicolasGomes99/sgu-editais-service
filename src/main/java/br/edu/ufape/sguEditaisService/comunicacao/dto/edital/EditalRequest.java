@@ -9,6 +9,7 @@ import br.edu.ufape.sguEditaisService.models.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import org.modelmapper.ModelMapper;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor
@@ -18,15 +19,11 @@ public class EditalRequest {
     private String titulo;
     @NotBlank(message = "descricao é obrigatório")
     private String descricao;
-    private java.time.LocalDateTime dataPublicacao;
-    private java.time.LocalDateTime inicioInscricao;
-    private java.time.LocalDateTime fimIncricao;
-    private StatusPersonalizado statusPersonalizado;
-    private TipoEditalRequest tipoEdital;
-    private List<EtapaRequest> etapas;
-    private List<InscricaoRequest> inscricao;
-    private List<DocumentoEditalRequest> documentosEdital;
-    private List<CampoPersonalizadoRequest> camposPersonalizados;
+    private LocalDateTime dataPublicacao;
+    private LocalDateTime inicioInscricao;
+    private LocalDateTime fimIncricao;
+    private Long statusPersonalizadoId;
+    private Long tipoEditalId;
 
     public Edital convertToEntity(EditalRequest request, ModelMapper modelMapper) {
         return modelMapper.map(request, Edital.class);

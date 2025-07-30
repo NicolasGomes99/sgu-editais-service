@@ -12,8 +12,8 @@ public class ValorCampoRequest {
 
     @NotBlank(message = "valor é obrigatório")
     private String valor;
-    private InscricaoRequest inscricao;
-    private CampoPersonalizadoRequest campoPersonalizado;
+    private Long inscricaoId;
+    private Long campoPersonalizadoId;
 
     public ValorCampo convertToEntity(ValorCampoRequest request, ModelMapper modelMapper) {
         return modelMapper.map(request, ValorCampo.class);

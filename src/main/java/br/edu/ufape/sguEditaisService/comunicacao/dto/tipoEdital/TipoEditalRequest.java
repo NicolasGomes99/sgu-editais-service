@@ -11,7 +11,6 @@ public class TipoEditalRequest {
 
     @NotBlank(message = "descricao é obrigatória")
     private String descricao;
-    private EditalRequest edital;
 
     public TipoEdital convertToEntity(TipoEditalRequest request, ModelMapper modelMapper) {
         return modelMapper.map(request, TipoEdital.class);

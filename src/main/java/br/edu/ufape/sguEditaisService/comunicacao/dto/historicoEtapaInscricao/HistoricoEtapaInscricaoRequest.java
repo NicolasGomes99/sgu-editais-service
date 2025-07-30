@@ -13,12 +13,11 @@ import java.util.Date;
 public class HistoricoEtapaInscricaoRequest {
     @NotNull(message = "Data da ação é obrigatória")
     private Date dataAacao;
-    @NotNull(message = "Status personalizado é obrigatório")
-    private StatusPersonalizado statusPersonalizado;
     @NotBlank(message = "Descrição é obrigatória")
     private String observacao;
-    private InscricaoRequest inscricao;
-    private EtapaRequest etapa;
+    private Long statusPersonalizadoId;
+    private Long inscricaoId;
+    private Long etapaId;
 
     public HistoricoEtapaInscricao convertToEntity(HistoricoEtapaInscricaoRequest request, ModelMapper modelMapper) {
         return modelMapper.map(request, HistoricoEtapaInscricao.class);

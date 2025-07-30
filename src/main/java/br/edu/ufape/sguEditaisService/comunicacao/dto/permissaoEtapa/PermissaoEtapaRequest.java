@@ -10,7 +10,7 @@ import org.modelmapper.ModelMapper;
 public class PermissaoEtapaRequest {
     @NotBlank(message = "Permissão é obrigatória")
     private String perfil;
-    private EtapaRequest etapa;
+    private Long etapaId;
 
     public PermissaoEtapa convertToEntity(PermissaoEtapaRequest request, ModelMapper modelMapper) {
         return modelMapper.map(request, PermissaoEtapa.class);

@@ -15,13 +15,13 @@ import org.modelmapper.ModelMapper;
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor
 public class StatusPersonalizadoRequest {
 
-    private String nome;
-    private TipoStatus tipoStatus;
+        private String nome;
+        private TipoStatus tipoStatus;
+        private Long editalId;
+        private Long etapaId;
+        private Long historicoEtapaInscricaoId;
+        private Long inscricaoId;
 
-    private EditalRequest edital;
-    private EtapaRequest etapa;
-    private HistoricoEtapaInscricaoRequest historicoEtapaInscricao;
-    private InscricaoRequest inscricao;
 
     public StatusPersonalizado convertToEntity(StatusPersonalizadoRequest request, ModelMapper modelMapper) {
         return modelMapper.map(request, StatusPersonalizado.class);

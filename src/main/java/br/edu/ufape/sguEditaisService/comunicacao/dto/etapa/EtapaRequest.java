@@ -22,12 +22,8 @@ public class EtapaRequest {
     private LocalDateTime dataFim;
     private boolean obrigatoria;
     private int ordem;
-    private StatusPersonalizado statusPersonalizado;
-    private List<DocumentoRequest> documentos;
-    private List<CampoPersonalizadoRequest> camposPersonalizados;
-    private EditalRequest edital;
-    private List<PermissaoEtapaRequest> permissaoEtapa;
-    private List<HistoricoEtapaInscricaoRequest> historicoEtapaInscricao;
+    private Long statusPersonalizadoId;
+    private Long editalId;
 
     public Etapa convertToEntity(EtapaRequest request, ModelMapper modelMapper) {
         return modelMapper.map(request, Etapa.class);

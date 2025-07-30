@@ -13,11 +13,8 @@ import java.util.List;
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor
 public class InscricaoRequest {
 
-    private StatusPersonalizado statusPersonalizado;
-    private List<DocumentoRequest> documentos;
-    private List<ValorCampoRequest> valoresCampos;
-    private EditalRequest edital;
-    private  List<HistoricoEtapaInscricaoRequest> historicoEtapaInscricao;
+        private Long statusPersonalizadoId;
+        private Long editalId;
 
     public Inscricao convertToEntity(InscricaoRequest request, ModelMapper modelMapper) {
         return modelMapper.map(request, Inscricao.class);

@@ -1,5 +1,6 @@
 package br.edu.ufape.sguEditaisService.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,8 +24,9 @@ public class Etapa {
     private boolean obrigatoria;
     private int ordem;
 
-    @OneToOne(mappedBy = "etapa")
-    private StatusPersonalizado statusPersonalizado;
+    @ManyToOne
+    @JsonIgnore
+    private StatusPersonalizado statusAtual;
 
     @OneToMany(mappedBy = "etapa", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Documento> documentos;

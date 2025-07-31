@@ -1,23 +1,17 @@
 package br.edu.ufape.sguEditaisService.comunicacao.dto.inscricao;
 
-import br.edu.ufape.sguEditaisService.comunicacao.dto.documento.DocumentoRequest;
-import br.edu.ufape.sguEditaisService.comunicacao.dto.edital.EditalRequest;
-import br.edu.ufape.sguEditaisService.comunicacao.dto.historicoEtapaInscricao.HistoricoEtapaInscricaoRequest;
-import br.edu.ufape.sguEditaisService.comunicacao.dto.valorCampo.ValorCampoRequest;
-import br.edu.ufape.sguEditaisService.models.StatusPersonalizado;
 import br.edu.ufape.sguEditaisService.models.Inscricao;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.modelmapper.ModelMapper;
-import java.util.List;
+import java.util.UUID;
 
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor
 public class InscricaoRequest {
-
-    private StatusPersonalizado statusPersonalizado;
-    private List<DocumentoRequest> documentos;
-    private List<ValorCampoRequest> valoresCampos;
-    private EditalRequest edital;
-    private  List<HistoricoEtapaInscricaoRequest> historicoEtapaInscricao;
+    @NotNull
+    private UUID idUsuario;
+    private Long editalId;
+    private Long statusAtualId;
 
     public Inscricao convertToEntity(InscricaoRequest request, ModelMapper modelMapper) {
         return modelMapper.map(request, Inscricao.class);

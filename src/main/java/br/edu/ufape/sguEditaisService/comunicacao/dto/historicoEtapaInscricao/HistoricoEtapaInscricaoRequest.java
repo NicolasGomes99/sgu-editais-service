@@ -1,24 +1,18 @@
 package br.edu.ufape.sguEditaisService.comunicacao.dto.historicoEtapaInscricao;
 
-import br.edu.ufape.sguEditaisService.comunicacao.dto.etapa.EtapaRequest;
-import br.edu.ufape.sguEditaisService.comunicacao.dto.inscricao.InscricaoRequest;
 import br.edu.ufape.sguEditaisService.models.HistoricoEtapaInscricao;
-import br.edu.ufape.sguEditaisService.models.StatusPersonalizado;
-import jakarta.validation.constraints.*;
 import lombok.*;
 import org.modelmapper.ModelMapper;
 import java.util.Date;
 
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor
 public class HistoricoEtapaInscricaoRequest {
-    @NotNull(message = "Data da ação é obrigatória")
-    private Date dataAacao;
-    @NotNull(message = "Status personalizado é obrigatório")
-    private StatusPersonalizado statusPersonalizado;
-    @NotBlank(message = "Descrição é obrigatória")
     private String observacao;
-    private InscricaoRequest inscricao;
-    private EtapaRequest etapa;
+    private Date dataAcao;
+
+    private Long etapaId;
+    private Long inscricaoId;
+    private Long statusId;
 
     public HistoricoEtapaInscricao convertToEntity(HistoricoEtapaInscricaoRequest request, ModelMapper modelMapper) {
         return modelMapper.map(request, HistoricoEtapaInscricao.class);

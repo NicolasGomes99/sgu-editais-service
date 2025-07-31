@@ -16,7 +16,7 @@ public class DocumentoEditalService implements br.edu.ufape.sguEditaisService.se
     private final ModelMapper modelMapper;
 
     @Override
-    public DocumentoEdital salvarDocumentoEdial(DocumentoEdital entity) {
+    public DocumentoEdital salvarDocumentoEdital(DocumentoEdital entity) {
         return  documentoEditalRepository.save(entity);
     }
 

@@ -1,5 +1,6 @@
 package br.edu.ufape.sguEditaisService.fachada;
 
+import br.edu.ufape.sguEditaisService.exceptions.notFound.StatusPersonalizadoNotFoundException;
 import br.edu.ufape.sguEditaisService.models.*;
 import br.edu.ufape.sguEditaisService.servicos.interfaces.*;
 import lombok.RequiredArgsConstructor;
@@ -21,12 +22,22 @@ public class Fachada {
     private final PermissaoEtapaService permissaoEtapaService;
     private final TipoEditalService tipoEditalService;
     private final ValorCampoService valorCampoService;
-    private final StatusPersonalizadoService salvarStatusPersonalizadoService;
+    private final StatusPersonalizadoService statusPersonalizadoService;
 
 
     // =================== CampoPersonalizado ===================
 
     public CampoPersonalizado salvarCampoPersonalizado(CampoPersonalizado campoPersonalizado) {
+        if (campoPersonalizado.getEtapa() != null && campoPersonalizado.getEtapa().getId() != null) {
+            Etapa etapa = etapaService.buscarPorIdEtapa(campoPersonalizado.getEtapa().getId());
+            campoPersonalizado.setEtapa(etapa);
+        }
+
+        if (campoPersonalizado.getEdital() != null && campoPersonalizado.getEdital().getId() != null) {
+            Edital edital = editalService.buscarPorIdEdital(campoPersonalizado.getEdital().getId());
+            campoPersonalizado.setEdital(edital);
+        }
+
         return campoPersonalizadoService.salvarCampoPersonalizado(campoPersonalizado);
     }
 
@@ -49,6 +60,16 @@ public class Fachada {
     // =================== Documento ===================
 
     public Documento salvarDocumento(Documento documento) {
+        if (documento.getEtapa() != null && documento.getEtapa().getId() != null) {
+            Etapa etapa = etapaService.buscarPorIdEtapa(documento.getEtapa().getId());
+            documento.setEtapa(etapa);
+        }
+
+        if (documento.getInscricao() != null && documento.getInscricao().getId() != null) {
+            Inscricao inscricao = inscricaoService.buscarPorIdInscricao(documento.getInscricao().getId());
+            documento.setInscricao(inscricao);
+        }
+
         return documentoService.salvarDocumento(documento);
     }
 
@@ -70,8 +91,12 @@ public class Fachada {
 
     // =================== DocumentoEdital ===================
 
-    public DocumentoEdital salvarDocumentoEdital(DocumentoEdital documentoEdital) {
-        return documentoEditalService.salvarDocumetoEdial(documentoEdital);
+    public DocumentoEdital salvarDocumentoEdital(DocumentoEdital obj) {
+        if (obj.getEdital() != null && obj.getEdital().getId() != null) {
+            Edital edital = editalService.buscarPorIdEdital(obj.getEdital().getId());
+            obj.setEdital(edital);
+        }
+        return documentoEditalService.salvarDocumentoEdial(obj);
     }
 
     public DocumentoEdital buscarPorIdDocumentoEdital(Long id) {
@@ -92,8 +117,18 @@ public class Fachada {
 
     // =================== Edital ===================
 
-    public Edital salvarEdital(Edital edital) {
-        return editalService.salvarEdital(edital);
+    public Edital salvarEdital(Edital obj) {
+        if (obj.getTipoEdital() != null && obj.getTipoEdital().getId() != null) {
+            TipoEdital tipoEdital = tipoEditalService.buscarPorIdTipoEdital(obj.getTipoEdital().getId());
+            obj.setTipoEdital(tipoEdital);
+        }
+
+        if (obj.getStatusAtual() != null && obj.getStatusAtual().getId() != null) {
+            StatusPersonalizado status = statusPersonalizadoService.buscarPorIdStatusPersonalizado(obj.getStatusAtual().getId());
+            obj.setStatusAtual(status);
+        }
+
+        return editalService.salvarEdital(obj);
     }
 
     public Edital buscarPorIdEdital(Long id) {
@@ -114,8 +149,16 @@ public class Fachada {
 
     // =================== Etapa ===================
 
-    public Etapa salvarEtapa(Etapa etapa) {
-        return etapaService.salvarEtapa(etapa);
+    public Etapa salvarEtapa(Etapa obj) {
+        if (obj.getEdital() != null && obj.getEdital().getId() != null) {
+            Edital edital = editalService.buscarPorIdEdital(obj.getEdital().getId());
+            obj.setEdital(edital);
+        }
+        if (obj.getStatusAtual() != null && obj.getStatusAtual().getId() != null) {
+            StatusPersonalizado status = statusPersonalizadoService.buscarPorIdStatusPersonalizado(obj.getStatusAtual().getId());
+            obj.setStatusAtual(status);
+        }
+        return etapaService.salvarEtapa(obj);
     }
 
     public Etapa buscarPorIdEtapa(Long id) {
@@ -136,8 +179,20 @@ public class Fachada {
 
     // =================== HistoricoEtapaInscricao ===================
 
-    public HistoricoEtapaInscricao salvarHistoricoEtapaInscricao(HistoricoEtapaInscricao historicoEtapaInscricao) {
-        return historicoEtapaInscricaoService.salvarHistoricoEtapaInscricao(historicoEtapaInscricao);
+    public HistoricoEtapaInscricao salvarHistoricoEtapaInscricao(HistoricoEtapaInscricao obj) {
+        if (obj.getEtapa() != null && obj.getEtapa().getId() != null) {
+            Etapa etapa = etapaService.buscarPorIdEtapa(obj.getEtapa().getId());
+            obj.setEtapa(etapa);
+        }
+        if (obj.getInscricao() != null && obj.getInscricao().getId() != null) {
+            Inscricao inscricao = inscricaoService.buscarPorIdInscricao(obj.getInscricao().getId());
+            obj.setInscricao(inscricao);
+        }
+        if (obj.getStatusPersonalizado() != null && obj.getStatusPersonalizado().getId() != null) {
+            StatusPersonalizado status = statusPersonalizadoService.buscarPorIdStatusPersonalizado(obj.getStatusPersonalizado().getId());
+            obj.setStatusPersonalizado(status);
+        }
+        return historicoEtapaInscricaoService.salvarHistoricoEtapaInscricao(obj);
     }
 
     public HistoricoEtapaInscricao buscarPorIdHistoricoEtapaInscricao(Long id) {
@@ -158,8 +213,16 @@ public class Fachada {
 
     // =================== Inscricao ===================
 
-    public Inscricao salvarInscricao(Inscricao inscricao) {
-        return inscricaoService.salvarInscricao(inscricao);
+    public Inscricao salvarInscricao(Inscricao obj) {
+        if (obj.getEdital() != null && obj.getEdital().getId() != null) {
+            Edital edital = editalService.buscarPorIdEdital(obj.getEdital().getId());
+            obj.setEdital(edital);
+        }
+        if (obj.getStatusAtual() != null && obj.getStatusAtual().getId() != null) {
+            StatusPersonalizado status = statusPersonalizadoService.buscarPorIdStatusPersonalizado(obj.getStatusAtual().getId());
+            obj.setStatusAtual(status);
+        }
+        return inscricaoService.salvarInscricao(obj);
     }
 
     public Inscricao buscarPorIdInscricao(Long id) {
@@ -180,8 +243,12 @@ public class Fachada {
 
     // =================== PermissaoEtapa ===================
 
-    public PermissaoEtapa salvarPermissaoEtapa(PermissaoEtapa permissaoEtapa) {
-        return permissaoEtapaService.salvarPermissaoEtapa(permissaoEtapa);
+    public PermissaoEtapa salvarPermissaoEtapa(PermissaoEtapa obj) {
+        if (obj.getEtapa() != null && obj.getEtapa().getId() != null) {
+            Etapa etapa = etapaService.buscarPorIdEtapa(obj.getEtapa().getId());
+            obj.setEtapa(etapa);
+        }
+        return permissaoEtapaService.salvarPermissaoEtapa(obj);
     }
 
     public PermissaoEtapa buscarPorIdPermissaoEtapa(Long id) {
@@ -224,8 +291,16 @@ public class Fachada {
 
     // =================== ValorCampo ===================
 
-    public ValorCampo salvarValorCampo(ValorCampo valorCampo) {
-        return valorCampoService.salvarValorCampo(valorCampo);
+    public ValorCampo salvarValorCampo(ValorCampo obj) {
+        if (obj.getInscricao() != null && obj.getInscricao().getId() != null) {
+            Inscricao inscricao = inscricaoService.buscarPorIdInscricao(obj.getInscricao().getId());
+            obj.setInscricao(inscricao);
+        }
+        if (obj.getCampoPersonalizado() != null && obj.getCampoPersonalizado().getId() != null) {
+            CampoPersonalizado campo = campoPersonalizadoService.buscarPorIdCampoPersonalizado(obj.getCampoPersonalizado().getId());
+            obj.setCampoPersonalizado(campo);
+        }
+        return valorCampoService.salvarValorCampo(obj);
     }
 
     public ValorCampo buscarPorIdValorCampo(Long id) {
@@ -247,22 +322,22 @@ public class Fachada {
     // =================== StatusPersonalizado ===================
 
     public StatusPersonalizado salvarStatusPersonalizado(StatusPersonalizado statusPersonalizado) {
-        return salvarStatusPersonalizadoService.salvarStatusPersonalizado(statusPersonalizado);
+        return statusPersonalizadoService.salvarStatusPersonalizado(statusPersonalizado);
     }
 
-    public  StatusPersonalizado buscarPorIdStatusPersonalizado(Long id) {
-        return salvarStatusPersonalizadoService.buscarPorIdStatusPersonalizado(id);
+    public StatusPersonalizado buscarPorIdStatusPersonalizado(Long id) throws StatusPersonalizadoNotFoundException {
+        return statusPersonalizadoService.buscarPorIdStatusPersonalizado(id);
     }
 
-    public  List<StatusPersonalizado> listarStatusPersonalizado() {
-        return salvarStatusPersonalizadoService.listarStatusPersonalizados();
+    public List<StatusPersonalizado> listarStatusPersonalizado() {
+        return statusPersonalizadoService.listarStatusPersonalizados();
     }
 
-    public  StatusPersonalizado editarStatusPersonalizado(Long id, StatusPersonalizado statusPersonalizado) {
-        return salvarStatusPersonalizadoService.editarStatusPersonalizado(id, statusPersonalizado);
+    public StatusPersonalizado editarStatusPersonalizado(Long id, StatusPersonalizado statusPersonalizado) throws StatusPersonalizadoNotFoundException {
+        return statusPersonalizadoService.editarStatusPersonalizado(id, statusPersonalizado);
     }
 
-    public  void deletarStatusPersonalizado(Long id){
-        salvarStatusPersonalizadoService.deletarStatusPersonalizado(id);
+    public void deletarStatusPersonalizado(Long id) throws StatusPersonalizadoNotFoundException {
+        statusPersonalizadoService.deletarStatusPersonalizado(id);
     }
 }

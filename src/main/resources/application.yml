@@ -3,6 +3,12 @@ spring:
     name: sgu-editais-service
   profiles:
     active: docker
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+server:
+  port: 8083
 
 #  config:
 #    import: "configserver:"

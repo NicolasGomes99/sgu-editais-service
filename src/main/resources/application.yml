@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: sgu-editais-service
+  profiles:
+    active: docker
+
+#  config:
+#    import: "configserver:"
+#
+#  cloud:
+#    config:
+#      uri: http://config-service:8888
+#      fail-fast: true

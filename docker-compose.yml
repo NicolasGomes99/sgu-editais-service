@@ -1,35 +1,50 @@
-services:
-  app:
-    build: .
-    container_name: sgu-editais-service
-    ports:
-      - "8083:8080"
-    depends_on:
-      - db
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/banco?stringtype=unspecified
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: 123123
-    networks:
-      - sgu-network
+version: '3.9'
 
-  db:
-    image: postgres:15
-    container_name: sgu-db
+services:
+  sgu-editais-service:
+    image: sgu-editais-service
+    build: .
+    ports:
+      - "8083:8083"
+    container_name: sgu-editais-service
+    command: mvn spring-boot:run
+    networks:
+      - sgu-networks
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://sgu-editais-db:5432/editais
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: password
+    depends_on:
+      sgu-editais-db:
+        condition: service_healthy
+    volumes:
+      - ./storage:/app/storage
+
+  sgu-editais-db:
+    image: postgres:16.0
     restart: always
     environment:
-      POSTGRES_DB: banco
+      POSTGRES_DB: editais
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 123123
+      POSTGRES_PASSWORD: password
+      TZ: America/Sao_Paulo
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d editais"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
+      - "5436:5432"
     networks:
-      - sgu-network
+      - sgu-networks
+    volumes:
+      - pg-data:/var/lib/postgresql/data
 
 volumes:
-  pgdata:
+  pg-data:
+    driver: local
 
 networks:
-  sgu-network:
+  sgu-networks:
+    external: true

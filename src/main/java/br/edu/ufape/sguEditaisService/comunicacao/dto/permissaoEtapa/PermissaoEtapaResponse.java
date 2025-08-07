@@ -5,7 +5,7 @@ import br.edu.ufape.sguEditaisService.models.PermissaoEtapa;
 import lombok.*;
 import org.modelmapper.ModelMapper;
 
-@Getter @Setter
+@Getter @Setter @NoArgsConstructor
 public class PermissaoEtapaResponse {
     private Long id;
     private String perfil;

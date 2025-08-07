@@ -14,7 +14,7 @@ public class HistoricoEtapaInscricao {
     private Long id;
     private Date dataAacao;
 
-    @OneToOne(mappedBy = "historicoEtapaInscricao")
+    @ManyToOne
     private StatusPersonalizado statusPersonalizado;
 
     private String observacao;

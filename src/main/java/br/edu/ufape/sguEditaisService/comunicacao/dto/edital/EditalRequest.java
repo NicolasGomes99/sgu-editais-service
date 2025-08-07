@@ -1,34 +1,45 @@
 package br.edu.ufape.sguEditaisService.comunicacao.dto.edital;
 
-import br.edu.ufape.sguEditaisService.comunicacao.dto.campoPersonalizado.CampoPersonalizadoRequest;
-import br.edu.ufape.sguEditaisService.comunicacao.dto.documentoEdital.DocumentoEditalRequest;
-import br.edu.ufape.sguEditaisService.comunicacao.dto.etapa.EtapaRequest;
-import br.edu.ufape.sguEditaisService.comunicacao.dto.inscricao.InscricaoRequest;
-import br.edu.ufape.sguEditaisService.comunicacao.dto.tipoEdital.TipoEditalRequest;
 import br.edu.ufape.sguEditaisService.models.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import org.modelmapper.ModelMapper;
-import java.util.List;
+import org.modelmapper.convention.MatchingStrategies;
+
+import java.time.LocalDateTime;
 
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor
 public class EditalRequest {
-
-    @NotBlank(message = "titulo é obrigatório")
+    @NotBlank
     private String titulo;
-    @NotBlank(message = "descricao é obrigatório")
+
+    @NotBlank
     private String descricao;
-    private java.time.LocalDateTime dataPublicacao;
-    private java.time.LocalDateTime inicioInscricao;
-    private java.time.LocalDateTime fimIncricao;
-    private StatusPersonalizado statusPersonalizado;
-    private TipoEditalRequest tipoEdital;
-    private List<EtapaRequest> etapas;
-    private List<InscricaoRequest> inscricao;
-    private List<DocumentoEditalRequest> documentosEdital;
-    private List<CampoPersonalizadoRequest> camposPersonalizados;
+
+    private LocalDateTime dataPublicacao;
+    private LocalDateTime inicioInscricao;
+    private LocalDateTime fimIncricao;
+
+    private Long statusAtualId;
+    private Long tipoEditalId;
 
     public Edital convertToEntity(EditalRequest request, ModelMapper modelMapper) {
-        return modelMapper.map(request, Edital.class);
+        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        Edital entity = modelMapper.map(request, Edital.class);
+
+        if (request.getStatusAtualId() != null) {
+            StatusPersonalizado status = new StatusPersonalizado();
+            status.setId(request.getStatusAtualId());
+            entity.setStatusAtual(status);
+        }
+
+        if (request.getTipoEditalId() != null) {
+            TipoEdital tipoEdital = new TipoEdital();
+            tipoEdital.setId(request.getTipoEditalId());
+            entity.setTipoEdital(tipoEdital);
+        }
+
+        return entity;
     }
 }
+

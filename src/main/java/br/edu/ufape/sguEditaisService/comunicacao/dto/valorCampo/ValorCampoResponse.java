@@ -6,7 +6,7 @@ import br.edu.ufape.sguEditaisService.models.ValorCampo;
 import lombok.*;
 import org.modelmapper.ModelMapper;
 
-@Getter @Setter
+@Getter @Setter @NoArgsConstructor
 public class ValorCampoResponse {
     private Long id;
     private String valor;

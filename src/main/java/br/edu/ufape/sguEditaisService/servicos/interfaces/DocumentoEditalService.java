@@ -6,7 +6,7 @@ import br.edu.ufape.sguEditaisService.models.DocumentoEdital;
 import java.util.List;
 
 public interface DocumentoEditalService {
-    DocumentoEdital salvarDocumetoEdial (DocumentoEdital entity);
+    DocumentoEdital salvarDocumentoEdital (DocumentoEdital entity);
 
     DocumentoEdital buscarPorIdDocumentoEdital(Long id) throws DocumentoEditalNotFoundException;
 

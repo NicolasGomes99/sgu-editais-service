@@ -21,15 +21,4 @@ public class StatusPersonalizado {
     @Enumerated(EnumType.STRING)
     private TipoStatus tipoStatus;
 
-    @OneToOne
-    private Edital edital;
-
-    @OneToOne
-    private Etapa etapa;
-
-    @OneToOne
-    private HistoricoEtapaInscricao historicoEtapaInscricao;
-
-    @OneToOne
-    private Inscricao inscricao;
 }

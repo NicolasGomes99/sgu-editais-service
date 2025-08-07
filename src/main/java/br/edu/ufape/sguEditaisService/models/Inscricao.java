@@ -1,5 +1,6 @@
 package br.edu.ufape.sguEditaisService.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,8 +19,9 @@ public class Inscricao {
 
     private UUID idUsuario;
 
-    @OneToOne(mappedBy = "inscricao")
-    private StatusPersonalizado statusPersonalizado;
+    @ManyToOne
+    @JsonIgnore
+    private StatusPersonalizado statusAtual;
 
     @OneToMany(mappedBy = "inscricao", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Documento> documentos;

@@ -1,5 +1,6 @@
 package br.edu.ufape.sguEditaisService.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,8 +23,9 @@ public class Edital {
     private LocalDateTime inicioInscricao;
     private LocalDateTime fimIncricao;
 
-    @OneToOne(mappedBy = "edital")
-    private StatusPersonalizado statusPersonalizado;
+    @ManyToOne
+    @JsonIgnore
+    private StatusPersonalizado statusAtual;
 
     @OneToOne
     private TipoEdital tipoEdital;

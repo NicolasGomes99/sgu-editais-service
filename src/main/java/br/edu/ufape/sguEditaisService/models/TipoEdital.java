@@ -15,6 +15,6 @@ public class TipoEdital {
 
     private String descricao;
 
-    @OneToOne
-    private Edital edital;
+//    @OneToOne
+//    private Edital edital;
 }

@@ -5,13 +5,14 @@ import br.edu.ufape.sguEditaisService.comunicacao.dto.inscricao.InscricaoRespons
 import br.edu.ufape.sguEditaisService.models.Documento;
 import lombok.*;
 import org.modelmapper.ModelMapper;
+import java.time.LocalDateTime;
 
-@Getter @Setter
+@Getter @Setter @NoArgsConstructor
 public class DocumentoResponse {
     private Long id;
     private String nome;
     private String caminho;
-    private java.time.LocalDateTime dataUpload;
+    private LocalDateTime dataUpload;
     private EtapaResponse etapa;
     private InscricaoResponse inscricao;
 

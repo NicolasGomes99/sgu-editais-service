@@ -3,10 +3,11 @@ package br.edu.ufape.sguEditaisService.comunicacao.dto.statusPersonalizado;
 import br.edu.ufape.sguEditaisService.models.*;
 import br.edu.ufape.sguEditaisService.models.enums.TipoStatus;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.modelmapper.ModelMapper;
 
-@Getter @Setter
+@Getter @Setter @NoArgsConstructor
 public class StatusPersonalizadoResponse {
     private Long id;
     private String nome;

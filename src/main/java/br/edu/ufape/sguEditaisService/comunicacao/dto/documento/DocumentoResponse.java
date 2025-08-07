@@ -7,7 +7,7 @@ import lombok.*;
 import org.modelmapper.ModelMapper;
 import java.time.LocalDateTime;
 
-@Getter @Setter
+@Getter @Setter @NoArgsConstructor
 public class DocumentoResponse {
     private Long id;
     private String nome;

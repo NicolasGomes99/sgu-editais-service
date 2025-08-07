@@ -7,7 +7,7 @@ import br.edu.ufape.sguEditaisService.models.CampoPersonalizado;
 import lombok.*;
 import org.modelmapper.ModelMapper;
 
-@Getter @Setter
+@Getter @Setter @NoArgsConstructor
 public class CampoPersonalizadoResponse {
     private Long id;
     private String nome;

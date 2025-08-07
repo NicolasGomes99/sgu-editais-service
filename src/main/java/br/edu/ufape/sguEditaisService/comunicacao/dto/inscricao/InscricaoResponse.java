@@ -7,7 +7,7 @@ import lombok.*;
 import org.modelmapper.ModelMapper;
 import java.util.UUID;
 
-@Getter @Setter
+@Getter @Setter @NoArgsConstructor
 public class InscricaoResponse {
     private Long id;
     private UUID idUsuario;

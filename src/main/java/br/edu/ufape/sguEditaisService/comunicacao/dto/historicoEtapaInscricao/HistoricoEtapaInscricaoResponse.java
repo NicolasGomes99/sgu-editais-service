@@ -8,7 +8,7 @@ import lombok.*;
 import org.modelmapper.ModelMapper;
 import java.util.Date;
 
-@Getter @Setter
+@Getter @Setter @NoArgsConstructor
 public class HistoricoEtapaInscricaoResponse {
     private Long id;
     private String observacao;

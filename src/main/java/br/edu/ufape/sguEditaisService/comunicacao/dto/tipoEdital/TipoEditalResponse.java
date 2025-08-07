@@ -4,7 +4,7 @@ import br.edu.ufape.sguEditaisService.models.TipoEdital;
 import lombok.*;
 import org.modelmapper.ModelMapper;
 
-@Getter @Setter
+@Getter @Setter @NoArgsConstructor
 public class TipoEditalResponse {
     private Long id;
     private String descricao;

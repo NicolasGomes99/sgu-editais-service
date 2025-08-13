@@ -16,7 +16,7 @@ public class DocumentoRequest {
     private String nome;
     @NotBlank(message = "caminho é obrigatório")
     private String caminho;
-    private LocalDateTime dataUpload;
+
     private Long etapaId;
     private Long inscricaoId;
 

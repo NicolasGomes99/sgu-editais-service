@@ -1,5 +1,6 @@
 package br.edu.ufape.sguEditaisService.comunicacao.dto.edital;
 
+import br.edu.ufape.sguEditaisService.comunicacao.annotations.DatasConsistentes;
 import br.edu.ufape.sguEditaisService.models.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -8,16 +9,20 @@ import org.modelmapper.convention.MatchingStrategies;
 
 import java.time.LocalDateTime;
 
-@Getter @Setter @AllArgsConstructor @NoArgsConstructor
+@Getter @Setter @AllArgsConstructor @NoArgsConstructor @DatasConsistentes
 public class EditalRequest {
-    @NotBlank
+    @NotBlank(message = "O título é obrigatório")
     private String titulo;
 
-    @NotBlank
+    @NotBlank(message = "A descrição é obrigatória")
     private String descricao;
 
     private LocalDateTime dataPublicacao;
+
+    @NotNull(message = "A data de início de inscrição é obrigatória")
     private LocalDateTime inicioInscricao;
+
+    @NotNull(message = "A data de fim de inscrição é obrigatória")
     private LocalDateTime fimIncricao;
 
     private Long statusAtualId;

@@ -13,7 +13,6 @@ import java.util.Date;
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor
 public class HistoricoEtapaInscricaoRequest {
     private String observacao;
-    private Date dataAcao;
 
     private Long etapaId;
     private Long inscricaoId;

@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -17,6 +18,7 @@ public class DocumentoService implements br.edu.ufape.sguEditaisService.servicos
 
     @Override
     public Documento salvarDocumento(Documento entity) {
+        entity.setDataUpload(LocalDateTime.now());
         return documentoRepository.save(entity);
     }
 

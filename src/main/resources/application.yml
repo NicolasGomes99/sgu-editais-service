@@ -3,6 +3,15 @@ spring:
     name: sgu-editais-service
   profiles:
     active: docker
+
+  config:
+    import: "configserver:"
+
+  cloud:
+    config:
+      uri: http://config-service:8888
+      fail-fast: true
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -10,10 +19,12 @@ spring:
 server:
   port: 8083
 
-#  config:
-#    import: "configserver:"
-#
-#  cloud:
-#    config:
-#      uri: http://config-service:8888
-#      fail-fast: true
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://discovery:8761/eureka/
+    registerWithEureka: true
+    fetchRegistry: true
+  instance:
+    hostname: sgu-editais-service
+    prefer-ip-address: true

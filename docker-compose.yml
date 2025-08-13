@@ -15,6 +15,10 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://sgu-editais-db:5432/editais
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: password
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
     depends_on:
       sgu-editais-db:
         condition: service_healthy

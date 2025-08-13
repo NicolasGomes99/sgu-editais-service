@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -17,6 +18,7 @@ public class HistoricoEtapaInscricaoService implements br.edu.ufape.sguEditaisSe
 
     @Override
     public HistoricoEtapaInscricao salvarHistoricoEtapaInscricao(HistoricoEtapaInscricao entity) {
+        entity.setDataAacao(LocalDateTime.now());
         return repository.save(entity);
     }
 

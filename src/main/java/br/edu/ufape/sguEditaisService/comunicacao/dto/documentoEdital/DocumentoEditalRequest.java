@@ -15,7 +15,6 @@ public class DocumentoEditalRequest {
     private String nome;
     @NotBlank
     private String caminho;
-    private LocalDateTime dataUpload;
     private Long editalId;
 
     public DocumentoEdital convertToEntity(DocumentoEditalRequest request, ModelMapper modelMapper) {

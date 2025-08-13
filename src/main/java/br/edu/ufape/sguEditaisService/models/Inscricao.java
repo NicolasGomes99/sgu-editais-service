@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,6 +19,7 @@ public class Inscricao {
     private Long id;
 
     private UUID idUsuario;
+    private LocalDateTime dataInscricao;
 
     @ManyToOne
     @JsonIgnore

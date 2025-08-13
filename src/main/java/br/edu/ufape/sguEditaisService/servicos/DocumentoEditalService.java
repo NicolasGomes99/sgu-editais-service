@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -17,6 +18,7 @@ public class DocumentoEditalService implements br.edu.ufape.sguEditaisService.se
 
     @Override
     public DocumentoEdital salvarDocumentoEdital(DocumentoEdital entity) {
+        entity.setDataUpload(LocalDateTime.now());
         return  documentoEditalRepository.save(entity);
     }
 

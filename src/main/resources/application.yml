@@ -1,19 +1,13 @@
-spring:
-  application:
-    name: sgu-editais-service
-  profiles:
-    active: docker
-  jpa:
-    hibernate:
-      ddl-auto: update
+  spring:
+    application:
+      name: sgu-editais-service
+    profiles:
+      active: docker
 
-server:
-  port: 8083
+    config:
+      import: "configserver:"
 
-#  config:
-#    import: "configserver:"
-#
-#  cloud:
-#    config:
-#      uri: http://config-service:8888
-#      fail-fast: true
+    cloud:
+      config:
+        uri: http://config-service:8888
+        fail-fast: true

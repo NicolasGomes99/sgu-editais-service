@@ -16,7 +16,6 @@ public class InscricaoResponse {
     private Long id;
     private UUID idUsuario;
 
-    @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
     private LocalDateTime dataInscricao;
 
     private EditalResponse edital;
@@ -24,9 +23,15 @@ public class InscricaoResponse {
 
     public InscricaoResponse(Inscricao entity, ModelMapper modelMapper) {
         if (entity == null) throw new IllegalArgumentException("inscricao não pode ser nulo");
-        else modelMapper.map(entity, this);
+        modelMapper.map(entity, this);
+    }
 
-        this.dataInscricao = entity.getDataInscricao()
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
+    public LocalDateTime getDataInscricao() {
+        if (this.dataInscricao == null) {
+            return null;
+        }
+        return this.dataInscricao
                 .atZone(ZoneId.of("UTC"))
                 .withZoneSameInstant(ZoneId.of("America/Sao_Paulo"))
                 .toLocalDateTime();

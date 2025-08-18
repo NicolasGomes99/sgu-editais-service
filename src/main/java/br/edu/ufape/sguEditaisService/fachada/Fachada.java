@@ -1,6 +1,8 @@
 package br.edu.ufape.sguEditaisService.fachada;
 
 import br.edu.ufape.sguEditaisService.auth.AuthenticatedUserProvider;
+import br.edu.ufape.sguEditaisService.dados.InscricaoRepository;
+import br.edu.ufape.sguEditaisService.exceptions.InscricaoDuplicadaException;
 import br.edu.ufape.sguEditaisService.exceptions.notFound.StatusPersonalizadoNotFoundException;
 import br.edu.ufape.sguEditaisService.models.*;
 import br.edu.ufape.sguEditaisService.servicos.interfaces.*;
@@ -29,6 +31,7 @@ public class Fachada {
     private final ValorCampoService valorCampoService;
     private final StatusPersonalizadoService statusPersonalizadoService;
     private final AuthenticatedUserProvider authenticatedUserProvider;
+    private final InscricaoRepository inscricaoRepository;
 
     // =================== CampoPersonalizado ===================
 
@@ -294,6 +297,10 @@ public class Fachada {
     public Inscricao salvarInscricao(Inscricao obj) {
         UUID userId = authenticatedUserProvider.getUserId();
         obj.setIdUsuario(userId);
+
+        if(inscricaoRepository.existsByIdUsuarioAndEditalId(userId, obj.getEdital().getId())){
+            throw new InscricaoDuplicadaException();
+        }
 
         if (obj.getEdital() != null && obj.getEdital().getId() != null) {
             Edital edital = editalService.buscarPorIdEdital(obj.getEdital().getId());

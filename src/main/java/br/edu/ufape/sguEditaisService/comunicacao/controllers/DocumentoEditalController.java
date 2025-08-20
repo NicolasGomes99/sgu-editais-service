@@ -46,11 +46,7 @@ public class DocumentoEditalController {
 
     @GetMapping
     public ResponseEntity<Page<DocumentoEditalResponse>> listar(@PageableDefault(sort = "id") Pageable pageable) {
-        Page<DocumentoEdital> page = fachada.listarDocumentoEdital().stream()
-                .collect(Collectors.collectingAndThen(
-                        Collectors.toList(),
-                        list -> new PageImpl<>(list, pageable, list.size())
-                ));
+        Page<DocumentoEdital> page = fachada.listarDocumentoEdital(pageable);
         Page<DocumentoEditalResponse> response = page.map(d -> new DocumentoEditalResponse(d, modelMapper));
         return ResponseEntity.ok(response);
     }

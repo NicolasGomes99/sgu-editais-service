@@ -5,6 +5,8 @@ import br.edu.ufape.sguEditaisService.models.*;
 import br.edu.ufape.sguEditaisService.servicos.interfaces.*;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -31,6 +33,18 @@ public class Fachada {
     // =================== CampoPersonalizado ===================
 
     public CampoPersonalizado salvarCampoPersonalizado(CampoPersonalizado campoPersonalizado) {
+        int parentCount = 0;
+        if (campoPersonalizado.getEdital() != null && campoPersonalizado.getEdital().getId() != null) parentCount++;
+        if (campoPersonalizado.getEtapa() != null && campoPersonalizado.getEtapa().getId() != null) parentCount++;
+        if (campoPersonalizado.getTipoEditalModelo() != null && campoPersonalizado.getTipoEditalModelo().getId() != null) parentCount++;
+
+        if (parentCount > 1) {
+            throw new IllegalArgumentException("Um CampoPersonalizado só pode pertencer a um Edital, a uma Etapa ou a um TipoEdital (modelo), mas não a múltiplos.");
+        }
+        if (parentCount == 0) {
+            throw new IllegalArgumentException("Um CampoPersonalizado deve pertencer a um Edital, a uma Etapa ou a um TipoEdital (modelo).");
+        }
+
         if (campoPersonalizado.getEtapa() != null && campoPersonalizado.getEtapa().getId() != null) {
             Etapa etapa = etapaService.buscarPorIdEtapa(campoPersonalizado.getEtapa().getId());
             campoPersonalizado.setEtapa(etapa);
@@ -41,6 +55,11 @@ public class Fachada {
             campoPersonalizado.setEdital(edital);
         }
 
+        if (campoPersonalizado.getTipoEditalModelo() != null && campoPersonalizado.getTipoEditalModelo().getId() != null) {
+            TipoEdital tipoEdital = tipoEditalService.buscarPorIdTipoEdital(campoPersonalizado.getTipoEditalModelo().getId());
+            campoPersonalizado.setTipoEditalModelo(tipoEdital);
+        }
+
         return campoPersonalizadoService.salvarCampoPersonalizado(campoPersonalizado);
     }
 
@@ -48,21 +67,36 @@ public class Fachada {
         return campoPersonalizadoService.buscarPorIdCampoPersonalizado(id);
     }
 
-    public List<CampoPersonalizado> listarCampoPersonalizado() {
-        return campoPersonalizadoService.listarCampoPersonalizado();
+    public Page<CampoPersonalizado> listarCampoPersonalizado(Pageable pageable) {
+        return campoPersonalizadoService.listarCampoPersonalizado(pageable);
     }
 
     public CampoPersonalizado editarCampoPersonalizado(Long id, CampoPersonalizado obj) {
         CampoPersonalizado original = campoPersonalizadoService.buscarPorIdCampoPersonalizado(id);
+
+        if (obj.getEdital() != null && !obj.getEdital().getId().equals(original.getEdital() != null ? original.getEdital().getId() : null)) {
+            throw new IllegalArgumentException("Não é permitido mover um Campo para um Edital diferente.");
+        }
+        if (obj.getEtapa() != null && !obj.getEtapa().getId().equals(original.getEtapa() != null ? original.getEtapa().getId() : null)) {
+            throw new IllegalArgumentException("Não é permitido mover um Campo para uma Etapa diferente.");
+        }
+        if (obj.getTipoEditalModelo() != null && !obj.getTipoEditalModelo().getId().equals(original.getTipoEditalModelo() != null ? original.getTipoEditalModelo().getId() : null)) {
+            throw new IllegalArgumentException("Não é permitido mover um Campo para um Modelo (TipoEdital) diferente.");
+        }
+
         modelMapper.map(obj, original);
 
-        if (obj.getEtapa() != null && obj.getEtapa().getId() != null) {
-            Etapa etapa = etapaService.buscarPorIdEtapa(obj.getEtapa().getId());
+        if (original.getEtapa() != null && original.getEtapa().getId() != null) {
+            Etapa etapa = etapaService.buscarPorIdEtapa(original.getEtapa().getId());
             original.setEtapa(etapa);
         }
-        if (obj.getEdital() != null && obj.getEdital().getId() != null) {
-            Edital edital = editalService.buscarPorIdEdital(obj.getEdital().getId());
+        if (original.getEdital() != null && original.getEdital().getId() != null) {
+            Edital edital = editalService.buscarPorIdEdital(original.getEdital().getId());
             original.setEdital(edital);
+        }
+        if (original.getTipoEditalModelo() != null && original.getTipoEditalModelo().getId() != null) {
+            TipoEdital tipoEdital = tipoEditalService.buscarPorIdTipoEdital(original.getTipoEditalModelo().getId());
+            original.setTipoEditalModelo(tipoEdital);
         }
 
         return campoPersonalizadoService.salvarCampoPersonalizado(original);
@@ -70,6 +104,22 @@ public class Fachada {
 
     public void deletarCampoPersonalizado(Long id) {
         campoPersonalizadoService.deletarCampoPersonalizado(id);
+    }
+
+    public List<CampoPersonalizado> listarCamposPorEdital(Long editalId) {
+        return campoPersonalizadoService.listarCamposPorEdital(editalId);
+    }
+
+    public List<CampoPersonalizado> listarCamposPorTipoEdital(Long tipoEditalId) {
+        return campoPersonalizadoService.listarCamposPorTipoEdital(tipoEditalId);
+    }
+
+    public List<CampoPersonalizado> listarCamposPorEtapa(Long etapaId) {
+        return campoPersonalizadoService.listarCamposPorEtapa(etapaId);
+    }
+
+    public CampoPersonalizado alternarObrigatoriedade(Long campoId) {
+        return campoPersonalizadoService.alternarObrigatoriedade(campoId);
     }
 
     // =================== Documento ===================
@@ -130,8 +180,8 @@ public class Fachada {
         return documentoEditalService.buscarPorIdDocumentoEdital(id);
     }
 
-    public List<DocumentoEdital> listarDocumentoEdital() {
-        return documentoEditalService.listarDocumentoEdital();
+    public Page<DocumentoEdital> listarDocumentoEdital(Pageable pageable) {
+        return documentoEditalService.listarDocumentoEdital(pageable);
     }
 
     public DocumentoEdital editarDocumentoEdital(Long id, DocumentoEdital obj) {
@@ -170,8 +220,8 @@ public class Fachada {
         return editalService.buscarPorIdEdital(id);
     }
 
-    public List<Edital> listarEdital() {
-        return editalService.listarEdital();
+    public Page<Edital> listarEdital(Pageable pageable) {
+        return editalService.listarEdital(pageable);
     }
 
     public Edital editarEdital(Long id, Edital obj) {
@@ -195,12 +245,44 @@ public class Fachada {
         editalService.deletarEdital(id);
     }
 
+    public Edital criarEditalAPartirDeModelo(Long templateId, Edital editalBase) {
+        return editalService.criarEditalAPartirDeModelo(templateId, editalBase);
+    }
+
+    public TipoEdital transformarEditalEmModelo(Long editalId, String nomeModelo, String descricaoModelo) {
+        return editalService.transformarEditalEmModelo(editalId, nomeModelo, descricaoModelo);
+    }
+
+    public Page<Edital> listarEditaisPublicados(Pageable pageable) {
+        return editalService.listarEditaisPublicados(pageable);
+    }
+
+    public Edital atualizarStatusEdital(Long editalId, Long novoStatusId) {
+        return editalService.atualizarStatusEdital(editalId, novoStatusId);
+    }
+
+
     // =================== Etapa ===================
 
     public Etapa salvarEtapa(Etapa obj) {
+        int parentCount = 0;
+        if (obj.getEdital() != null && obj.getEdital().getId() != null) parentCount++;
+        if (obj.getTipoEditalModelo() != null && obj.getTipoEditalModelo().getId() != null) parentCount++;
+
+        if (parentCount > 1) {
+            throw new IllegalArgumentException("Uma Etapa só pode pertencer a um Edital ou a um TipoEdital (modelo), mas não a ambos.");
+        }
+        if (parentCount == 0) {
+            throw new IllegalArgumentException("Uma Etapa deve pertencer a um Edital ou a um TipoEdital (modelo).");
+        }
+
         if (obj.getEdital() != null && obj.getEdital().getId() != null) {
             Edital edital = editalService.buscarPorIdEdital(obj.getEdital().getId());
             obj.setEdital(edital);
+        }
+        if (obj.getTipoEditalModelo() != null && obj.getTipoEditalModelo().getId() != null) {
+            TipoEdital tipoEdital = tipoEditalService.buscarPorIdTipoEdital(obj.getTipoEditalModelo().getId());
+            obj.setTipoEditalModelo(tipoEdital);
         }
         if (obj.getStatusAtual() != null && obj.getStatusAtual().getId() != null) {
             StatusPersonalizado status = statusPersonalizadoService.buscarPorIdStatusPersonalizado(obj.getStatusAtual().getId());
@@ -213,17 +295,29 @@ public class Fachada {
         return etapaService.buscarPorIdEtapa(id);
     }
 
-    public List<Etapa> listarEtapa() {
-        return etapaService.listarEtapa();
+    public Page<Etapa> listarEtapa(Pageable pageable) {
+        return etapaService.listarEtapa(pageable);
     }
 
     public Etapa editarEtapa(Long id, Etapa obj) {
         Etapa original = etapaService.buscarPorIdEtapa(id);
+
+        if (obj.getEdital() != null && !obj.getEdital().getId().equals(original.getEdital() != null ? original.getEdital().getId() : null)) {
+            throw new IllegalArgumentException("Não é permitido mover uma Etapa para um Edital diferente.");
+        }
+        if (obj.getTipoEditalModelo() != null && !obj.getTipoEditalModelo().getId().equals(original.getTipoEditalModelo() != null ? original.getTipoEditalModelo().getId() : null)) {
+            throw new IllegalArgumentException("Não é permitido mover uma Etapa para um Modelo (TipoEdital) diferente.");
+        }
+
         modelMapper.map(obj, original);
 
-        if (obj.getEdital() != null && obj.getEdital().getId() != null) {
-            Edital edital = editalService.buscarPorIdEdital(obj.getEdital().getId());
+        if (original.getEdital() != null && original.getEdital().getId() != null) {
+            Edital edital = editalService.buscarPorIdEdital(original.getEdital().getId());
             original.setEdital(edital);
+        }
+        if (original.getTipoEditalModelo() != null && original.getTipoEditalModelo().getId() != null) {
+            TipoEdital tipoEdital = tipoEditalService.buscarPorIdTipoEdital(original.getTipoEditalModelo().getId());
+            original.setTipoEditalModelo(tipoEdital);
         }
         if (obj.getStatusAtual() != null && obj.getStatusAtual().getId() != null) {
             StatusPersonalizado status = statusPersonalizadoService.buscarPorIdStatusPersonalizado(obj.getStatusAtual().getId());
@@ -235,6 +329,18 @@ public class Fachada {
 
     public void deletarEtapa(Long id) {
         etapaService.deletarEtapa(id);
+    }
+
+    public List<Etapa> listarEtapasPorEdital(Long editalId) {
+        return etapaService.listarEtapasPorEdital(editalId);
+    }
+
+    public List<Etapa> listarEtapasPorTipoEdital(Long tipoEditalId) {
+        return etapaService.listarEtapasPorTipoEdital(tipoEditalId);
+    }
+
+    public void atualizarOrdemEtapas(List<Long> idsEtapasEmOrdem) {
+        etapaService.atualizarOrdemEtapas(idsEtapasEmOrdem);
     }
 
     // =================== HistoricoEtapaInscricao ===================
@@ -373,8 +479,8 @@ public class Fachada {
         return tipoEditalService.buscarPorIdTipoEdital(id);
     }
 
-    public List<TipoEdital> listarTipoEdital() {
-        return tipoEditalService.listarTipoEdital();
+    public Page<TipoEdital> listarTipoEdital(Pageable pageable) {
+        return tipoEditalService.listarTipoEdital(pageable);
     }
 
     public TipoEdital editarTipoEdital(Long id, TipoEdital tipoEdital) {
@@ -383,6 +489,10 @@ public class Fachada {
 
     public void deletarTipoEdital(Long id) {
         tipoEditalService.deletarTipoEdital(id);
+    }
+
+    public TipoEdital duplicarTipoEdital(Long id) {
+        return tipoEditalService.duplicarTipoEdital(id);
     }
 
     // =================== ValorCampo ===================

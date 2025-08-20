@@ -12,8 +12,7 @@ import java.util.UUID;
 
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor
 public class InscricaoRequest {
-//    @NotNull
-    private UUID idUsuario;
+
     private Long editalId;
     private Long statusAtualId;
 

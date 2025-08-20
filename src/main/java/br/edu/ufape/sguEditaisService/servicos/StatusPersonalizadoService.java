@@ -23,7 +23,7 @@ public class StatusPersonalizadoService implements br.edu.ufape.sguEditaisServic
 
     @Override
     public StatusPersonalizado buscarPorIdStatusPersonalizado(Long id) throws StatusPersonalizadoNotFoundException {
-        return statusPersonalizadoRepository.findById(id).orElseThrow(StatusPersonalizadoNotFoundException::new);
+        return statusPersonalizadoRepository.findById(id).orElseThrow(() -> new StatusPersonalizadoNotFoundException(id));
     }
 
     @Override
@@ -33,14 +33,14 @@ public class StatusPersonalizadoService implements br.edu.ufape.sguEditaisServic
 
     @Override
     public StatusPersonalizado editarStatusPersonalizado(Long id, StatusPersonalizado statusPersonalizado) throws StatusPersonalizadoNotFoundException {
-        StatusPersonalizado statusPersonalizado1 = statusPersonalizadoRepository.findById(id).orElseThrow(StatusPersonalizadoNotFoundException::new);
+        StatusPersonalizado statusPersonalizado1 = statusPersonalizadoRepository.findById(id).orElseThrow(() -> new StatusPersonalizadoNotFoundException(id));
         modelMapper.map(statusPersonalizado, statusPersonalizado1);
         return statusPersonalizadoRepository.save(statusPersonalizado1);
     }
 
     @Override
     public void deletarStatusPersonalizado(Long id) throws StatusPersonalizadoNotFoundException {
-        StatusPersonalizado statusPersonalizado = statusPersonalizadoRepository.findById(id).orElseThrow(StatusPersonalizadoNotFoundException::new);
+        StatusPersonalizado statusPersonalizado = statusPersonalizadoRepository.findById(id).orElseThrow(() -> new StatusPersonalizadoNotFoundException(id));
         statusPersonalizadoRepository.delete(statusPersonalizado);
     }
 }

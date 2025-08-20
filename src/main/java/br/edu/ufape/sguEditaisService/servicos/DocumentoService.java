@@ -2,6 +2,7 @@ package br.edu.ufape.sguEditaisService.servicos;
 
 import br.edu.ufape.sguEditaisService.dados.DocumentoRepository;
 import br.edu.ufape.sguEditaisService.exceptions.notFound.DocumentoNotFoundException;
+import br.edu.ufape.sguEditaisService.exceptions.notFound.HistoricoEtapaInscricaoNotFoundException;
 import br.edu.ufape.sguEditaisService.models.Documento;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -24,7 +25,7 @@ public class DocumentoService implements br.edu.ufape.sguEditaisService.servicos
 
     @Override
     public Documento buscarPorIdDocumento(Long id) throws DocumentoNotFoundException {
-        return documentoRepository.findById(id).orElseThrow(DocumentoNotFoundException::new);
+        return documentoRepository.findById(id).orElseThrow(() -> new HistoricoEtapaInscricaoNotFoundException(id));
     }
 
     @Override
@@ -34,14 +35,14 @@ public class DocumentoService implements br.edu.ufape.sguEditaisService.servicos
 
     @Override
     public Documento editarDocumento(Long id, Documento entity) throws DocumentoNotFoundException {
-        Documento documento = documentoRepository.findById(id).orElseThrow(DocumentoNotFoundException::new);
+        Documento documento = documentoRepository.findById(id).orElseThrow(() -> new HistoricoEtapaInscricaoNotFoundException(id));
         modelMapper.map(entity, documento);
         return documentoRepository.save(documento);
     }
 
     @Override
     public void deletarDocumento(Long id) throws DocumentoNotFoundException{
-        Documento documento = documentoRepository.findById(id).orElseThrow(DocumentoNotFoundException::new);
+        Documento documento = documentoRepository.findById(id).orElseThrow(() -> new HistoricoEtapaInscricaoNotFoundException(id));
         documentoRepository.delete(documento);
     }
 }

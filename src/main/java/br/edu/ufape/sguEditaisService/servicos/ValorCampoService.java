@@ -22,7 +22,7 @@ public class ValorCampoService implements br.edu.ufape.sguEditaisService.servico
 
     @Override
     public ValorCampo buscarPorIdValorCampo(Long id) throws ValorCampoNotFoundException {
-        return repository.findById(id).orElseThrow(ValorCampoNotFoundException::new);
+        return repository.findById(id).orElseThrow(() -> new ValorCampoNotFoundException(id));
     }
 
     @Override
@@ -32,14 +32,14 @@ public class ValorCampoService implements br.edu.ufape.sguEditaisService.servico
 
     @Override
     public ValorCampo editarValorCampo(Long id, ValorCampo entity) throws ValorCampoNotFoundException {
-        ValorCampo original = repository.findById(id).orElseThrow(ValorCampoNotFoundException::new);
+        ValorCampo original = repository.findById(id).orElseThrow(() -> new ValorCampoNotFoundException(id));
         modelMapper.map(entity, original);
         return repository.save(original);
     }
 
     @Override
     public void deletarValorCampo(Long id) throws ValorCampoNotFoundException {
-        ValorCampo entity = repository.findById(id).orElseThrow(ValorCampoNotFoundException::new);
+        ValorCampo entity = repository.findById(id).orElseThrow(() -> new ValorCampoNotFoundException(id));
         repository.delete(entity);
     }
 }

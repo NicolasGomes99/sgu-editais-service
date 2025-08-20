@@ -24,7 +24,7 @@ public class InscricaoService implements br.edu.ufape.sguEditaisService.servicos
 
     @Override
     public Inscricao buscarPorIdInscricao(Long id) throws InscricaoNotFoundException {
-        return repository.findById(id).orElseThrow(InscricaoNotFoundException::new);
+        return repository.findById(id).orElseThrow(() -> new InscricaoNotFoundException(id));
     }
 
     @Override
@@ -34,14 +34,14 @@ public class InscricaoService implements br.edu.ufape.sguEditaisService.servicos
 
     @Override
     public Inscricao editarInscricao(Long id, Inscricao entity) throws InscricaoNotFoundException {
-        Inscricao original = repository.findById(id).orElseThrow(InscricaoNotFoundException::new);
+        Inscricao original = repository.findById(id).orElseThrow(() -> new InscricaoNotFoundException(id));
         modelMapper.map(entity, original);
         return repository.save(original);
     }
 
     @Override
     public void deletarInscricao(Long id) throws InscricaoNotFoundException {
-        Inscricao entity = repository.findById(id).orElseThrow(InscricaoNotFoundException::new);
+        Inscricao entity = repository.findById(id).orElseThrow(() -> new InscricaoNotFoundException(id));
         repository.delete(entity);
     }
 }

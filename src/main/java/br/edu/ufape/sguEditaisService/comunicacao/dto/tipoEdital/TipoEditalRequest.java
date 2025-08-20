@@ -8,6 +8,7 @@ import org.modelmapper.ModelMapper;
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor
 public class TipoEditalRequest {
     @NotBlank
+    private String nome;
     private String descricao;
 
     public TipoEdital convertToEntity(TipoEditalRequest request, ModelMapper modelMapper) {

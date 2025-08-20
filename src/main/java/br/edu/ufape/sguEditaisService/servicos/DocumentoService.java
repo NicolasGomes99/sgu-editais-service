@@ -25,7 +25,7 @@ public class DocumentoService implements br.edu.ufape.sguEditaisService.servicos
 
     @Override
     public Documento buscarPorIdDocumento(Long id) throws DocumentoNotFoundException {
-        return documentoRepository.findById(id).orElseThrow(() -> new HistoricoEtapaInscricaoNotFoundException(id));
+        return documentoRepository.findById(id).orElseThrow(() -> new DocumentoNotFoundException(id));
     }
 
     @Override
@@ -35,14 +35,14 @@ public class DocumentoService implements br.edu.ufape.sguEditaisService.servicos
 
     @Override
     public Documento editarDocumento(Long id, Documento entity) throws DocumentoNotFoundException {
-        Documento documento = documentoRepository.findById(id).orElseThrow(() -> new HistoricoEtapaInscricaoNotFoundException(id));
+        Documento documento = documentoRepository.findById(id).orElseThrow(() -> new DocumentoNotFoundException(id));
         modelMapper.map(entity, documento);
         return documentoRepository.save(documento);
     }
 
     @Override
     public void deletarDocumento(Long id) throws DocumentoNotFoundException{
-        Documento documento = documentoRepository.findById(id).orElseThrow(() -> new HistoricoEtapaInscricaoNotFoundException(id));
+        Documento documento = documentoRepository.findById(id).orElseThrow(() -> new DocumentoNotFoundException(id));
         documentoRepository.delete(documento);
     }
 }

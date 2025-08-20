@@ -423,8 +423,8 @@ public class Fachada {
         return inscricaoService.buscarPorIdInscricao(id);
     }
 
-    public List<Inscricao> listarInscricao() {
-        return inscricaoService.listarInscricao();
+    public Page<Inscricao> listarInscricao(Pageable pageable) {
+        return inscricaoService.listarInscricao(pageable);
     }
 
     public Inscricao editarInscricao(Long id, Inscricao obj) {

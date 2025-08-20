@@ -5,6 +5,8 @@ import br.edu.ufape.sguEditaisService.exceptions.notFound.InscricaoNotFoundExcep
 import br.edu.ufape.sguEditaisService.models.Inscricao;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -28,8 +30,8 @@ public class InscricaoService implements br.edu.ufape.sguEditaisService.servicos
     }
 
     @Override
-    public List<Inscricao> listarInscricao() {
-        return repository.findAll();
+    public Page<Inscricao> listarInscricao(Pageable pageable) {
+        return repository.findAll(pageable);
     }
 
     @Override

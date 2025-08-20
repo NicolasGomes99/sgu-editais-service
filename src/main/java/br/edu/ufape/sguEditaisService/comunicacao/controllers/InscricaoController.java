@@ -46,11 +46,7 @@ public class InscricaoController {
 
     @GetMapping
     public ResponseEntity<Page<InscricaoResponse>> listar(@PageableDefault(sort = "id") Pageable pageable) {
-        Page<Inscricao> page = fachada.listarInscricao().stream()
-                .collect(Collectors.collectingAndThen(
-                        Collectors.toList(),
-                        list -> new PageImpl<>(list, pageable, list.size())
-                ));
+        Page<Inscricao> page = fachada.listarInscricao(pageable);
         Page<InscricaoResponse> response = page.map(i -> new InscricaoResponse(i, modelMapper));
         return ResponseEntity.ok(response);
     }

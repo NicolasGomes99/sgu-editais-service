@@ -1,11 +1,15 @@
 package br.edu.ufape.sguEditaisService.comunicacao.dto.etapa;
 
-import br.edu.ufape.sguEditaisService.comunicacao.dto.edital.EditalResponse;
+import br.edu.ufape.sguEditaisService.comunicacao.dto.campoPersonalizado.CampoPersonalizadoResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.statusPersonalizado.StatusPersonalizadoResponse;
-import br.edu.ufape.sguEditaisService.models.*;
-import lombok.*;
+import br.edu.ufape.sguEditaisService.models.Etapa;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.modelmapper.ModelMapper;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter @Setter @NoArgsConstructor
 public class EtapaResponse {
@@ -17,11 +21,19 @@ public class EtapaResponse {
     private boolean obrigatoria;
     private int ordem;
 
-    private EditalResponse edital;
     private StatusPersonalizadoResponse statusAtual;
+
+    private List<CampoPersonalizadoResponse> camposPersonalizados;
 
     public EtapaResponse(Etapa entity, ModelMapper modelMapper) {
         if (entity == null) throw new IllegalArgumentException("etapa não pode ser nulo");
-        else modelMapper.map(entity, this);
+
+        modelMapper.map(entity, this);
+
+        if (entity.getCamposPersonalizados() != null) {
+            this.camposPersonalizados = entity.getCamposPersonalizados().stream()
+                    .map(campo -> new CampoPersonalizadoResponse(campo, modelMapper))
+                    .collect(Collectors.toList());
+        }
     }
 }

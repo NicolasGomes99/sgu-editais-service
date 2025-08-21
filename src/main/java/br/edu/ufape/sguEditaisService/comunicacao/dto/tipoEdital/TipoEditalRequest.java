@@ -9,7 +9,7 @@ import org.modelmapper.ModelMapper;
 public class TipoEditalRequest {
     @NotBlank
     private String descricao;
-
+    private String nome;
     public TipoEdital convertToEntity(TipoEditalRequest request, ModelMapper modelMapper) {
         return modelMapper.map(request, TipoEdital.class);
     }

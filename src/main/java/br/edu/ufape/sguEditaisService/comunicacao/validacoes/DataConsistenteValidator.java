@@ -30,6 +30,13 @@ public class DataConsistenteValidator implements ConstraintValidator<DatasConsis
             fim = request.getDataFim();
         }
 
+        // A validação só será executada se ambas as datas não forem nulas.
+        // Se uma ou ambas forem nulas, a validação passa (considera-se válido).
+        if (inicio == null || fim == null) {
+            return true;
+        }
+        // =============================================================
+
         return !inicio.isAfter(fim);
     }
 }

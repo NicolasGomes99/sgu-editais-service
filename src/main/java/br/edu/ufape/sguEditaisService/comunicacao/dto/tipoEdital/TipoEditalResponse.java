@@ -8,7 +8,7 @@ import org.modelmapper.ModelMapper;
 public class TipoEditalResponse {
     private Long id;
     private String descricao;
-
+    private String nome;
     public TipoEditalResponse(TipoEdital entity, ModelMapper modelMapper) {
         if (entity == null) throw new IllegalArgumentException("tipoEdital não pode ser nulo");
         else modelMapper.map(entity, this);

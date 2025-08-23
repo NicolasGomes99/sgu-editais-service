@@ -1,5 +1,6 @@
 package br.edu.ufape.sguEditaisService.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,9 +21,11 @@ public class HistoricoEtapaInscricao {
     private String observacao;
 
     @ManyToOne
+    @JsonIgnore
     private Inscricao inscricao;
 
     @ManyToOne
+    @JsonIgnore
     private Etapa etapa;
 
 

@@ -18,7 +18,7 @@ public class InscricaoResponse {
 
     private LocalDateTime dataInscricao;
 
-    private EditalResponse edital;
+    //private EditalResponse edital;
     private StatusPersonalizadoResponse statusAtual;
 
     public InscricaoResponse(Inscricao entity, ModelMapper modelMapper) {

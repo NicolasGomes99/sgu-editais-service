@@ -20,8 +20,8 @@ public class HistoricoEtapaInscricaoResponse {
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
     private LocalDateTime dataAcao;
 
-    private EtapaResponse etapa;
-    private InscricaoResponse inscricao;
+//    private EtapaResponse etapa;
+//    private InscricaoResponse inscricao;
     private StatusPersonalizadoResponse status;
 
     public HistoricoEtapaInscricaoResponse(HistoricoEtapaInscricao entity, ModelMapper modelMapper) {

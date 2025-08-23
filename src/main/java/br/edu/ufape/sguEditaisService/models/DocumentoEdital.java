@@ -1,5 +1,6 @@
 package br.edu.ufape.sguEditaisService.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,5 +21,6 @@ public class DocumentoEdital {
     private LocalDateTime dataUpload;
 
     @ManyToOne
+    @JsonIgnore
     private Edital edital;
 }

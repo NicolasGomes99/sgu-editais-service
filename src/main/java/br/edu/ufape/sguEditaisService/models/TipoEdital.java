@@ -17,6 +17,7 @@ public class TipoEdital {
 
     private String nome;
     private String descricao;
+    private Long idUnidadeAdministrativa;
 
     @OneToMany(mappedBy = "tipoEditalModelo", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Etapa> etapasModelo;

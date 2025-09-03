@@ -1,6 +1,8 @@
 package br.edu.ufape.sguEditaisService.fachada;
 
 import br.edu.ufape.sguEditaisService.auth.AuthenticatedUserProvider;
+import br.edu.ufape.sguEditaisService.comunicacao.dto.tipoEdital.TipoEditalResponse;
+import br.edu.ufape.sguEditaisService.comunicacao.dto.unidadeAdministrativa.UnidadeAdministrativaResponse;
 import br.edu.ufape.sguEditaisService.dados.InscricaoRepository;
 import br.edu.ufape.sguEditaisService.exceptions.InscricaoDuplicadaException;
 import br.edu.ufape.sguEditaisService.exceptions.notFound.StatusPersonalizadoNotFoundException;
@@ -34,6 +36,7 @@ public class Fachada {
     private final StatusPersonalizadoService statusPersonalizadoService;
     private final AuthenticatedUserProvider authenticatedUserProvider;
     private final InscricaoRepository inscricaoRepository;
+    private final AuthServiceHandler authServiceHandler;
 
     // =================== CampoPersonalizado ===================
 
@@ -483,28 +486,54 @@ public class Fachada {
 
     // =================== TipoEdital ===================
 
-    public TipoEdital salvarTipoEdital(TipoEdital tipoEdital) {
-        return tipoEditalService.salvarTipoEdital(tipoEdital);
+    public TipoEditalResponse salvarTipoEdital(TipoEdital tipoEdital) {
+        authServiceHandler.buscarUnidadeAdministrativa(tipoEdital.getIdUnidadeAdministrativa());
+        TipoEdital salvo = tipoEditalService.salvarTipoEdital(tipoEdital);
+        UnidadeAdministrativaResponse unidade = authServiceHandler.buscarUnidadeAdministrativa(salvo.getIdUnidadeAdministrativa());
+        TipoEditalResponse response = new TipoEditalResponse(salvo, modelMapper);
+        response.setUnidadeAdministrativa(unidade);
+        return response;
     }
 
-    public TipoEdital buscarPorIdTipoEdital(Long id) {
-        return tipoEditalService.buscarPorIdTipoEdital(id);
+    public TipoEditalResponse buscarPorIdTipoEdital(Long id) {
+        TipoEdital tipoEdital = tipoEditalService.buscarPorIdTipoEdital(id);
+        UnidadeAdministrativaResponse unidade = authServiceHandler.buscarUnidadeAdministrativa(tipoEdital.getIdUnidadeAdministrativa());
+        TipoEditalResponse response = new TipoEditalResponse(tipoEdital, modelMapper);
+        response.setUnidadeAdministrativa(unidade);
+        return response;
     }
 
-    public Page<TipoEdital> listarTipoEdital(Pageable pageable) {
-        return tipoEditalService.listarTipoEdital(pageable);
+    public Page<TipoEditalResponse> listarTipoEdital(Pageable pageable) {
+        Page<TipoEdital> paginaDeEntidades = tipoEditalService.listarTipoEdital(pageable);
+        return paginaDeEntidades.map(tipoEdital -> {
+            TipoEditalResponse response = new TipoEditalResponse(tipoEdital, modelMapper);
+            UnidadeAdministrativaResponse unidade = authServiceHandler.buscarUnidadeAdministrativa(tipoEdital.getIdUnidadeAdministrativa());
+            response.setUnidadeAdministrativa(unidade);
+            return response;
+        });
     }
 
-    public TipoEdital editarTipoEdital(Long id, TipoEdital tipoEdital) {
-        return tipoEditalService.editarTipoEdital(id, tipoEdital);
+    public TipoEditalResponse editarTipoEdital(Long id, TipoEdital tipoEdital) {
+        if (tipoEdital.getIdUnidadeAdministrativa() != null) {
+            authServiceHandler.buscarUnidadeAdministrativa(tipoEdital.getIdUnidadeAdministrativa());
+        }
+        TipoEdital atualizado = tipoEditalService.editarTipoEdital(id, tipoEdital);
+        TipoEditalResponse response = new TipoEditalResponse(atualizado, modelMapper);
+        UnidadeAdministrativaResponse unidade = authServiceHandler.buscarUnidadeAdministrativa(atualizado.getIdUnidadeAdministrativa());
+        response.setUnidadeAdministrativa(unidade);
+        return response;
     }
 
     public void deletarTipoEdital(Long id) {
         tipoEditalService.deletarTipoEdital(id);
     }
 
-    public TipoEdital duplicarTipoEdital(Long id) {
-        return tipoEditalService.duplicarTipoEdital(id);
+    public TipoEditalResponse duplicarTipoEdital(Long id) {
+        TipoEdital duplicado = tipoEditalService.duplicarTipoEdital(id);
+        TipoEditalResponse response = new TipoEditalResponse(duplicado, modelMapper);
+        UnidadeAdministrativaResponse unidade = authServiceHandler.buscarUnidadeAdministrativa(duplicado.getIdUnidadeAdministrativa());
+        response.setUnidadeAdministrativa(unidade);
+        return response;
     }
 
     // =================== ValorCampo ===================

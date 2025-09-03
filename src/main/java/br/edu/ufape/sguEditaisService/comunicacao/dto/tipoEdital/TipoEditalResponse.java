@@ -2,6 +2,7 @@ package br.edu.ufape.sguEditaisService.comunicacao.dto.tipoEdital;
 
 import br.edu.ufape.sguEditaisService.comunicacao.dto.campoPersonalizado.CampoPersonalizadoResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.etapa.EtapaResponse;
+import br.edu.ufape.sguEditaisService.comunicacao.dto.unidadeAdministrativa.UnidadeAdministrativaResponse;
 import br.edu.ufape.sguEditaisService.models.TipoEdital;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,6 +16,8 @@ public class TipoEditalResponse {
     private Long id;
     private String nome;
     private String descricao;
+
+    private UnidadeAdministrativaResponse unidadeAdministrativa;
 
     private List<EtapaResponse> etapasModelo;
     private List<CampoPersonalizadoResponse> camposPersonalizadosModelo;

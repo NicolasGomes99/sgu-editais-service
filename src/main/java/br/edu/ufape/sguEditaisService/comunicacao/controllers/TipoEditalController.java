@@ -30,34 +30,28 @@ public class TipoEditalController {
     @PostMapping
     public ResponseEntity<TipoEditalResponse> salvar(@Valid @RequestBody TipoEditalRequest request) {
         TipoEdital entity = request.convertToEntity(request, modelMapper);
-        TipoEdital salvo = fachada.salvarTipoEdital(entity);
-        return new ResponseEntity<>(new TipoEditalResponse(salvo, modelMapper), HttpStatus.CREATED);
+        return new ResponseEntity<>(fachada.salvarTipoEdital(entity), HttpStatus.CREATED);
     }
 
     @PostMapping("/{id}/duplicar")
     public ResponseEntity<TipoEditalResponse> duplicarModelo(@PathVariable Long id) {
-        TipoEdital novoModelo = fachada.duplicarTipoEdital(id);
-        return new ResponseEntity<>(new TipoEditalResponse(novoModelo, modelMapper), HttpStatus.CREATED);
+        return new ResponseEntity<>(fachada.duplicarTipoEdital(id), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<TipoEditalResponse> editar(@PathVariable Long id, @Valid @RequestBody TipoEditalRequest request) throws TipoEditalNotFoundException {
         TipoEdital entity = request.convertToEntity(request, modelMapper);
-        TipoEdital atualizado = fachada.editarTipoEdital(id, entity);
-        return new ResponseEntity<>(new TipoEditalResponse(atualizado, modelMapper), HttpStatus.OK);
+        return new ResponseEntity<>(fachada.editarTipoEdital(id, entity), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<TipoEditalResponse> buscar(@PathVariable Long id) throws TipoEditalNotFoundException {
-        TipoEdital entity = fachada.buscarPorIdTipoEdital(id);
-        return new ResponseEntity<>(new TipoEditalResponse(entity, modelMapper), HttpStatus.OK);
+        return new ResponseEntity<>(fachada.buscarPorIdTipoEdital(id), HttpStatus.OK);
     }
 
     @GetMapping
     public ResponseEntity<Page<TipoEditalResponse>> listar(@PageableDefault(sort = "id") Pageable pageable) {
-        Page<TipoEdital> page = fachada.listarTipoEdital(pageable);
-        Page<TipoEditalResponse> response = page.map(t -> new TipoEditalResponse(t, modelMapper));
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(fachada.listarTipoEdital(pageable));
     }
 
     @GetMapping("/{tipoEditalId}/etapas")

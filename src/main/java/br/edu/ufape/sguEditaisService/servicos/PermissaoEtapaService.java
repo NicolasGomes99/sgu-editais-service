@@ -22,7 +22,7 @@ public class PermissaoEtapaService implements br.edu.ufape.sguEditaisService.ser
 
     @Override
     public PermissaoEtapa buscarPorIdPermissaoEtapa(Long id) throws PermissaoEtapaNotFoundException {
-        return repository.findById(id).orElseThrow(PermissaoEtapaNotFoundException::new);
+        return repository.findById(id).orElseThrow(() -> new PermissaoEtapaNotFoundException(id));
     }
 
     @Override
@@ -32,14 +32,14 @@ public class PermissaoEtapaService implements br.edu.ufape.sguEditaisService.ser
 
     @Override
     public PermissaoEtapa editarPermissaoEtapa(Long id, PermissaoEtapa entity) throws PermissaoEtapaNotFoundException {
-        PermissaoEtapa original = repository.findById(id).orElseThrow(PermissaoEtapaNotFoundException::new);
+        PermissaoEtapa original = repository.findById(id).orElseThrow(() -> new PermissaoEtapaNotFoundException(id));
         modelMapper.map(entity, original);
         return repository.save(original);
     }
 
     @Override
     public void deletarPermissaoEtapa(Long id) throws PermissaoEtapaNotFoundException {
-        PermissaoEtapa entity = repository.findById(id).orElseThrow(PermissaoEtapaNotFoundException::new);
+        PermissaoEtapa entity = repository.findById(id).orElseThrow(() -> new PermissaoEtapaNotFoundException(id));
         repository.delete(entity);
     }
 }

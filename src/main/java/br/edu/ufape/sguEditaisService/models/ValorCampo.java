@@ -1,5 +1,6 @@
 package br.edu.ufape.sguEditaisService.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,8 +18,11 @@ public class ValorCampo {
 
 
     @ManyToOne
+    @JsonIgnore
     private Inscricao inscricao;
+
     @ManyToOne
+    @JsonIgnore
     private CampoPersonalizado campoPersonalizado;
 
 }

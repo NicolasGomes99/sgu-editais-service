@@ -17,7 +17,7 @@ public class DocumentoEditalResponse {
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
     private LocalDateTime dataUpload;
 
-    private EditalResponse edital;
+//    private EditalResponse edital;
 
     public DocumentoEditalResponse(DocumentoEdital entity, ModelMapper modelMapper) {
         if (entity == null) throw new IllegalArgumentException("documentoEdital não pode ser nulo");

@@ -9,7 +9,7 @@ import org.modelmapper.ModelMapper;
 public class PermissaoEtapaResponse {
     private Long id;
     private String perfil;
-    private EtapaResponse etapa;
+//    private EtapaResponse etapa;
 
     public PermissaoEtapaResponse(PermissaoEtapa entity, ModelMapper modelMapper) {
         if (entity == null) throw new IllegalArgumentException("PermissaoEtapa não pode ser nulo");

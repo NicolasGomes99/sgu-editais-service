@@ -1,18 +1,27 @@
 package br.edu.ufape.sguEditaisService.comunicacao.controllers;
 
+import br.edu.ufape.sguEditaisService.comunicacao.dto.edital.AtualizarStatusRequest;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.edital.EditalRequest;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.edital.EditalResponse;
+import br.edu.ufape.sguEditaisService.comunicacao.dto.edital.TransformarEmModeloRequest;
+import br.edu.ufape.sguEditaisService.comunicacao.dto.etapa.EtapaResponse;
+import br.edu.ufape.sguEditaisService.comunicacao.dto.campoPersonalizado.CampoPersonalizadoResponse;
+import br.edu.ufape.sguEditaisService.comunicacao.dto.tipoEdital.TipoEditalResponse;
 import br.edu.ufape.sguEditaisService.exceptions.notFound.EditalNotFoundException;
 import br.edu.ufape.sguEditaisService.fachada.Fachada;
 import br.edu.ufape.sguEditaisService.models.Edital;
+import br.edu.ufape.sguEditaisService.models.TipoEdital;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
@@ -22,7 +31,6 @@ public class EditalController {
     private final Fachada fachada;
     private final ModelMapper modelMapper;
 
-    //    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping
     public ResponseEntity<EditalResponse> salvar(@Valid @RequestBody EditalRequest request) {
         Edital entity = request.convertToEntity(request, modelMapper);
@@ -30,11 +38,31 @@ public class EditalController {
         return new ResponseEntity<>(new EditalResponse(salvo, modelMapper), HttpStatus.CREATED);
     }
 
-    //    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @PostMapping("/from-template/{templateId}")
+    public ResponseEntity<EditalResponse> criarEditalPorModelo(
+            @PathVariable Long templateId,
+            @Valid @RequestBody EditalRequest request) {
+        Edital editalBase = request.convertToEntity(request, modelMapper);
+        Edital editalSalvo = fachada.criarEditalAPartirDeModelo(templateId, editalBase);
+        return new ResponseEntity<>(new EditalResponse(editalSalvo, modelMapper), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/{id}/transformar-em-modelo")
+    public ResponseEntity<TipoEditalResponse> transformarEmModelo(@PathVariable Long id, @Valid @RequestBody TransformarEmModeloRequest request) {
+        TipoEdital novoModelo = fachada.transformarEditalEmModelo(id, request.getNomeModelo(), request.getDescricaoModelo());
+        return new ResponseEntity<>(new TipoEditalResponse(novoModelo, modelMapper), HttpStatus.CREATED);
+    }
+
     @PatchMapping("/{id}")
     public ResponseEntity<EditalResponse> editar(@PathVariable Long id, @Valid @RequestBody EditalRequest request) throws EditalNotFoundException {
         Edital entity = request.convertToEntity(request, modelMapper);
         Edital atualizado = fachada.editarEdital(id, entity);
+        return new ResponseEntity<>(new EditalResponse(atualizado, modelMapper), HttpStatus.OK);
+    }
+
+    @PatchMapping("/{id}/atualizar-status")
+    public ResponseEntity<EditalResponse> atualizarStatus(@PathVariable Long id, @Valid @RequestBody AtualizarStatusRequest request) {
+        Edital atualizado = fachada.atualizarStatusEdital(id, request.getStatusId());
         return new ResponseEntity<>(new EditalResponse(atualizado, modelMapper), HttpStatus.OK);
     }
 
@@ -46,16 +74,34 @@ public class EditalController {
 
     @GetMapping
     public ResponseEntity<Page<EditalResponse>> listar(@PageableDefault(sort = "id") Pageable pageable) {
-        Page<Edital> page = fachada.listarEdital().stream()
-                .collect(Collectors.collectingAndThen(
-                        Collectors.toList(),
-                        list -> new PageImpl<>(list, pageable, list.size())
-                ));
+        Page<Edital> page = fachada.listarEdital(pageable);
         Page<EditalResponse> response = page.map(e -> new EditalResponse(e, modelMapper));
         return ResponseEntity.ok(response);
     }
 
-    //    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @GetMapping("/publicados")
+    public ResponseEntity<Page<EditalResponse>> listarPublicados(@PageableDefault(sort = "fimIncricao") Pageable pageable) {
+        Page<Edital> page = fachada.listarEditaisPublicados(pageable);
+        Page<EditalResponse> response = page.map(e -> new EditalResponse(e, modelMapper));
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{editalId}/etapas")
+    public ResponseEntity<List<EtapaResponse>> listarEtapasPorEdital(@PathVariable Long editalId) {
+        List<EtapaResponse> response = fachada.listarEtapasPorEdital(editalId).stream()
+                .map(etapa -> new EtapaResponse(etapa, modelMapper))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{editalId}/campos")
+    public ResponseEntity<List<CampoPersonalizadoResponse>> listarCamposPorEdital(@PathVariable Long editalId) {
+        List<CampoPersonalizadoResponse> response = fachada.listarCamposPorEdital(editalId).stream()
+                .map(campo -> new CampoPersonalizadoResponse(campo, modelMapper))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(response);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) throws EditalNotFoundException {
         fachada.deletarEdital(id);

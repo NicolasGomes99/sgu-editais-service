@@ -25,7 +25,6 @@ public class Etapa {
     private int ordem;
 
     @ManyToOne
-    @JsonIgnore
     private StatusPersonalizado statusAtual;
 
     @OneToMany(mappedBy = "etapa", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -35,7 +34,12 @@ public class Etapa {
     private List<CampoPersonalizado> camposPersonalizados;
 
     @ManyToOne
+    @JsonIgnore
     private Edital edital;
+
+    @ManyToOne
+    @JsonIgnore
+    private TipoEdital tipoEditalModelo;
 
     @OneToMany(mappedBy = "etapa", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PermissaoEtapa> permissaoEtapa;

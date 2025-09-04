@@ -22,7 +22,6 @@ public class CampoPersonalizadoController {
     private final Fachada fachada;
     private final ModelMapper modelMapper;
 
-//    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PostMapping
     public ResponseEntity<CampoPersonalizadoResponse> salvar(@Valid @RequestBody CampoPersonalizadoRequest request) {
         CampoPersonalizado entity = request.convertToEntity(request, modelMapper);
@@ -30,11 +29,16 @@ public class CampoPersonalizadoController {
         return new ResponseEntity<>(new CampoPersonalizadoResponse(salvo, modelMapper), HttpStatus.CREATED);
     }
 
-//    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @PatchMapping("/{id}")
     public ResponseEntity<CampoPersonalizadoResponse> editar(@PathVariable Long id, @Valid @RequestBody CampoPersonalizadoRequest request) throws CampoPersonalizadoNotFoundException {
         CampoPersonalizado entity = request.convertToEntity(request, modelMapper);
         CampoPersonalizado atualizado = fachada.editarCampoPersonalizado(id, entity);
+        return new ResponseEntity<>(new CampoPersonalizadoResponse(atualizado, modelMapper), HttpStatus.OK);
+    }
+
+    @PatchMapping("/{id}/toggle-obrigatorio")
+    public ResponseEntity<CampoPersonalizadoResponse> toggleObrigatorio(@PathVariable Long id) {
+        CampoPersonalizado atualizado = fachada.alternarObrigatoriedade(id);
         return new ResponseEntity<>(new CampoPersonalizadoResponse(atualizado, modelMapper), HttpStatus.OK);
     }
 
@@ -46,16 +50,11 @@ public class CampoPersonalizadoController {
 
     @GetMapping
     public ResponseEntity<Page<CampoPersonalizadoResponse>> listar(@PageableDefault(sort = "id") Pageable pageable) {
-        Page<CampoPersonalizado> page = fachada.listarCampoPersonalizado().stream()
-                .collect(java.util.stream.Collectors.collectingAndThen(
-                        java.util.stream.Collectors.toList(),
-                        list -> new org.springframework.data.domain.PageImpl<>(list, pageable, list.size()))
-                );
+        Page<CampoPersonalizado> page = fachada.listarCampoPersonalizado(pageable);
         Page<CampoPersonalizadoResponse> response = page.map(c -> new CampoPersonalizadoResponse(c, modelMapper));
         return ResponseEntity.ok(response);
     }
 
-//    @PreAuthorize("hasRole('ADMINISTRADOR')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) throws CampoPersonalizadoNotFoundException {
         fachada.deletarCampoPersonalizado(id);

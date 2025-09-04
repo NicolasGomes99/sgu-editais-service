@@ -24,10 +24,9 @@ public class Edital {
     private LocalDateTime fimIncricao;
 
     @ManyToOne
-    @JsonIgnore
     private StatusPersonalizado statusAtual;
 
-    @OneToOne
+    @ManyToOne
     private TipoEdital tipoEdital;
 
     private Long idUnidadeAdministrativa;

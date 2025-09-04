@@ -5,6 +5,8 @@ import br.edu.ufape.sguEditaisService.exceptions.notFound.InscricaoNotFoundExcep
 import br.edu.ufape.sguEditaisService.models.Inscricao;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,24 +26,24 @@ public class InscricaoService implements br.edu.ufape.sguEditaisService.servicos
 
     @Override
     public Inscricao buscarPorIdInscricao(Long id) throws InscricaoNotFoundException {
-        return repository.findById(id).orElseThrow(InscricaoNotFoundException::new);
+        return repository.findById(id).orElseThrow(() -> new InscricaoNotFoundException(id));
     }
 
     @Override
-    public List<Inscricao> listarInscricao() {
-        return repository.findAll();
+    public Page<Inscricao> listarInscricao(Pageable pageable) {
+        return repository.findAll(pageable);
     }
 
     @Override
     public Inscricao editarInscricao(Long id, Inscricao entity) throws InscricaoNotFoundException {
-        Inscricao original = repository.findById(id).orElseThrow(InscricaoNotFoundException::new);
+        Inscricao original = repository.findById(id).orElseThrow(() -> new InscricaoNotFoundException(id));
         modelMapper.map(entity, original);
         return repository.save(original);
     }
 
     @Override
     public void deletarInscricao(Long id) throws InscricaoNotFoundException {
-        Inscricao entity = repository.findById(id).orElseThrow(InscricaoNotFoundException::new);
+        Inscricao entity = repository.findById(id).orElseThrow(() -> new InscricaoNotFoundException(id));
         repository.delete(entity);
     }
 }

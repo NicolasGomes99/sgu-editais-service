@@ -18,8 +18,8 @@ public class DocumentoResponse {
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
     private LocalDateTime dataUpload;
 
-    private EtapaResponse etapa;
-    private InscricaoResponse inscricao;
+//    private EtapaResponse etapa;
+//    private InscricaoResponse inscricao;
 
     public DocumentoResponse(Documento entity, ModelMapper modelMapper) {
         if (entity == null) throw new IllegalArgumentException("documento não pode ser nulo");

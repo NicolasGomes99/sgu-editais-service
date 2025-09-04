@@ -1,5 +1,6 @@
 package br.edu.ufape.sguEditaisService.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,5 +16,6 @@ public class PermissaoEtapa {
     private String perfil;
 
     @ManyToOne
+    @JsonIgnore
     private Etapa etapa;
 }

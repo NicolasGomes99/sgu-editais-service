@@ -1,6 +1,7 @@
 package br.edu.ufape.sguEditaisService.models;
 
 import br.edu.ufape.sguEditaisService.models.enums.TipoCampo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,9 +34,14 @@ public class CampoPersonalizado {
     private List<ValorCampo> valoresCampo;
 
     @ManyToOne
+    @JsonIgnore
     private Etapa etapa;
 
     @ManyToOne
+    @JsonIgnore
     private Edital edital;
 
+    @ManyToOne
+    @JsonIgnore
+    private TipoEdital tipoEditalModelo;
 }

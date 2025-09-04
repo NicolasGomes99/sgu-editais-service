@@ -10,8 +10,8 @@ import org.modelmapper.ModelMapper;
 public class ValorCampoResponse {
     private Long id;
     private String valor;
-    private InscricaoResponse inscricao;
-    private CampoPersonalizadoResponse campoPersonalizado;
+//    private InscricaoResponse inscricao;
+//    private CampoPersonalizadoResponse campoPersonalizado;
 
     public ValorCampoResponse(ValorCampo entity, ModelMapper modelMapper) {
         if (entity == null) throw new IllegalArgumentException("valorCampo não pode ser nulo");

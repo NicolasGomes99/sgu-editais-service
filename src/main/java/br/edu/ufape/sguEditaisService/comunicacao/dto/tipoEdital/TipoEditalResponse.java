@@ -22,7 +22,7 @@ public class TipoEditalResponse {
     private List<EtapaResponse> etapasModelo;
     private List<CampoPersonalizadoResponse> camposPersonalizadosModelo;
 
-
+  
     public TipoEditalResponse(TipoEdital entity, ModelMapper modelMapper) {
         if (entity == null) throw new IllegalArgumentException("tipoEdital não pode ser nulo");
 

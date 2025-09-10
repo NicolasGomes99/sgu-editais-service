@@ -1,6 +1,7 @@
 package br.edu.ufape.sguEditaisService.fachada;
 
 import br.edu.ufape.sguEditaisService.auth.AuthenticatedUserProvider;
+import br.edu.ufape.sguEditaisService.comunicacao.dto.edital.EditalResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.tipoEdital.TipoEditalResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.unidadeAdministrativa.UnidadeAdministrativaResponse;
 import br.edu.ufape.sguEditaisService.dados.InscricaoRepository;
@@ -210,63 +211,70 @@ public class Fachada {
 
     // =================== Edital ===================
 
-    public Edital salvarEdital(Edital obj) {
+    public EditalResponse salvarEdital(Edital obj) {
         if (obj.getTipoEdital() != null && obj.getTipoEdital().getId() != null) {
-            TipoEdital tipoEdital = tipoEditalService.buscarPorIdTipoEdital(obj.getTipoEdital().getId());
-            obj.setTipoEdital(tipoEdital);
+            obj.setTipoEdital(tipoEditalService.buscarPorIdTipoEdital(obj.getTipoEdital().getId()));
         }
-
         if (obj.getStatusAtual() != null && obj.getStatusAtual().getId() != null) {
-            StatusPersonalizado status = statusPersonalizadoService.buscarPorIdStatusPersonalizado(obj.getStatusAtual().getId());
-            obj.setStatusAtual(status);
+            obj.setStatusAtual(statusPersonalizadoService.buscarPorIdStatusPersonalizado(obj.getStatusAtual().getId()));
         }
-
-        return editalService.salvarEdital(obj);
+        Edital editalSalvo = editalService.salvarEdital(obj);
+        return mapToEditalResponse(editalSalvo);
     }
 
-    public Edital buscarPorIdEdital(Long id) {
-        return editalService.buscarPorIdEdital(id);
+    public EditalResponse criarEditalAPartirDeModelo(Long templateId, Edital editalBase) {
+        Edital editalSalvo = editalService.criarEditalAPartirDeModelo(templateId, editalBase);
+        return mapToEditalResponse(editalSalvo);
     }
 
-    public Page<Edital> listarEdital(Pageable pageable) {
-        return editalService.listarEdital(pageable);
+    public EditalResponse buscarPorIdEdital(Long id) {
+        Edital edital = editalService.buscarPorIdEdital(id);
+        return mapToEditalResponse(edital);
     }
 
-    public Edital editarEdital(Long id, Edital obj) {
+    public Page<EditalResponse> listarEdital(Pageable pageable) {
+        Page<Edital> paginaDeEditais = editalService.listarEdital(pageable);
+        return paginaDeEditais.map(this::mapToEditalResponse);
+    }
+
+    public EditalResponse editarEdital(Long id, Edital obj) {
         Edital edital = editalService.buscarPorIdEdital(id);
         modelMapper.map(obj, edital);
-
         if (obj.getTipoEdital() != null && obj.getTipoEdital().getId() != null) {
-            TipoEdital tipoEdital = tipoEditalService.buscarPorIdTipoEdital(obj.getTipoEdital().getId());
-            edital.setTipoEdital(tipoEdital);
+            edital.setTipoEdital(tipoEditalService.buscarPorIdTipoEdital(obj.getTipoEdital().getId()));
         }
-
         if (obj.getStatusAtual() != null && obj.getStatusAtual().getId() != null) {
-            StatusPersonalizado status = statusPersonalizadoService.buscarPorIdStatusPersonalizado(obj.getStatusAtual().getId());
-            edital.setStatusAtual(status);
+            edital.setStatusAtual(statusPersonalizadoService.buscarPorIdStatusPersonalizado(obj.getStatusAtual().getId()));
         }
+        Edital editalAtualizado = editalService.salvarEdital(edital);
+        return mapToEditalResponse(editalAtualizado);
+    }
 
-        return editalService.salvarEdital(edital);
+    public Page<EditalResponse> listarEditaisPublicados(Pageable pageable) {
+        Page<Edital> editais = editalService.listarEditaisPublicados(pageable);
+        return editais.map(this::mapToEditalResponse);
+    }
+
+    public EditalResponse atualizarStatusEdital(Long editalId, Long novoStatusId) {
+        Edital editalAtualizado = editalService.atualizarStatusEdital(editalId, novoStatusId);
+        return mapToEditalResponse(editalAtualizado);
+    }
+
+    private EditalResponse mapToEditalResponse(Edital edital) {
+        EditalResponse response = new EditalResponse(edital, modelMapper);
+        if (response.getTipoEdital() != null && edital.getTipoEdital().getIdUnidadeAdministrativa() != null) {
+            UnidadeAdministrativaResponse unidade = authServiceHandler.buscarUnidadeAdministrativa(edital.getTipoEdital().getIdUnidadeAdministrativa());
+            response.getTipoEdital().setUnidadeAdministrativa(unidade);
+        }
+        return response;
     }
 
     public void deletarEdital(Long id) {
         editalService.deletarEdital(id);
     }
 
-    public Edital criarEditalAPartirDeModelo(Long templateId, Edital editalBase) {
-        return editalService.criarEditalAPartirDeModelo(templateId, editalBase);
-    }
-
     public TipoEdital transformarEditalEmModelo(Long editalId, String nomeModelo, String descricaoModelo) {
         return editalService.transformarEditalEmModelo(editalId, nomeModelo, descricaoModelo);
-    }
-
-    public Page<Edital> listarEditaisPublicados(Pageable pageable) {
-        return editalService.listarEditaisPublicados(pageable);
-    }
-
-    public Edital atualizarStatusEdital(Long editalId, Long novoStatusId) {
-        return editalService.atualizarStatusEdital(editalId, novoStatusId);
     }
 
 

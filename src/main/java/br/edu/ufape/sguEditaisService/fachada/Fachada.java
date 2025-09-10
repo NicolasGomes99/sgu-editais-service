@@ -223,6 +223,12 @@ public class Fachada {
     }
 
     public EditalResponse criarEditalAPartirDeModelo(Long templateId, Edital editalBase) {
+        if (editalBase.getTipoEdital() != null && editalBase.getTipoEdital().getId() != null) {
+            editalBase.setTipoEdital(tipoEditalService.buscarPorIdTipoEdital(editalBase.getTipoEdital().getId()));
+        }
+        if (editalBase.getStatusAtual() != null && editalBase.getStatusAtual().getId() != null) {
+            editalBase.setStatusAtual(statusPersonalizadoService.buscarPorIdStatusPersonalizado(editalBase.getStatusAtual().getId()));
+        }
         Edital editalSalvo = editalService.criarEditalAPartirDeModelo(templateId, editalBase);
         return mapToEditalResponse(editalSalvo);
     }

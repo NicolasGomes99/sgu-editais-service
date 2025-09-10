@@ -38,9 +38,7 @@ public class EditalController {
     }
 
     @PostMapping("/from-template/{templateId}")
-    public ResponseEntity<EditalResponse> criarEditalPorModelo(
-            @PathVariable Long templateId,
-            @Valid @RequestBody EditalRequest request) {
+    public ResponseEntity<EditalResponse> criarEditalPorModelo(@PathVariable Long templateId, @Valid @RequestBody EditalRequest request) {
         Edital editalBase = request.convertToEntity(request, modelMapper);
         return new ResponseEntity<>(fachada.criarEditalAPartirDeModelo(templateId, editalBase), HttpStatus.CREATED);
     }

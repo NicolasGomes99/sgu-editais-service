@@ -34,17 +34,13 @@ public class EditalController {
     @PostMapping
     public ResponseEntity<EditalResponse> salvar(@Valid @RequestBody EditalRequest request) {
         Edital entity = request.convertToEntity(request, modelMapper);
-        Edital salvo = fachada.salvarEdital(entity);
-        return new ResponseEntity<>(new EditalResponse(salvo, modelMapper), HttpStatus.CREATED);
+        return new ResponseEntity<>(fachada.salvarEdital(entity), HttpStatus.CREATED);
     }
 
     @PostMapping("/from-template/{templateId}")
-    public ResponseEntity<EditalResponse> criarEditalPorModelo(
-            @PathVariable Long templateId,
-            @Valid @RequestBody EditalRequest request) {
+    public ResponseEntity<EditalResponse> criarEditalPorModelo(@PathVariable Long templateId, @Valid @RequestBody EditalRequest request) {
         Edital editalBase = request.convertToEntity(request, modelMapper);
-        Edital editalSalvo = fachada.criarEditalAPartirDeModelo(templateId, editalBase);
-        return new ResponseEntity<>(new EditalResponse(editalSalvo, modelMapper), HttpStatus.CREATED);
+        return new ResponseEntity<>(fachada.criarEditalAPartirDeModelo(templateId, editalBase), HttpStatus.CREATED);
     }
 
     @PostMapping("/{id}/transformar-em-modelo")
@@ -56,34 +52,27 @@ public class EditalController {
     @PatchMapping("/{id}")
     public ResponseEntity<EditalResponse> editar(@PathVariable Long id, @Valid @RequestBody EditalRequest request) throws EditalNotFoundException {
         Edital entity = request.convertToEntity(request, modelMapper);
-        Edital atualizado = fachada.editarEdital(id, entity);
-        return new ResponseEntity<>(new EditalResponse(atualizado, modelMapper), HttpStatus.OK);
+        return new ResponseEntity<>(fachada.editarEdital(id, entity), HttpStatus.OK);
     }
 
     @PatchMapping("/{id}/atualizar-status")
     public ResponseEntity<EditalResponse> atualizarStatus(@PathVariable Long id, @Valid @RequestBody AtualizarStatusRequest request) {
-        Edital atualizado = fachada.atualizarStatusEdital(id, request.getStatusId());
-        return new ResponseEntity<>(new EditalResponse(atualizado, modelMapper), HttpStatus.OK);
+        return new ResponseEntity<>(fachada.atualizarStatusEdital(id, request.getStatusId()), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<EditalResponse> buscar(@PathVariable Long id) throws EditalNotFoundException {
-        Edital entity = fachada.buscarPorIdEdital(id);
-        return new ResponseEntity<>(new EditalResponse(entity, modelMapper), HttpStatus.OK);
+        return new ResponseEntity<>(fachada.buscarPorIdEdital(id), HttpStatus.OK);
     }
 
     @GetMapping
     public ResponseEntity<Page<EditalResponse>> listar(@PageableDefault(sort = "id") Pageable pageable) {
-        Page<Edital> page = fachada.listarEdital(pageable);
-        Page<EditalResponse> response = page.map(e -> new EditalResponse(e, modelMapper));
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(fachada.listarEdital(pageable));
     }
 
     @GetMapping("/publicados")
     public ResponseEntity<Page<EditalResponse>> listarPublicados(@PageableDefault(sort = "fimIncricao") Pageable pageable) {
-        Page<Edital> page = fachada.listarEditaisPublicados(pageable);
-        Page<EditalResponse> response = page.map(e -> new EditalResponse(e, modelMapper));
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(fachada.listarEditaisPublicados(pageable));
     }
 
     @GetMapping("/{editalId}/etapas")

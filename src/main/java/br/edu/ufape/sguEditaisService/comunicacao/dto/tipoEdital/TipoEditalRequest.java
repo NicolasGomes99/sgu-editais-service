@@ -11,9 +11,6 @@ public class TipoEditalRequest {
     private String nome;
     private String descricao;
 
-    @NotNull(message = "O ID da Unidade Administrativa é obrigatório")
-    private Long idUnidadeAdministrativa;
-
     public TipoEdital convertToEntity(TipoEditalRequest request, ModelMapper modelMapper) {
         return modelMapper.map(request, TipoEdital.class);
     }

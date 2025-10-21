@@ -690,12 +690,10 @@ public class Fachada {
     private void validarRelacaoEtapaEdital(Etapa etapa, Edital edital) {
         boolean editalVinculadoCorretamente = false;
 
-        // Cenário 1: A etapa é filha direta do edital
         if (etapa.getEdital() != null && etapa.getEdital().getId().equals(edital.getId())) {
             editalVinculadoCorretamente = true;
         }
 
-        // Cenário 2: A etapa é de um modelo (TipoEdital) que o edital utiliza
         if (etapa.getTipoEditalModelo() != null && edital.getTipoEdital() != null &&
                 etapa.getTipoEditalModelo().getId().equals(edital.getTipoEdital().getId())) {
             editalVinculadoCorretamente = true;
@@ -707,21 +705,17 @@ public class Fachada {
     }
 
     private void validarConsistenciaTemporal(DataEtapa dataEtapaSendoSalva, Edital edital) {
-        // 1. Verificar se o edital está "congelado"
         if (edital.getInicioInscricao() != null && LocalDateTime.now().isAfter(edital.getInicioInscricao())) {
             throw new IllegalStateException("Não é possível modificar as datas das etapas de um edital com inscrições já iniciadas.");
         }
 
-        // 2. Buscar todas as etapas ordenadas do edital
         List<Etapa> etapasOrdenadas = etapaService.listarEtapasPorEdital(edital.getId());
         if (etapasOrdenadas.isEmpty()) {
-            return; // Nenhuma etapa para validar
+            return;
         }
 
-        // 3. Buscar todas as DataEtapa existentes deste edital
         List<DataEtapa> todasAsDatas = dataEtapaService.listarDatasEtapasPorEditalId(edital.getId());
 
-        // 4. Construir o mapa do estado ATUAL das datas, lidando com possíveis duplicatas pré-existentes
         Map<Long, DataEtapa> mapaDatas = todasAsDatas.stream()
                 .collect(Collectors.toMap(
                         d -> d.getEtapa().getId(),
@@ -731,12 +725,10 @@ public class Fachada {
 
         mapaDatas.put(dataEtapaSendoSalva.getEtapa().getId(), dataEtapaSendoSalva);
 
-        // 6. Iniciar validações sobre o estado futuro simulado
         DataEtapa dataAnterior = null;
         DataEtapa primeiraData = null;
         DataEtapa ultimaData = null;
 
-        // 7. Iterar sobre as ETAPAS (mestre da ordem), e buscar as DATAS no mapa (estado futuro)
         for (Etapa etapa : etapasOrdenadas) {
             DataEtapa dataAtual = mapaDatas.get(etapa.getId());
 
@@ -751,7 +743,6 @@ public class Fachada {
             }
             ultimaData = dataAtual;
 
-            // 8. Validação de sequência (lógica idêntica à do método antigo)
             if (dataAnterior != null && dataAnterior.getDataFim() != null && dataAtual.getDataInicio() != null) {
                 if (dataAnterior.getDataFim().isAfter(dataAtual.getDataInicio())) {
                     throw new IllegalStateException(
@@ -764,7 +755,6 @@ public class Fachada {
             dataAnterior = dataAtual;
         }
 
-        // 9. Validação de limites do edital (lógica idêntica à do método antigo)
         if (primeiraData != null && primeiraData.getDataInicio() != null && edital.getInicioInscricao() != null &&
                 primeiraData.getDataInicio().isBefore(edital.getInicioInscricao())) {
             throw new IllegalStateException("A data de início da primeira etapa ('" + primeiraData.getEtapa().getNome() + "') não pode ser anterior ao início das inscrições do edital.");

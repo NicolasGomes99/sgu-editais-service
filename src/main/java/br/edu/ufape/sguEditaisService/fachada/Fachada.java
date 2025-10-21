@@ -17,9 +17,12 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -27,6 +30,7 @@ public class Fachada {
 
     private final ModelMapper modelMapper;
 
+    private final DataEtapaService dataEtapaService;
     private final CampoPersonalizadoService campoPersonalizadoService;
     private final DocumentoService documentoService;
     private final DocumentoEditalService documentoEditalService;
@@ -631,4 +635,145 @@ public class Fachada {
     public void deletarStatusPersonalizado(Long id) throws StatusPersonalizadoNotFoundException {
         statusPersonalizadoService.deletarStatusPersonalizado(id);
     }
+
+    // =================== Data Etapa ===================
+    public DataEtapa salvarDataEtapa(DataEtapa dataEtapa) {
+        Etapa etapa = etapaService.buscarPorIdEtapa(dataEtapa.getEtapa().getId());
+        Edital edital = editalService.buscarPorIdEdital(dataEtapa.getEdital().getId());
+        dataEtapa.setEtapa(etapa);
+        dataEtapa.setEdital(edital);
+        validarRelacaoEtapaEdital(etapa, edital);
+        validarConsistenciaTemporal(dataEtapa, edital);
+        return dataEtapaService.salvarDataEtapa(dataEtapa);
+    }
+
+    public DataEtapa buscarDataEtapaPorId(Long id) {
+        return dataEtapaService.buscarDataEtapaPorId(id);
+    }
+
+    public List<DataEtapa> listarDatasEtapas() {
+        return dataEtapaService.listarDatasEtapas();
+    }
+
+    public DataEtapa editarDataEtapa(Long id, DataEtapa dataEtapa) {
+
+        DataEtapa dataEtapaExistente = dataEtapaService.buscarDataEtapaPorId(id);
+
+
+        Long etapaIdReq = (dataEtapa.getEtapa() != null && dataEtapa.getEtapa().getId() != null)
+                ? dataEtapa.getEtapa().getId()
+                : dataEtapaExistente.getEtapa().getId();
+
+        Long editalIdReq = (dataEtapa.getEdital() != null && dataEtapa.getEdital().getId() != null)
+                ? dataEtapa.getEdital().getId()
+                : dataEtapaExistente.getEdital().getId();
+
+        Etapa etapa = etapaService.buscarPorIdEtapa(etapaIdReq);
+        Edital edital = editalService.buscarPorIdEdital(editalIdReq);
+
+        validarRelacaoEtapaEdital(etapa, edital);
+        modelMapper.map(dataEtapa, dataEtapaExistente);
+
+        dataEtapaExistente.setEtapa(etapa);
+        dataEtapaExistente.setEdital(edital);
+
+        validarConsistenciaTemporal(dataEtapaExistente, edital);
+
+        return dataEtapaService.salvarDataEtapa(dataEtapaExistente);
+    }
+
+
+    public void deletarDataEtapa(Long id) {
+        dataEtapaService.deletarDataEtapa(id);
+    }
+
+    private void validarRelacaoEtapaEdital(Etapa etapa, Edital edital) {
+        boolean editalVinculadoCorretamente = false;
+
+        // Cenário 1: A etapa é filha direta do edital
+        if (etapa.getEdital() != null && etapa.getEdital().getId().equals(edital.getId())) {
+            editalVinculadoCorretamente = true;
+        }
+
+        // Cenário 2: A etapa é de um modelo (TipoEdital) que o edital utiliza
+        if (etapa.getTipoEditalModelo() != null && edital.getTipoEdital() != null &&
+                etapa.getTipoEditalModelo().getId().equals(edital.getTipoEdital().getId())) {
+            editalVinculadoCorretamente = true;
+        }
+
+        if (!editalVinculadoCorretamente) {
+            throw new IllegalArgumentException("A etapa informada não pertence ao edital (seja diretamente ou via modelo).");
+        }
+    }
+
+    private void validarConsistenciaTemporal(DataEtapa dataEtapaSendoSalva, Edital edital) {
+        // 1. Verificar se o edital está "congelado"
+        if (edital.getInicioInscricao() != null && LocalDateTime.now().isAfter(edital.getInicioInscricao())) {
+            throw new IllegalStateException("Não é possível modificar as datas das etapas de um edital com inscrições já iniciadas.");
+        }
+
+        // 2. Buscar todas as etapas ordenadas do edital
+        List<Etapa> etapasOrdenadas = etapaService.listarEtapasPorEdital(edital.getId());
+        if (etapasOrdenadas.isEmpty()) {
+            return; // Nenhuma etapa para validar
+        }
+
+        // 3. Buscar todas as DataEtapa existentes deste edital
+        List<DataEtapa> todasAsDatas = dataEtapaService.listarDatasEtapasPorEditalId(edital.getId());
+
+        // 4. Construir o mapa do estado ATUAL das datas, lidando com possíveis duplicatas pré-existentes
+        Map<Long, DataEtapa> mapaDatas = todasAsDatas.stream()
+                .collect(Collectors.toMap(
+                        d -> d.getEtapa().getId(),
+                        d -> d,
+                        (existente, novo) -> existente
+                ));
+
+        mapaDatas.put(dataEtapaSendoSalva.getEtapa().getId(), dataEtapaSendoSalva);
+
+        // 6. Iniciar validações sobre o estado futuro simulado
+        DataEtapa dataAnterior = null;
+        DataEtapa primeiraData = null;
+        DataEtapa ultimaData = null;
+
+        // 7. Iterar sobre as ETAPAS (mestre da ordem), e buscar as DATAS no mapa (estado futuro)
+        for (Etapa etapa : etapasOrdenadas) {
+            DataEtapa dataAtual = mapaDatas.get(etapa.getId());
+
+            if (dataAtual == null) {
+                continue;
+            }
+
+            dataAtual.setEtapa(etapa);
+
+            if (primeiraData == null) {
+                primeiraData = dataAtual;
+            }
+            ultimaData = dataAtual;
+
+            // 8. Validação de sequência (lógica idêntica à do método antigo)
+            if (dataAnterior != null && dataAnterior.getDataFim() != null && dataAtual.getDataInicio() != null) {
+                if (dataAnterior.getDataFim().isAfter(dataAtual.getDataInicio())) {
+                    throw new IllegalStateException(
+                            String.format("Inconsistência de datas: A etapa '%s' (ordem %d) não pode começar antes do término da etapa '%s' (ordem %d).",
+                                    dataAtual.getEtapa().getNome(), dataAtual.getEtapa().getOrdem(),
+                                    dataAnterior.getEtapa().getNome(), dataAnterior.getEtapa().getOrdem())
+                    );
+                }
+            }
+            dataAnterior = dataAtual;
+        }
+
+        // 9. Validação de limites do edital (lógica idêntica à do método antigo)
+        if (primeiraData != null && primeiraData.getDataInicio() != null && edital.getInicioInscricao() != null &&
+                primeiraData.getDataInicio().isBefore(edital.getInicioInscricao())) {
+            throw new IllegalStateException("A data de início da primeira etapa ('" + primeiraData.getEtapa().getNome() + "') não pode ser anterior ao início das inscrições do edital.");
+        }
+
+        if (ultimaData != null && ultimaData.getDataFim() != null && edital.getFimIncricao() != null &&
+                ultimaData.getDataFim().isAfter(edital.getFimIncricao())) {
+            throw new IllegalStateException("A data de fim da última etapa ('" + ultimaData.getEtapa().getNome() + "') não pode ser posterior ao fim das inscrições do edital.");
+        }
+    }
+
 }

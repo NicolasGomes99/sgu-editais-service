@@ -1,8 +1,8 @@
 package br.edu.ufape.sguEditaisService.comunicacao.validacoes;
 
 import br.edu.ufape.sguEditaisService.comunicacao.annotations.DatasConsistentes;
+import br.edu.ufape.sguEditaisService.comunicacao.dto.dataEtapa.DataEtapaRequest;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.edital.EditalRequest;
-import br.edu.ufape.sguEditaisService.comunicacao.dto.etapa.EtapaRequest;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import java.time.LocalDateTime;
@@ -25,17 +25,14 @@ public class DataConsistenteValidator implements ConstraintValidator<DatasConsis
         if (value instanceof EditalRequest request) {
             inicio = request.getInicioInscricao();
             fim = request.getFimIncricao();
-        } else if (value instanceof EtapaRequest request) {
+        } else if (value instanceof DataEtapaRequest request) {
             inicio = request.getDataInicio();
             fim = request.getDataFim();
         }
 
-        // A validação só será executada se ambas as datas não forem nulas.
-        // Se uma ou ambas forem nulas, a validação passa (considera-se válido).
         if (inicio == null || fim == null) {
             return true;
         }
-        // =============================================================
 
         return !inicio.isAfter(fim);
     }

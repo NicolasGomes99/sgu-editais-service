@@ -19,8 +19,6 @@ public class Etapa {
 
     private String nome;
     private String descricao;
-    private LocalDateTime dataInicio;
-    private LocalDateTime dataFim;
     private boolean obrigatoria;
     private int ordem;
 

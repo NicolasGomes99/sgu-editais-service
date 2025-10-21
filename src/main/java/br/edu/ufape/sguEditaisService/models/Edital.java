@@ -32,7 +32,7 @@ public class Edital {
     private Long idUnidadeAdministrativa;
 
     @OneToMany(mappedBy = "edital", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Etapa> etapas;
+    private List<DataEtapa> datasEtapas;
 
     @OneToMany(mappedBy = "edital", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Inscricao> inscricoes;

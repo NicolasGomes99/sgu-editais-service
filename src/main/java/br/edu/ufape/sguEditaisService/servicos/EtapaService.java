@@ -35,63 +35,9 @@ public class EtapaService implements br.edu.ufape.sguEditaisService.servicos.int
         }
     }
 
-    private void validarConsistenciaTemporal(Etapa etapa) {
-        if (etapa.getEdital() == null || etapa.getEdital().getId() == null) {
-            return; // Validação só se aplica a etapas de um edital concreto
-        }
-
-        // Busca o edital completo para ter acesso às suas datas de inscrição
-        Edital edital = editalRepository.findById(etapa.getEdital().getId())
-                .orElseThrow(() -> new EditalNotFoundException(etapa.getEdital().getId()));
-
-        List<Etapa> todasEtapas = etapaRepository.findByEditalIdOrderByOrdemAsc(etapa.getEdital().getId());
-
-        if (etapa.getId() != null) {
-            todasEtapas.removeIf(e -> e.getId().equals(etapa.getId()));
-        }
-        todasEtapas.add(etapa);
-
-        todasEtapas.sort(Comparator.comparingInt(Etapa::getOrdem));
-
-        if (todasEtapas.isEmpty()) {
-            return; // Nenhuma etapa para validar
-        }
-
-        // Verifica se as etapas estão dentro do período de inscrição do edital
-        Etapa primeiraEtapa = todasEtapas.getFirst();
-        Etapa ultimaEtapa = todasEtapas.getLast();
-
-        if (primeiraEtapa.getDataInicio() != null && edital.getInicioInscricao() != null &&
-                primeiraEtapa.getDataInicio().isBefore(edital.getInicioInscricao())) {
-            throw new IllegalStateException("A data de início da primeira etapa ('" + primeiraEtapa.getNome() + "') não pode ser anterior ao início das inscrições do edital.");
-        }
-
-        if (ultimaEtapa.getDataFim() != null && edital.getFimIncricao() != null &&
-                ultimaEtapa.getDataFim().isAfter(edital.getFimIncricao())) {
-            throw new IllegalStateException("A data de fim da última etapa ('" + ultimaEtapa.getNome() + "') não pode ser posterior ao fim das inscrições do edital.");
-        }
-        // ==========================================================
-
-        // Validação de sequência entre etapas (já existente)
-        for (int i = 1; i < todasEtapas.size(); i++) {
-            Etapa etapaAnterior = todasEtapas.get(i - 1);
-            Etapa etapaAtual = todasEtapas.get(i);
-
-            if (etapaAnterior.getDataFim() != null && etapaAtual.getDataInicio() != null) {
-                if (etapaAnterior.getDataFim().isAfter(etapaAtual.getDataInicio())) {
-                    throw new IllegalStateException(
-                            String.format("Inconsistência de datas: A etapa '%s' (ordem %d) não pode começar antes do término da etapa '%s' (ordem %d).",
-                                    etapaAtual.getNome(), etapaAtual.getOrdem(), etapaAnterior.getNome(), etapaAnterior.getOrdem())
-                    );
-                }
-            }
-        }
-    }
-
     @Override
     public Etapa salvarEtapa(Etapa entity) {
         verificarSeEditalEstaCongelado(entity);
-        validarConsistenciaTemporal(entity);
         return etapaRepository.save(entity);
     }
 
@@ -110,7 +56,6 @@ public class EtapaService implements br.edu.ufape.sguEditaisService.servicos.int
         Etapa etapa = etapaRepository.findById(id).orElseThrow(() -> new EtapaNotFoundException(id));
         verificarSeEditalEstaCongelado(etapa);
         modelMapper.map(entity, etapa);
-        validarConsistenciaTemporal(etapa);
         return etapaRepository.save(etapa);
     }
 

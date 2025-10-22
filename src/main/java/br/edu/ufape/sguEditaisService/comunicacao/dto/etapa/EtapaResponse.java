@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.modelmapper.ModelMapper;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,8 +15,6 @@ public class EtapaResponse {
     private Long id;
     private String nome;
     private String descricao;
-    private LocalDateTime dataInicio;
-    private LocalDateTime dataFim;
     private boolean obrigatoria;
     private int ordem;
 

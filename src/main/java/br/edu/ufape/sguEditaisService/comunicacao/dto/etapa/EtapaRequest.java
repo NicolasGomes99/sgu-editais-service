@@ -1,6 +1,5 @@
 package br.edu.ufape.sguEditaisService.comunicacao.dto.etapa;
 
-import br.edu.ufape.sguEditaisService.comunicacao.annotations.DatasConsistentes;
 import br.edu.ufape.sguEditaisService.models.Edital;
 import br.edu.ufape.sguEditaisService.models.Etapa;
 import br.edu.ufape.sguEditaisService.models.StatusPersonalizado;
@@ -12,16 +11,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
-import java.time.LocalDateTime;
 
-@Getter @Setter @AllArgsConstructor @NoArgsConstructor @DatasConsistentes
+
+@Getter @Setter @AllArgsConstructor @NoArgsConstructor
 public class EtapaRequest {
     @NotBlank(message = "O nome é obrigatório")
     private String nome;
 
     private String descricao;
-    private LocalDateTime dataInicio;
-    private LocalDateTime dataFim;
     private boolean obrigatoria;
     private int ordem;
 

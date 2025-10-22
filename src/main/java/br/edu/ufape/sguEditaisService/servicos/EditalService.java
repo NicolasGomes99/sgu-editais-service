@@ -1,14 +1,11 @@
 package br.edu.ufape.sguEditaisService.servicos;
 
 import br.edu.ufape.sguEditaisService.dados.EditalRepository;
+import br.edu.ufape.sguEditaisService.dados.EtapaRepository;
 import br.edu.ufape.sguEditaisService.dados.TipoEditalRepository;
 import br.edu.ufape.sguEditaisService.exceptions.notFound.EditalNotFoundException;
 import br.edu.ufape.sguEditaisService.exceptions.notFound.TipoEditalNotFoundException;
-import br.edu.ufape.sguEditaisService.models.CampoPersonalizado;
-import br.edu.ufape.sguEditaisService.models.Edital;
-import br.edu.ufape.sguEditaisService.models.Etapa;
-import br.edu.ufape.sguEditaisService.models.StatusPersonalizado;
-import br.edu.ufape.sguEditaisService.models.TipoEdital;
+import br.edu.ufape.sguEditaisService.models.*;
 import br.edu.ufape.sguEditaisService.servicos.interfaces.StatusPersonalizadoService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -19,12 +16,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
 public class EditalService implements br.edu.ufape.sguEditaisService.servicos.interfaces.EditalService{
     private final EditalRepository editalRepository;
+    private final EtapaRepository etapaRepository;
     private final TipoEditalRepository tipoEditalRepository;
     private final StatusPersonalizadoService statusPersonalizadoService;
     private final ModelMapper modelMapper;
@@ -64,13 +63,13 @@ public class EditalService implements br.edu.ufape.sguEditaisService.servicos.in
                 .orElseThrow(() -> new TipoEditalNotFoundException(templateId));
 
         editalBase.setTipoEdital(modelo);
-        editalBase.setEtapas(new ArrayList<>());
         editalBase.setCamposPersonalizados(new ArrayList<>());
+        editalBase.setDatasEtapas(new ArrayList<>());
 
         Edital novoEdital = editalRepository.save(editalBase);
 
         if (modelo.getEtapasModelo() != null) {
-            novoEdital.setEtapas(modelo.getEtapasModelo().stream().map(etapaModelo -> {
+            List<Etapa> novasEtapas = modelo.getEtapasModelo().stream().map(etapaModelo -> {
                 Etapa novaEtapa = new Etapa();
                 modelMapper.map(etapaModelo, novaEtapa);
                 novaEtapa.setId(null);
@@ -87,7 +86,9 @@ public class EditalService implements br.edu.ufape.sguEditaisService.servicos.in
                     }).collect(Collectors.toList()));
                 }
                 return novaEtapa;
-            }).collect(Collectors.toList()));
+            }).collect(Collectors.toList());
+
+            etapaRepository.saveAll(novasEtapas);
         }
 
         if (modelo.getCamposPersonalizadosModelo() != null) {
@@ -114,25 +115,27 @@ public class EditalService implements br.edu.ufape.sguEditaisService.servicos.in
 
         TipoEdital modeloSalvo = tipoEditalRepository.save(novoModelo);
 
-        if (editalOriginal.getEtapas() != null) {
-            modeloSalvo.setEtapasModelo(editalOriginal.getEtapas().stream().map(etapaOriginal -> {
-                Etapa novaEtapaModelo = new Etapa();
-                modelMapper.map(etapaOriginal, novaEtapaModelo);
-                novaEtapaModelo.setId(null);
-                novaEtapaModelo.setEdital(null);
-                novaEtapaModelo.setTipoEditalModelo(modeloSalvo);
+        if (editalOriginal.getDatasEtapas() != null && !editalOriginal.getDatasEtapas().isEmpty()) {
+            modeloSalvo.setEtapasModelo(editalOriginal.getDatasEtapas().stream()
+                    .map(DataEtapa::getEtapa)
+                    .map(etapaOriginal -> {
+                        Etapa novaEtapaModelo = new Etapa();
+                        modelMapper.map(etapaOriginal, novaEtapaModelo);
+                        novaEtapaModelo.setId(null);
+                        novaEtapaModelo.setEdital(null);
+                        novaEtapaModelo.setTipoEditalModelo(modeloSalvo);
 
-                if(etapaOriginal.getCamposPersonalizados() != null){
-                    novaEtapaModelo.setCamposPersonalizados(etapaOriginal.getCamposPersonalizados().stream().map(campoOriginal -> {
-                        CampoPersonalizado novoCampoModelo = new CampoPersonalizado();
-                        modelMapper.map(campoOriginal, novoCampoModelo);
-                        novoCampoModelo.setId(null);
-                        novoCampoModelo.setEtapa(novaEtapaModelo);
-                        return novoCampoModelo;
+                        if(etapaOriginal.getCamposPersonalizados() != null){
+                            novaEtapaModelo.setCamposPersonalizados(etapaOriginal.getCamposPersonalizados().stream().map(campoOriginal -> {
+                                CampoPersonalizado novoCampoModelo = new CampoPersonalizado();
+                                modelMapper.map(campoOriginal, novoCampoModelo);
+                                novoCampoModelo.setId(null);
+                                novoCampoModelo.setEtapa(novaEtapaModelo);
+                                return novoCampoModelo;
+                            }).collect(Collectors.toList()));
+                        }
+                        return novaEtapaModelo;
                     }).collect(Collectors.toList()));
-                }
-                return novaEtapaModelo;
-            }).collect(Collectors.toList()));
         }
 
         if (editalOriginal.getCamposPersonalizados() != null) {

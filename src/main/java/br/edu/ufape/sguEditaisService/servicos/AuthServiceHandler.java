@@ -1,5 +1,8 @@
 package br.edu.ufape.sguEditaisService.servicos;
 
+
+import br.edu.ufape.sguEditaisService.comunicacao.dto.usuario.UsuarioResponse;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import br.edu.ufape.sguEditaisService.auth.AuthServiceClient;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.unidadeAdministrativa.UnidadeAdministrativaResponse;
 import lombok.RequiredArgsConstructor;
@@ -49,5 +52,17 @@ public class AuthServiceHandler implements br.edu.ufape.sguEditaisService.servic
     public Page<UnidadeAdministrativaResponse> fallbackListarUnidadesDoGestorPorId(UUID usuarioId, Throwable t) {
         log.warn("AVISO: Falha ao buscar unidades para o usuário como gestor com ID {}. Erro: {}", usuarioId, t.getMessage());
         return new PageImpl<>(Collections.emptyList());
+    }
+
+    @Override
+    @CircuitBreaker(name = "authServiceClient", fallbackMethod = "fallbackBuscarUsuarioPorId")
+    public UsuarioResponse buscarUsuarioPorId(UUID userId) {
+        return authServiceClient.buscarUsuarioPorId(userId);
+    }
+
+    @Override
+    public UsuarioResponse fallbackBuscarUsuarioPorId(UUID userId, Throwable t) {
+        log.warn("AVISO: Falha ao buscar dados do USUÁRIO com ID {}. O serviço de autenticação pode estar indisponível. Erro: {}", userId, t.getMessage());
+        return new UsuarioResponse();
     }
 }

@@ -1,5 +1,7 @@
 package br.edu.ufape.sguEditaisService.fachada;
 
+import br.edu.ufape.sguEditaisService.comunicacao.dto.inscricao.InscricaoResponse;
+import br.edu.ufape.sguEditaisService.comunicacao.dto.usuario.UsuarioResponse;
 import br.edu.ufape.sguEditaisService.auth.AuthenticatedUserProvider;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.edital.EditalResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.tipoEdital.TipoEditalResponse;
@@ -16,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -424,7 +427,7 @@ public class Fachada {
 
     // =================== Inscricao ===================
 
-    public Inscricao salvarInscricao(Inscricao obj) {
+    public InscricaoResponse salvarInscricao(Inscricao obj) {
         UUID userId = authenticatedUserProvider.getUserId();
         obj.setIdUsuario(userId);
 
@@ -440,18 +443,22 @@ public class Fachada {
             StatusPersonalizado status = statusPersonalizadoService.buscarPorIdStatusPersonalizado(obj.getStatusAtual().getId());
             obj.setStatusAtual(status);
         }
-        return inscricaoService.salvarInscricao(obj);
+
+        Inscricao inscricaoSalva = inscricaoService.salvarInscricao(obj);
+        return mapToInscricaoResponse(inscricaoSalva);
     }
 
-    public Inscricao buscarPorIdInscricao(Long id) {
-        return inscricaoService.buscarPorIdInscricao(id);
+    public InscricaoResponse buscarPorIdInscricao(Long id) {
+        Inscricao inscricao = inscricaoService.buscarPorIdInscricao(id);
+        return mapToInscricaoResponse(inscricao);
     }
 
-    public Page<Inscricao> listarInscricao(Pageable pageable) {
-        return inscricaoService.listarInscricao(pageable);
+    public Page<InscricaoResponse> listarInscricao(Pageable pageable) {
+        Page<Inscricao> paginaInscricao = inscricaoService.listarInscricao(pageable);
+        return paginaInscricao.map(this::mapToInscricaoResponse);
     }
 
-    public Inscricao editarInscricao(Long id, Inscricao obj) {
+    public InscricaoResponse editarInscricao(Long id, Inscricao obj) {
         Inscricao original = inscricaoService.buscarPorIdInscricao(id);
         modelMapper.map(obj, original);
 
@@ -464,11 +471,23 @@ public class Fachada {
             original.setStatusAtual(status);
         }
 
-        return inscricaoService.salvarInscricao(original);
+        Inscricao inscricaoSalva = inscricaoService.salvarInscricao(original);
+        return mapToInscricaoResponse(inscricaoSalva);
     }
 
     public void deletarInscricao(Long id) {
         inscricaoService.deletarInscricao(id);
+    }
+
+    private InscricaoResponse mapToInscricaoResponse(Inscricao inscricao) {
+        InscricaoResponse response = new InscricaoResponse(inscricao, modelMapper);
+
+        if (inscricao.getIdUsuario() != null) {
+            UsuarioResponse usuario = authServiceHandler.buscarUsuarioPorId(inscricao.getIdUsuario());
+            response.setUsuario(usuario);
+        }
+
+        return response;
     }
 
     // =================== PermissaoEtapa ===================

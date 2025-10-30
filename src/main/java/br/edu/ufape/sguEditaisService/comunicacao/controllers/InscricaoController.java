@@ -43,8 +43,8 @@ public class InscricaoController {
     @ApiResponse(responseCode = "500", description = "Erro interno do servidor.", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     public ResponseEntity<InscricaoResponse> salvar(@Valid @RequestBody InscricaoRequest request) {
         Inscricao entity = request.convertToEntity(request, modelMapper);
-        Inscricao salvo = fachada.salvarInscricao(entity);
-        return new ResponseEntity<>(new InscricaoResponse(salvo, modelMapper), HttpStatus.CREATED);
+        InscricaoResponse salvo = fachada.salvarInscricao(entity);
+        return new ResponseEntity<>(salvo, HttpStatus.CREATED);
     }
 
     //    @PreAuthorize("hasRole('ADMINISTRADOR')")
@@ -58,8 +58,8 @@ public class InscricaoController {
     @ApiResponse(responseCode = "500", description = "Erro interno do servidor.", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     public ResponseEntity<InscricaoResponse> editar(@PathVariable Long id, @Valid @RequestBody InscricaoRequest request) throws InscricaoNotFoundException {
         Inscricao entity = request.convertToEntity(request, modelMapper);
-        Inscricao atualizado = fachada.editarInscricao(id, entity);
-        return new ResponseEntity<>(new InscricaoResponse(atualizado, modelMapper), HttpStatus.OK);
+        InscricaoResponse atualizado = fachada.editarInscricao(id, entity);
+        return new ResponseEntity<>(atualizado, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
@@ -70,8 +70,8 @@ public class InscricaoController {
     @ApiResponse(responseCode = "404", description = "Inscrição não encontrada.", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     @ApiResponse(responseCode = "500", description = "Erro interno do servidor.", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     public ResponseEntity<InscricaoResponse> buscar(@PathVariable Long id) throws InscricaoNotFoundException {
-        Inscricao entity = fachada.buscarPorIdInscricao(id);
-        return new ResponseEntity<>(new InscricaoResponse(entity, modelMapper), HttpStatus.OK);
+        InscricaoResponse entity = fachada.buscarPorIdInscricao(id);
+        return new ResponseEntity<>(entity, HttpStatus.OK);
     }
 
     @GetMapping
@@ -81,8 +81,7 @@ public class InscricaoController {
     @ApiResponse(responseCode = "403", description = "Acesso negado. O usuário não tem permissão para acessar este recurso.", content = @Content(schema = @Schema(implementation = Void.class)))
     @ApiResponse(responseCode = "500", description = "Erro interno do servidor.", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     public ResponseEntity<Page<InscricaoResponse>> listar(@ParameterObject @PageableDefault(sort = "id") Pageable pageable) {
-        Page<Inscricao> page = fachada.listarInscricao(pageable);
-        Page<InscricaoResponse> response = page.map(i -> new InscricaoResponse(i, modelMapper));
+        Page<InscricaoResponse> response = fachada.listarInscricao(pageable); // Agora retorna Page<InscricaoResponse>
         return ResponseEntity.ok(response);
     }
 

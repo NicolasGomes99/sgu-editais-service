@@ -1,5 +1,6 @@
 package br.edu.ufape.sguEditaisService.servicos.interfaces;
 
+import br.edu.ufape.sguEditaisService.comunicacao.dto.usuario.UsuarioResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.unidadeAdministrativa.UnidadeAdministrativaResponse;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.data.domain.Page;
@@ -24,4 +25,11 @@ public interface AuthServiceHandler {
 
     @SuppressWarnings("unused")
     Page<UnidadeAdministrativaResponse> fallbackListarUnidadesDoGestorPorId(UUID usuarioId, Throwable t);
+
+    @CircuitBreaker(name = "authServiceClient", fallbackMethod = "fallbackBuscarUsuarioPorId")
+    UsuarioResponse buscarUsuarioPorId(UUID userId);
+
+    @SuppressWarnings("unused")
+    UsuarioResponse fallbackBuscarUsuarioPorId(UUID userId, Throwable t);
+
 }

@@ -1,5 +1,6 @@
 package br.edu.ufape.sguEditaisService.auth;
 
+import br.edu.ufape.sguEditaisService.comunicacao.dto.usuario.UsuarioResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.unidadeAdministrativa.UnidadeAdministrativaResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.data.domain.Page;
@@ -20,4 +21,6 @@ public interface AuthServiceClient {
     @GetMapping("/unidade-administrativa/gestor/{usuarioId}")
     Page<UnidadeAdministrativaResponse> listarUnidadesDoGestorPorId(@PathVariable("usuarioId") UUID usuarioId);
 
+    @GetMapping("/usuario/{userId}")
+    UsuarioResponse buscarUsuarioPorId(@PathVariable("userId") UUID userId);
 }

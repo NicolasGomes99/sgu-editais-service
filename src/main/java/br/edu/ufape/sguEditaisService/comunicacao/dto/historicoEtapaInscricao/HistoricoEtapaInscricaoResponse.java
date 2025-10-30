@@ -20,13 +20,17 @@ public class HistoricoEtapaInscricaoResponse {
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
     private LocalDateTime dataAcao;
 
-//    private EtapaResponse etapa;
-//    private InscricaoResponse inscricao;
+    private EtapaResponse etapa;
+    private InscricaoResponse inscricao;
     private StatusPersonalizadoResponse status;
 
     public HistoricoEtapaInscricaoResponse(HistoricoEtapaInscricao entity, ModelMapper modelMapper) {
         if (entity == null) throw new IllegalArgumentException("HistoricoEtapaInscricao não pode ser nulo");
         else modelMapper.map(entity, this);
+
+        if (entity.getStatusPersonalizado() != null) {
+            this.status = new StatusPersonalizadoResponse(entity.getStatusPersonalizado(), modelMapper);
+        }
 
         this.dataAcao = entity.getDataAacao()
                 .atZone(ZoneId.of("UTC"))

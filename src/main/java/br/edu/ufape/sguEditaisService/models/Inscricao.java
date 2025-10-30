@@ -24,7 +24,7 @@ public class Inscricao {
     private LocalDateTime dataInscricao;
 
     @ManyToOne
-    //@JsonIgnore
+    @JoinColumn(nullable = false)
     private StatusPersonalizado statusAtual;
 
     @OneToMany(mappedBy = "inscricao", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -34,9 +34,14 @@ public class Inscricao {
     private List<ValorCampo> valoresCampo;
 
     @ManyToOne
+    @JoinColumn(nullable = false)
     @JsonIgnore
     private Edital edital;
 
-    @OneToMany(mappedBy = "inscricao", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<HistoricoEtapaInscricao> historicoEtapaInscricao;
+//    @OneToMany(mappedBy = "inscricao", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<HistoricoEtapaInscricao> historicoEtapaInscricao;
+
+    @ManyToOne
+    @JoinColumn(name = "etapa_atual_id")
+    private Etapa etapaAtual;
 }

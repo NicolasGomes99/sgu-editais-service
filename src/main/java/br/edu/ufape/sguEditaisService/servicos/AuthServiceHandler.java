@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -65,4 +66,21 @@ public class AuthServiceHandler implements br.edu.ufape.sguEditaisService.servic
         log.warn("AVISO: Falha ao buscar dados do USUÁRIO com ID {}. O serviço de autenticação pode estar indisponível. Erro: {}", userId, t.getMessage());
         return new UsuarioResponse();
     }
+
+    @Override
+    @CircuitBreaker(name = "authServiceClient", fallbackMethod = "fallbackBuscarUsuariosPorIds")
+    public List<UsuarioResponse> buscarUsuariosPorIds(List<UUID> userIds) {
+        if(userIds == null || userIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return authServiceClient.buscarUsuariosPorIds(userIds);
+    }
+
+// Avaliar isso daqui!!
+//    @SuppressWarnings("unused")
+//    public List<UsuarioResponse> fallbackBuscarUsuariosPorIds(List<UUID> userIds, Throwable t) {
+//        log.warn("AVISO: Falha ao buscar dados em batch para {} usuários. O serviço de autenticação pode estar indisponível. Erro: {}", userIds.size(), t.getMessage());
+//        // Retorna uma lista de DTOs parciais para evitar NullPointerException
+//        return userIds.stream().map(id -> new UsuarioResponse(id, "Usuário " + id, null, null, null)).toList();
+//    }
 }

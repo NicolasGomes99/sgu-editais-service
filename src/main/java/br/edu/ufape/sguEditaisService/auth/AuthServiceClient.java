@@ -6,7 +6,10 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.List;
 import java.util.UUID;
 
 @FeignClient(name = "authServiceClient", url = "${authClient.base-url}")
@@ -23,4 +26,7 @@ public interface AuthServiceClient {
 
     @GetMapping("/usuario/{userId}")
     UsuarioResponse buscarUsuarioPorId(@PathVariable("userId") UUID userId);
+
+    @PostMapping("/usuario/batch")
+    List<UsuarioResponse> buscarUsuariosPorIds(@RequestBody List<UUID> userIds);
 }

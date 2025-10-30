@@ -7,4 +7,7 @@ import java.util.UUID;
 
 public interface InscricaoRepository extends JpaRepository<Inscricao, Long> {
     boolean existsByIdUsuarioAndEditalId(UUID idUsuario, Long editalId);
+    boolean existsByEditalIdAndIdUsuario(Long editalId, UUID idUsuario);
+    Inscricao findByEditalId(Long editalId);
+    Inscricao findByIdUsuario(UUID idUsuario);
 }

@@ -1,21 +1,23 @@
-FROM openjdk:22-jdk-slim AS build
+# syntax=docker/dockerfile:1.3
+ARG BASE_IMAGE=eclipse-temurin:24-jdk
 
-RUN apt-get update && apt-get install -y maven
-
+FROM ${BASE_IMAGE} AS build
 WORKDIR /app
 
-COPY pom.xml .
-RUN mvn dependency:go-offline -B
+COPY mvnw ./
+COPY .mvn .mvn
+COPY pom.xml ./
+RUN chmod +x mvnw
+
+RUN --mount=type=cache,target=/root/.m2 \
+    ./mvnw dependency:go-offline -B
 
 COPY src ./src
-RUN mvn clean package -DskipTests
+RUN --mount=type=cache,target=/root/.m2 \
+    ./mvnw clean install -DskipTests
 
-FROM openjdk:22-jdk-slim
-
+FROM ${BASE_IMAGE} AS runtime
 WORKDIR /app
 
 COPY --from=build /app/target/*.jar app.jar
-
-EXPOSE 8083
-
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java","-jar","app.jar"]

@@ -20,4 +20,6 @@ public interface InscricaoService {
     void deletarInscricao(Long id) throws InscricaoNotFoundException;
 
     boolean existeInscricao(UUID userId, Long editalId);
+
+    List<Inscricao> listarInscricoesPorUsuario(UUID idUsuario);
 }

@@ -6,13 +6,12 @@ import br.edu.ufape.sguEditaisService.dados.TipoEditalRepository;
 import br.edu.ufape.sguEditaisService.models.Etapa;
 import br.edu.ufape.sguEditaisService.models.StatusPersonalizado;
 import br.edu.ufape.sguEditaisService.models.TipoEdital;
-import br.edu.ufape.sguEditaisService.models.enums.StatusBase;
+import br.edu.ufape.sguEditaisService.models.enums.TipoStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.Optional;
 
 @Component
@@ -26,63 +25,63 @@ public class Seeder implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) throws Exception {
-        seedStatus();
-        seedModelosCanonicos();
+        seedStatusInteligentes();
+        seedModeloFluxoPadrao();
     }
 
-    private void seedStatus() {
-        Arrays.stream(StatusBase.values()).forEach(statusEnum -> {
-            Optional<StatusPersonalizado> existente = statusRepository.findAll().stream()
-                    .filter(s -> s.getNome().equalsIgnoreCase(statusEnum.getNome())
-                            && s.getTipoStatus() == statusEnum.getTipo())
-                    .findFirst();
+    private void seedStatusInteligentes() {
+        // Status Gerais (Não avançam etapa)
+        criarStatus("Inscrição Iniciada", TipoStatus.INSCRICAO, false);
+        criarStatus("Em Análise", TipoStatus.INSCRICAO, false);
+        criarStatus("Pendência", TipoStatus.INSCRICAO, false);
+        criarStatus("Aguardando Pagamento", TipoStatus.INSCRICAO, false);
+        criarStatus("Indeferido", TipoStatus.INSCRICAO, false);
 
-            if (existente.isEmpty()) {
-                StatusPersonalizado novo = new StatusPersonalizado();
-                novo.setNome(statusEnum.getNome());
-                novo.setTipoStatus(statusEnum.getTipo());
-                statusRepository.save(novo);
-                System.out.println("Seeder: Status '" + statusEnum.getNome() + "' criado.");
-            }
-        });
+        // Status de Sucesso (AVANÇAM ETAPA!)
+        criarStatus("Deferido", TipoStatus.INSCRICAO, true);
+        criarStatus("Pago", TipoStatus.INSCRICAO, true);
+        criarStatus("Isento", TipoStatus.INSCRICAO, true);
+        criarStatus("Aprovado", TipoStatus.ETAPA, true);
     }
 
-    private void seedModelosCanonicos() {
-        String nomeModelo = "Fluxo Padrão com Pagamento";
-
-        Optional<TipoEdital> existente = tipoEditalRepository.findAll().stream()
-                .filter(t -> t.getNome().equals(nomeModelo))
+    private void criarStatus(String nome, TipoStatus tipo, boolean concluiEtapa) {
+        Optional<StatusPersonalizado> existente = statusRepository.findAll().stream()
+                .filter(s -> s.getNome().equalsIgnoreCase(nome) && s.getTipoStatus() == tipo)
                 .findFirst();
 
-        if (existente.isPresent()) {
+        if (existente.isEmpty()) {
+            StatusPersonalizado novo = new StatusPersonalizado();
+            novo.setNome(nome);
+            novo.setTipoStatus(tipo);
+            novo.setConcluiEtapa(concluiEtapa);
+            statusRepository.save(novo);
+            System.out.println("Seeder: Status '" + nome + "' criado (Conclui Etapa: " + concluiEtapa + ")");
+        }
+    }
+
+    private void seedModeloFluxoPadrao() {
+        String nomeModelo = "Fluxo Padrão (Com Pagamento)";
+        if (tipoEditalRepository.findAll().stream().anyMatch(t -> t.getNome().equals(nomeModelo))) {
             return;
         }
 
         TipoEdital modelo = new TipoEdital();
         modelo.setNome(nomeModelo);
-        modelo.setDescricao("Modelo canônico contendo Inscrição, Pagamento e Homologação.");
-        // idUnidadeAdministrativa pode ser null para modelos globais do sistema
+        modelo.setDescricao("Fluxo: Inscrição -> Pagamento -> Homologação -> Resultado.");
+        TipoEdital salvo = tipoEditalRepository.save(modelo);
 
-        TipoEdital modeloSalvo = tipoEditalRepository.save(modelo);
-
-        // Criando as Etapas Canônicas
-        criarEtapaModelo(modeloSalvo, "Inscrição", "Preenchimento de dados e envio de documentos.", 1, true);
-        criarEtapaModelo(modeloSalvo, "Pagamento/Isenção", "Análise de pagamento ou deferimento de isenção.", 2, true);
-        criarEtapaModelo(modeloSalvo, "Homologação das Inscrições", "Resultado preliminar das inscrições.", 3, true);
-        criarEtapaModelo(modeloSalvo, "Recursos", "Período para interposição de recursos.", 4, false);
-        criarEtapaModelo(modeloSalvo, "Resultado Final", "Publicação do resultado final.", 5, true);
-
-        System.out.println("Seeder: Modelo Canônico '" + nomeModelo + "' criado com sucesso.");
+        criarEtapa(salvo, "Inscrição", 1);
+        criarEtapa(salvo, "Pagamento/Isenção", 2);
+        criarEtapa(salvo, "Homologação", 3);
+        criarEtapa(salvo, "Resultado Final", 4);
     }
 
-    private void criarEtapaModelo(TipoEdital modelo, String nome, String descricao, int ordem, boolean obrigatoria) {
-        Etapa etapa = new Etapa();
-        etapa.setNome(nome);
-        etapa.setDescricao(descricao);
-        etapa.setOrdem(ordem);
-        etapa.setObrigatoria(obrigatoria);
-        etapa.setTipoEditalModelo(modelo);
-
-        etapaRepository.save(etapa);
+    private void criarEtapa(TipoEdital modelo, String nome, int ordem) {
+        Etapa e = new Etapa();
+        e.setNome(nome);
+        e.setOrdem(ordem);
+        e.setObrigatoria(true);
+        e.setTipoEditalModelo(modelo);
+        etapaRepository.save(e);
     }
 }

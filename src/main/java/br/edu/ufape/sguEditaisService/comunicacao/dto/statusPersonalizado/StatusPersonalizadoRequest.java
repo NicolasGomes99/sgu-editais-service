@@ -18,6 +18,8 @@ public class StatusPersonalizadoRequest {
     @NotNull
     private TipoStatus tipoStatus;
 
+    private boolean concluiEtapa;
+
     public StatusPersonalizado convertToEntity(StatusPersonalizadoRequest request, ModelMapper modelMapper) {
         return modelMapper.map(request, StatusPersonalizado.class);
     }

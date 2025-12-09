@@ -144,16 +144,30 @@ public class Fachada {
 
     // =================== Documento ===================
 
+    @Transactional
     public Documento salvarDocumento(Documento documento) {
+        if (documento.getInscricao() == null || documento.getInscricao().getId() == null) {
+            throw new IllegalArgumentException("O documento deve estar vinculado a uma inscrição.");
+        }
+        Inscricao inscricao = inscricaoService.buscarPorIdInscricao(documento.getInscricao().getId());
+        documento.setInscricao(inscricao);
+
+        verificarDonoInscricao(inscricao);
+
         if (documento.getEtapa() != null && documento.getEtapa().getId() != null) {
-            Etapa etapa = etapaService.buscarPorIdEtapa(documento.getEtapa().getId());
-            documento.setEtapa(etapa);
+            Etapa etapaSolicitada = etapaService.buscarPorIdEtapa(documento.getEtapa().getId());
+            // Opcional: Validar se a etapaSolicitada pertence ao Edital da inscrição
+            if (!etapaSolicitada.getEdital().getId().equals(inscricao.getEdital().getId()) &&
+                    (etapaSolicitada.getTipoEditalModelo() == null)) {
+            }
+            documento.setEtapa(etapaSolicitada);
+        } else {
+            // AUTO-BINDING: Vincula automaticamente à etapa onde o usuário está
+            documento.setEtapa(inscricao.getEtapaAtual());
         }
 
-        if (documento.getInscricao() != null && documento.getInscricao().getId() != null) {
-            Inscricao inscricao = inscricaoService.buscarPorIdInscricao(documento.getInscricao().getId());
-            documento.setInscricao(inscricao);
-        }
+        // 4. Valida se a etapa está vigente (opcional, mas recomendado)
+        dataEtapaService.validarVigencia(documento.getEtapa());
 
         return documentoService.salvarDocumento(documento);
     }
@@ -455,32 +469,28 @@ public class Fachada {
         obj.setEdital(edital);
         obj.setIdUsuario(userId);
 
-        // Tenta achar por nome "Inscrição" ou pega a primeira (ordem 1) VERIFICAR!!!!
+        // 1. Define a Etapa Inicial (menor ordem)
         Etapa etapaInicial = edital.getEtapas().stream()
-                .filter(e -> e.getNome().trim().equalsIgnoreCase("Inscrição"))
-                .findFirst()
-                .orElseGet(() -> edital.getEtapas().stream()
-                        .min(Comparator.comparingInt(Etapa::getOrdem))
-                        .orElseThrow(() -> new EtapaNotFoundException("O edital não possui etapas configuradas.")));
+                .min(Comparator.comparingInt(Etapa::getOrdem))
+                .orElseThrow(() -> new EtapaNotFoundException("O edital não possui etapas configuradas."));
 
         obj.setEtapaAtual(etapaInicial);
-
         dataEtapaService.validarVigencia(etapaInicial);
 
-        if (obj.getStatusAtual() != null && obj.getStatusAtual().getId() != null) {
-            StatusPersonalizado status = statusPersonalizadoService.buscarPorIdStatusPersonalizado(obj.getStatusAtual().getId());
-            obj.setStatusAtual(status);
-        }
+        // 2. Define o Status Inicial Padrão ("Em Análise" ou similar)
+        // Buscamos um status que NÃO conclua etapa por padrão para iniciar
+        StatusPersonalizado statusInicial = statusPersonalizadoService.listarStatusPersonalizados().stream()
+                .filter(s -> s.getNome().equalsIgnoreCase("Em Análise")) // Nome canônico do Seeder
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Status base 'Em Análise' não encontrado. Verifique o Seeder."));
+
+        obj.setStatusAtual(statusInicial);
+        obj.setDataInscricao(LocalDateTime.now());
 
         Inscricao inscricaoSalva = inscricaoService.salvarInscricao(obj);
 
-        HistoricoEtapaInscricao historico = new HistoricoEtapaInscricao();
-        historico.setInscricao(inscricaoSalva);
-        historico.setEtapa(etapaInicial);
-        historico.setDataAacao(LocalDateTime.now());
-        historico.setObservacao("Inscrição realizada pelo candidato.");
-
-        historicoEtapaInscricaoService.salvarHistoricoEtapaInscricao(historico);
+        // 3. Gera Histórico Inicial
+        registrarHistorico(inscricaoSalva, etapaInicial, statusInicial, "Inscrição realizada pelo candidato.");
 
         return mapToInscricaoResponse(inscricaoSalva);
     }
@@ -495,29 +505,29 @@ public class Fachada {
         return paginaInscricao.map(this::mapToInscricaoResponse);
     }
 
+    public List<InscricaoResponse> listarInscricoesUsuarioLogado() {
+        UUID userId = authenticatedUserProvider.getUserId();
+        List<Inscricao> inscricoes = inscricaoService.listarInscricoesPorUsuario(userId);
+
+        return inscricoes.stream()
+                .map(this::mapToInscricaoResponse)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public InscricaoResponse editarInscricao(Long id, Inscricao obj) {
         Inscricao original = inscricaoService.buscarPorIdInscricao(id);
 
         verificarDonoInscricao(original);
-
         dataEtapaService.validarVigencia(original.getEtapaAtual());
 
-        if (obj.getStatusAtual() != null && obj.getStatusAtual().getId() != null) {
-            StatusPersonalizado status = statusPersonalizadoService.buscarPorIdStatusPersonalizado(obj.getStatusAtual().getId());
-            original.setStatusAtual(status);
-        }
-
+        // A edição de dados não muda o status automaticamente, mantém o atual
+        // a menos que seja explicitamente enviado um novo status (mas o ideal é usar a rota de status)
         modelMapper.map(obj, original);
 
         Inscricao inscricaoSalva = inscricaoService.salvarInscricao(original);
 
-        HistoricoEtapaInscricao historicoLog = new HistoricoEtapaInscricao();
-        historicoLog.setInscricao(inscricaoSalva);
-        historicoLog.setEtapa(inscricaoSalva.getEtapaAtual());
-        historicoLog.setDataAacao(LocalDateTime.now());
-        historicoLog.setObservacao("Dados atualizados pelo usuário");
-        historicoEtapaInscricaoService.salvarHistoricoEtapaInscricao(historicoLog);
+        registrarHistorico(inscricaoSalva, original.getEtapaAtual(), original.getStatusAtual(), "Dados da inscrição atualizados pelo candidato.");
 
         return mapToInscricaoResponse(inscricaoSalva);
     }
@@ -526,23 +536,75 @@ public class Fachada {
         inscricaoService.deletarInscricao(id);
     }
 
-//    private void validarCamposObrigatorios(Inscricao inscricao, List<ValorCampo> valoresEnviados) {
-//        List<CampoPersonalizado> camposConfigurados = inscricao.getEdital().getCamposPersonalizados();
-//
-//        for (CampoPersonalizado campo : camposConfigurados) {
-//            if (campo.isObrigatorio()) {
-//                // Verifica se existe resposta para este campo na lista enviada
-//                boolean preenchido = valoresEnviados.stream()
-//                        .anyMatch(valor -> valor.getCampoPersonalizado().getId().equals(campo.getId())
-//                                && valor.getValor() != null
-//                                && !valor.getValor().isBlank());
-//
-//                if (!preenchido) {
-//                    throw new IllegalArgumentException("O campo obrigatório '" + campo.getNome() + "' não foi preenchido.");
-//                }
-//            }
-//        }
-//    }
+    @Transactional
+    public InscricaoResponse atualizarStatusInscricao(Long id, Long novoStatusId, String observacao) {
+        Inscricao inscricao = inscricaoService.buscarPorIdInscricao(id);
+        StatusPersonalizado novoStatus = statusPersonalizadoService.buscarPorIdStatusPersonalizado(novoStatusId);
+
+        // 1. Atualiza Status e Salva
+        inscricao.setStatusAtual(novoStatus);
+        Inscricao inscricaoSalva = inscricaoService.salvarInscricao(inscricao);
+
+        // 2. Log de Auditoria (Historico)
+        HistoricoEtapaInscricao historico = new HistoricoEtapaInscricao();
+        historico.setInscricao(inscricaoSalva);
+        historico.setEtapa(inscricaoSalva.getEtapaAtual());
+        historico.setStatusPersonalizado(novoStatus);
+        historico.setDataAacao(LocalDateTime.now());
+        historico.setObservacao(observacao != null ? observacao : "Atualização de status manual.");
+        historicoEtapaInscricaoService.salvarHistoricoEtapaInscricao(historico);
+
+        // 3. O Motor de Decisão: Baseado na flag do banco!
+        if (novoStatus.isConcluiEtapa()) {
+            avancarParaProximaEtapa(inscricaoSalva);
+        }
+
+        return mapToInscricaoResponse(inscricaoSalva);
+    }
+
+    private void avancarParaProximaEtapa(Inscricao inscricao) {
+        Long editalId = inscricao.getEdital().getId();
+        int ordemAtual = inscricao.getEtapaAtual().getOrdem();
+
+        // Busca a próxima etapa
+        Optional<Etapa> proximaEtapa = etapaService.buscarProximaEtapa(editalId, ordemAtual);
+
+        if (proximaEtapa.isPresent()) {
+            Etapa novaEtapa = proximaEtapa.get();
+            inscricao.setEtapaAtual(novaEtapa);
+
+            // Busca o status "Em Análise" para ser o padrão da nova etapa
+            // Se não achar, mantém o status atual como fallback
+            StatusPersonalizado statusInicialNovaEtapa = statusPersonalizadoService.listarStatusPersonalizados().stream()
+                    .filter(s -> s.getNome().equalsIgnoreCase("Em Análise"))
+                    .findFirst()
+                    .orElse(inscricao.getStatusAtual());
+
+            inscricao.setStatusAtual(statusInicialNovaEtapa);
+            inscricaoService.salvarInscricao(inscricao);
+
+            // Log automático de entrada na nova etapa
+            HistoricoEtapaInscricao logAvanco = new HistoricoEtapaInscricao();
+            logAvanco.setInscricao(inscricao);
+            logAvanco.setEtapa(novaEtapa);
+            logAvanco.setStatusPersonalizado(statusInicialNovaEtapa);
+            logAvanco.setDataAacao(LocalDateTime.now());
+            logAvanco.setObservacao("Sistema: Avanço automático para a etapa '" + novaEtapa.getNome() + "' após aprovação.");
+            historicoEtapaInscricaoService.salvarHistoricoEtapaInscricao(logAvanco);
+        } else {
+            // Fim do fluxo. Opcional: Definir um status "Concluído" global.
+        }
+    }
+
+    private void registrarHistorico(Inscricao inscricao, Etapa etapa, StatusPersonalizado status, String obs) {
+        HistoricoEtapaInscricao historico = new HistoricoEtapaInscricao();
+        historico.setInscricao(inscricao);
+        historico.setEtapa(etapa);
+        historico.setStatusPersonalizado(status);
+        historico.setDataAacao(LocalDateTime.now());
+        historico.setObservacao(obs);
+        historicoEtapaInscricaoService.salvarHistoricoEtapaInscricao(historico);
+    }
 
     private InscricaoResponse mapToInscricaoResponse(Inscricao inscricao) {
         InscricaoResponse response = new InscricaoResponse(inscricao, modelMapper);

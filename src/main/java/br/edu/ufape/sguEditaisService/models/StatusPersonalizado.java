@@ -21,4 +21,6 @@ public class StatusPersonalizado {
     @Enumerated(EnumType.STRING)
     private TipoStatus tipoStatus;
 
+    private boolean concluiEtapa;
+
 }

@@ -52,4 +52,9 @@ public class InscricaoService implements br.edu.ufape.sguEditaisService.servicos
     public boolean existeInscricao(UUID userId, Long editalId) {
         return repository.existsByIdUsuarioAndEditalId(userId, editalId);
     }
+
+    @Override
+    public List<Inscricao> listarInscricoesPorUsuario(UUID idUsuario) {
+        return repository.findByIdUsuario(idUsuario);
+    }
 }

@@ -12,6 +12,7 @@ public class StatusPersonalizadoResponse {
     private Long id;
     private String nome;
     private TipoStatus tipoStatus;
+    private boolean concluiEtapa;
 
     public StatusPersonalizadoResponse(StatusPersonalizado entity, ModelMapper modelMapper) {
         if (entity == null) throw new IllegalArgumentException("StatusPersonalizado não pode ser nulo");

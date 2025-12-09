@@ -23,4 +23,7 @@ public interface AuthServiceClient {
 
     @GetMapping("/usuario/{userId}")
     UsuarioResponse buscarUsuarioPorId(@PathVariable("userId") UUID userId);
+
+    @GetMapping("/unidade-administrativa/{id}/vinculo")
+    boolean verificarVinculo(@PathVariable("id") Long id);
 }

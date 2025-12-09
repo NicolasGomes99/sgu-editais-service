@@ -65,4 +65,16 @@ public class AuthServiceHandler implements br.edu.ufape.sguEditaisService.servic
         log.warn("AVISO: Falha ao buscar dados do USUÁRIO com ID {}. O serviço de autenticação pode estar indisponível. Erro: {}", userId, t.getMessage());
         return new UsuarioResponse();
     }
+
+    @Override
+    @CircuitBreaker(name = "authServiceClient", fallbackMethod = "fallbackVerificarVinculo")
+    public boolean verificarVinculo(Long unidadeId) {
+        return authServiceClient.verificarVinculo(unidadeId);
+    }
+
+    @Override
+    public boolean fallbackVerificarVinculo(Long unidadeId, Throwable t) {
+        log.warn("Não foi possível verificar vínculo com a unidade {} no AuthService. Bloqueando acesso por segurança.", unidadeId, t);
+        return false;
+    }
 }

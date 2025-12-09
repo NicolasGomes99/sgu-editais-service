@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
@@ -45,5 +46,10 @@ public class InscricaoService implements br.edu.ufape.sguEditaisService.servicos
     public void deletarInscricao(Long id) throws InscricaoNotFoundException {
         Inscricao entity = repository.findById(id).orElseThrow(() -> new InscricaoNotFoundException(id));
         repository.delete(entity);
+    }
+
+    @Override
+    public boolean existeInscricao(UUID userId, Long editalId) {
+        return repository.existsByIdUsuarioAndEditalId(userId, editalId);
     }
 }

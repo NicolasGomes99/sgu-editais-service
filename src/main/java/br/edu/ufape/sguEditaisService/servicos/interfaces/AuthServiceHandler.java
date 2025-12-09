@@ -32,4 +32,9 @@ public interface AuthServiceHandler {
     @SuppressWarnings("unused")
     UsuarioResponse fallbackBuscarUsuarioPorId(UUID userId, Throwable t);
 
+    @CircuitBreaker(name = "authServiceClient", fallbackMethod = "fallbackVerificarVinculo")
+    boolean verificarVinculo(Long unidadeId);
+
+    boolean fallbackVerificarVinculo(Long unidadeId, Throwable t);
+
 }

@@ -6,12 +6,14 @@ import br.edu.ufape.sguEditaisService.auth.AuthenticatedUserProvider;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.edital.EditalResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.tipoEdital.TipoEditalResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.unidadeAdministrativa.UnidadeAdministrativaResponse;
-import br.edu.ufape.sguEditaisService.dados.InscricaoRepository;
+import br.edu.ufape.sguEditaisService.exceptions.GlobalAccessDeniedException;
 import br.edu.ufape.sguEditaisService.exceptions.InscricaoDuplicadaException;
+import br.edu.ufape.sguEditaisService.exceptions.notFound.EtapaNotFoundException;
 import br.edu.ufape.sguEditaisService.exceptions.notFound.StatusPersonalizadoNotFoundException;
 import br.edu.ufape.sguEditaisService.models.*;
 import br.edu.ufape.sguEditaisService.servicos.interfaces.*;
 import feign.FeignException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -20,11 +22,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -46,7 +46,6 @@ public class Fachada {
     private final ValorCampoService valorCampoService;
     private final StatusPersonalizadoService statusPersonalizadoService;
     private final AuthenticatedUserProvider authenticatedUserProvider;
-    private final InscricaoRepository inscricaoRepository;
     private final AuthServiceHandler authServiceHandler;
 
     // =================== CampoPersonalizado ===================
@@ -55,7 +54,8 @@ public class Fachada {
         int parentCount = 0;
         if (campoPersonalizado.getEdital() != null && campoPersonalizado.getEdital().getId() != null) parentCount++;
         if (campoPersonalizado.getEtapa() != null && campoPersonalizado.getEtapa().getId() != null) parentCount++;
-        if (campoPersonalizado.getTipoEditalModelo() != null && campoPersonalizado.getTipoEditalModelo().getId() != null) parentCount++;
+        if (campoPersonalizado.getTipoEditalModelo() != null && campoPersonalizado.getTipoEditalModelo().getId() != null)
+            parentCount++;
 
         if (parentCount > 1) {
             throw new IllegalArgumentException("Um CampoPersonalizado só pode pertencer a um Edital, a uma Etapa ou a um TipoEdital (modelo), mas não a múltiplos.");
@@ -222,6 +222,12 @@ public class Fachada {
     // =================== Edital ===================
 
     public EditalResponse salvarEdital(Edital obj) {
+
+        boolean temPermissao = authServiceHandler.verificarVinculo(obj.getIdUnidadeAdministrativa());
+        if (!temPermissao) {
+            throw new GlobalAccessDeniedException("Você não tem permissão para Criar este edital.");
+        }
+
         if (obj.getTipoEdital() != null && obj.getTipoEdital().getId() != null) {
             obj.setTipoEdital(tipoEditalService.buscarPorIdTipoEdital(obj.getTipoEdital().getId()));
         }
@@ -427,24 +433,49 @@ public class Fachada {
 
     // =================== Inscricao ===================
 
+    @Transactional
     public InscricaoResponse salvarInscricao(Inscricao obj) {
         UUID userId = authenticatedUserProvider.getUserId();
-        obj.setIdUsuario(userId);
 
-        if(inscricaoRepository.existsByIdUsuarioAndEditalId(userId, obj.getEdital().getId())){
+        if (obj.getEdital() == null || obj.getEdital().getId() == null) {
+            throw new IllegalArgumentException("O ID do Edital é obrigatório.");
+        }
+
+        if (inscricaoService.existeInscricao(userId, obj.getEdital().getId())) {
             throw new InscricaoDuplicadaException();
         }
 
-        if (obj.getEdital() != null && obj.getEdital().getId() != null) {
-            Edital edital = editalService.buscarPorIdEdital(obj.getEdital().getId());
-            obj.setEdital(edital);
-        }
+        Edital edital = editalService.buscarPorIdEdital(obj.getEdital().getId());
+        obj.setEdital(edital);
+        obj.setIdUsuario(userId);
+
+        // Tenta achar por nome "Inscrição" ou pega a primeira (ordem 1) VERIFICAR!!!!
+        Etapa etapaInicial = edital.getEtapas().stream()
+                .filter(e -> e.getNome().trim().equalsIgnoreCase("Inscrição"))
+                .findFirst()
+                .orElseGet(() -> edital.getEtapas().stream()
+                        .min(Comparator.comparingInt(Etapa::getOrdem))
+                        .orElseThrow(() -> new EtapaNotFoundException("O edital não possui etapas configuradas.")));
+
+        obj.setEtapaAtual(etapaInicial);
+
+        dataEtapaService.validarVigencia(etapaInicial);
+
         if (obj.getStatusAtual() != null && obj.getStatusAtual().getId() != null) {
             StatusPersonalizado status = statusPersonalizadoService.buscarPorIdStatusPersonalizado(obj.getStatusAtual().getId());
             obj.setStatusAtual(status);
         }
 
         Inscricao inscricaoSalva = inscricaoService.salvarInscricao(obj);
+
+        HistoricoEtapaInscricao historico = new HistoricoEtapaInscricao();
+        historico.setInscricao(inscricaoSalva);
+        historico.setEtapa(etapaInicial);
+        historico.setDataAacao(LocalDateTime.now());
+        historico.setObservacao("Inscrição realizada pelo candidato.");
+
+        historicoEtapaInscricaoService.salvarHistoricoEtapaInscricao(historico);
+
         return mapToInscricaoResponse(inscricaoSalva);
     }
 
@@ -458,26 +489,54 @@ public class Fachada {
         return paginaInscricao.map(this::mapToInscricaoResponse);
     }
 
+    @Transactional
     public InscricaoResponse editarInscricao(Long id, Inscricao obj) {
         Inscricao original = inscricaoService.buscarPorIdInscricao(id);
-        modelMapper.map(obj, original);
 
-        if (obj.getEdital() != null && obj.getEdital().getId() != null) {
-            Edital edital = editalService.buscarPorIdEdital(obj.getEdital().getId());
-            original.setEdital(edital);
-        }
+        verificarDonoInscricao(original);
+
+        dataEtapaService.validarVigencia(original.getEtapaAtual());
+
         if (obj.getStatusAtual() != null && obj.getStatusAtual().getId() != null) {
             StatusPersonalizado status = statusPersonalizadoService.buscarPorIdStatusPersonalizado(obj.getStatusAtual().getId());
             original.setStatusAtual(status);
         }
 
+        modelMapper.map(obj, original);
+
         Inscricao inscricaoSalva = inscricaoService.salvarInscricao(original);
+
+        HistoricoEtapaInscricao historicoLog = new HistoricoEtapaInscricao();
+        historicoLog.setInscricao(inscricaoSalva);
+        historicoLog.setEtapa(inscricaoSalva.getEtapaAtual());
+        historicoLog.setDataAacao(LocalDateTime.now());
+        historicoLog.setObservacao("Dados atualizados pelo usuário");
+        historicoEtapaInscricaoService.salvarHistoricoEtapaInscricao(historicoLog);
+
         return mapToInscricaoResponse(inscricaoSalva);
     }
 
     public void deletarInscricao(Long id) {
         inscricaoService.deletarInscricao(id);
     }
+
+//    private void validarCamposObrigatorios(Inscricao inscricao, List<ValorCampo> valoresEnviados) {
+//        List<CampoPersonalizado> camposConfigurados = inscricao.getEdital().getCamposPersonalizados();
+//
+//        for (CampoPersonalizado campo : camposConfigurados) {
+//            if (campo.isObrigatorio()) {
+//                // Verifica se existe resposta para este campo na lista enviada
+//                boolean preenchido = valoresEnviados.stream()
+//                        .anyMatch(valor -> valor.getCampoPersonalizado().getId().equals(campo.getId())
+//                                && valor.getValor() != null
+//                                && !valor.getValor().isBlank());
+//
+//                if (!preenchido) {
+//                    throw new IllegalArgumentException("O campo obrigatório '" + campo.getNome() + "' não foi preenchido.");
+//                }
+//            }
+//        }
+//    }
 
     private InscricaoResponse mapToInscricaoResponse(Inscricao inscricao) {
         InscricaoResponse response = new InscricaoResponse(inscricao, modelMapper);
@@ -782,6 +841,15 @@ public class Fachada {
         if (ultimaData != null && ultimaData.getDataFim() != null && edital.getFimIncricao() != null &&
                 ultimaData.getDataFim().isAfter(edital.getFimIncricao())) {
             throw new IllegalStateException("A data de fim da última etapa ('" + ultimaData.getEtapa().getNome() + "') não pode ser posterior ao fim das inscrições do edital.");
+        }
+    }
+
+    // =================== Auth ===================
+
+    private void verificarDonoInscricao(Inscricao inscricao) {
+        UUID userId = authenticatedUserProvider.getUserId();
+        if (!inscricao.getIdUsuario().equals(userId)) {
+            throw new GlobalAccessDeniedException("Você não tem permissão para alterar esta inscrição.");
         }
     }
 

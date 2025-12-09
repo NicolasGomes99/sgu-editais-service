@@ -29,7 +29,12 @@ public class Edital {
     @ManyToOne
     private TipoEdital tipoEdital;
 
+    @OneToMany(mappedBy = "edital", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Etapa> etapas;
+
     private Long idUnidadeAdministrativa;
+
+    private Long cursoId;
 
     @OneToMany(mappedBy = "edital", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DataEtapa> datasEtapas;

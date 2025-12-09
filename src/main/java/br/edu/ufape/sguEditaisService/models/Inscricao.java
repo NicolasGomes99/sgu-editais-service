@@ -37,6 +37,10 @@ public class Inscricao {
     @JsonIgnore
     private Edital edital;
 
+    @ManyToOne
+    @JoinColumn(name = "etapa_atual_id")
+    private Etapa etapaAtual;
+
     @OneToMany(mappedBy = "inscricao", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HistoricoEtapaInscricao> historicoEtapaInscricao;
 }

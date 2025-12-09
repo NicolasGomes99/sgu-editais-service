@@ -31,35 +31,35 @@ public class HistoricoEtapaInscricaoController {
     private final Fachada fachada;
     private final ModelMapper modelMapper;
 
-    //    @PreAuthorize("hasRole('ADMINISTRADOR')")
-    @PostMapping
-    @Operation(summary = "Cadastrar Histórico de Etapa", description = "Cadastra um novo histórico de etapa.")
-    @ApiResponse(responseCode = "201", description = "Operação bem-sucedida. Retorna informações do histórico de etapa cadastrado.")
-    @ApiResponse(responseCode = "400", description = "Erro na requisição.", content = @Content(schema = @Schema(oneOf = {ApiValidationErrorResponse.class, ApiErrorResponse.class})))
-    @ApiResponse(responseCode = "401", description = "Não autorizado. Falha na autenticação.", content = @Content(schema = @Schema(implementation = Void.class)))
-    @ApiResponse(responseCode = "403", description = "Acesso negado. O usuário não tem permissão para acessar este recurso.", content = @Content(schema = @Schema(implementation = Void.class)))
-    @ApiResponse(responseCode = "404", description = "Propriedades não encontradas.", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
-    @ApiResponse(responseCode = "500", description = "Erro interno do servidor.", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
-    public ResponseEntity<HistoricoEtapaInscricaoResponse> salvar(@Valid @RequestBody HistoricoEtapaInscricaoRequest request) {
-        HistoricoEtapaInscricao entity = request.convertToEntity(request, modelMapper);
-        HistoricoEtapaInscricao salvo = fachada.salvarHistoricoEtapaInscricao(entity);
-        return new ResponseEntity<>(new HistoricoEtapaInscricaoResponse(salvo, modelMapper), HttpStatus.CREATED);
-    }
-
-    //    @PreAuthorize("hasRole('ADMINISTRADOR')")
-    @PatchMapping("/{id}")
-    @Operation(summary = "Editar Histórico de Etapa por ID", description = "Edita o Histórico de Etapa pelo seu ID.")
-    @ApiResponse(responseCode = "200", description = "Operação bem-sucedida. Histórico de Etapa editado.")
-    @ApiResponse(responseCode = "400", description = "Erro na requisição.", content = @Content(schema = @Schema(oneOf = {ApiValidationErrorResponse.class, ApiErrorResponse.class})))
-    @ApiResponse(responseCode = "401", description = "Não autorizado. Falha na autenticação.", content = @Content(schema = @Schema(implementation = Void.class)))
-    @ApiResponse(responseCode = "403", description = "Acesso negado. O usuário não tem permissão para acessar este recurso.", content = @Content(schema = @Schema(implementation = Void.class)))
-    @ApiResponse(responseCode = "404", description = "Histórico de Etapa não encontrado para edição.", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
-    @ApiResponse(responseCode = "500", description = "Erro interno do servidor.", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
-    public ResponseEntity<HistoricoEtapaInscricaoResponse> editar(@PathVariable Long id, @Valid @RequestBody HistoricoEtapaInscricaoRequest request) throws HistoricoEtapaInscricaoNotFoundException {
-        HistoricoEtapaInscricao entity = request.convertToEntity(request, modelMapper);
-        HistoricoEtapaInscricao atualizado = fachada.editarHistoricoEtapaInscricao(id, entity);
-        return new ResponseEntity<>(new HistoricoEtapaInscricaoResponse(atualizado, modelMapper), HttpStatus.OK);
-    }
+//    //    @PreAuthorize("hasRole('ADMINISTRADOR')")
+//    @PostMapping
+//    @Operation(summary = "Cadastrar Histórico de Etapa", description = "Cadastra um novo histórico de etapa.")
+//    @ApiResponse(responseCode = "201", description = "Operação bem-sucedida. Retorna informações do histórico de etapa cadastrado.")
+//    @ApiResponse(responseCode = "400", description = "Erro na requisição.", content = @Content(schema = @Schema(oneOf = {ApiValidationErrorResponse.class, ApiErrorResponse.class})))
+//    @ApiResponse(responseCode = "401", description = "Não autorizado. Falha na autenticação.", content = @Content(schema = @Schema(implementation = Void.class)))
+//    @ApiResponse(responseCode = "403", description = "Acesso negado. O usuário não tem permissão para acessar este recurso.", content = @Content(schema = @Schema(implementation = Void.class)))
+//    @ApiResponse(responseCode = "404", description = "Propriedades não encontradas.", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+//    @ApiResponse(responseCode = "500", description = "Erro interno do servidor.", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+//    public ResponseEntity<HistoricoEtapaInscricaoResponse> salvar(@Valid @RequestBody HistoricoEtapaInscricaoRequest request) {
+//        HistoricoEtapaInscricao entity = request.convertToEntity(request, modelMapper);
+//        HistoricoEtapaInscricao salvo = fachada.salvarHistoricoEtapaInscricao(entity);
+//        return new ResponseEntity<>(new HistoricoEtapaInscricaoResponse(salvo, modelMapper), HttpStatus.CREATED);
+//    }
+//
+//    //    @PreAuthorize("hasRole('ADMINISTRADOR')")
+//    @PatchMapping("/{id}")
+//    @Operation(summary = "Editar Histórico de Etapa por ID", description = "Edita o Histórico de Etapa pelo seu ID.")
+//    @ApiResponse(responseCode = "200", description = "Operação bem-sucedida. Histórico de Etapa editado.")
+//    @ApiResponse(responseCode = "400", description = "Erro na requisição.", content = @Content(schema = @Schema(oneOf = {ApiValidationErrorResponse.class, ApiErrorResponse.class})))
+//    @ApiResponse(responseCode = "401", description = "Não autorizado. Falha na autenticação.", content = @Content(schema = @Schema(implementation = Void.class)))
+//    @ApiResponse(responseCode = "403", description = "Acesso negado. O usuário não tem permissão para acessar este recurso.", content = @Content(schema = @Schema(implementation = Void.class)))
+//    @ApiResponse(responseCode = "404", description = "Histórico de Etapa não encontrado para edição.", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+//    @ApiResponse(responseCode = "500", description = "Erro interno do servidor.", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+//    public ResponseEntity<HistoricoEtapaInscricaoResponse> editar(@PathVariable Long id, @Valid @RequestBody HistoricoEtapaInscricaoRequest request) throws HistoricoEtapaInscricaoNotFoundException {
+//        HistoricoEtapaInscricao entity = request.convertToEntity(request, modelMapper);
+//        HistoricoEtapaInscricao atualizado = fachada.editarHistoricoEtapaInscricao(id, entity);
+//        return new ResponseEntity<>(new HistoricoEtapaInscricaoResponse(atualizado, modelMapper), HttpStatus.OK);
+//    }
 
     @GetMapping("/{id}")
     @Operation(summary = "Busca Histórico de Etapa por ID", description = "Retorna o Histórico de Etapa pelo seu ID.")
@@ -88,17 +88,17 @@ public class HistoricoEtapaInscricaoController {
         Page<HistoricoEtapaInscricaoResponse> response = page.map(h -> new HistoricoEtapaInscricaoResponse(h, modelMapper));
         return ResponseEntity.ok(response);
     }
-
-    //    @PreAuthorize("hasRole('ADMINISTRADOR')")
-    @DeleteMapping("/{id}")
-    @Operation(summary = "Deletar Histórico de Etapa por ID", description = "Deleta o Histórico de Etapa pelo seu ID.")
-    @ApiResponse(responseCode = "204", description = "Operação bem-sucedida. Histórico de Etapa deletado.")
-    @ApiResponse(responseCode = "401", description = "Não autorizado. Falha na autenticação.", content = @Content(schema = @Schema(implementation = Void.class)))
-    @ApiResponse(responseCode = "403", description = "Acesso negado. O usuário não tem permissão para acessar este recurso.", content = @Content(schema = @Schema(implementation = Void.class)))
-    @ApiResponse(responseCode = "404", description = "Histórico de Etapa não encontrado.", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
-    @ApiResponse(responseCode = "500", description = "Erro interno do servidor.", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
-    public ResponseEntity<Void> deletar(@PathVariable Long id) throws HistoricoEtapaInscricaoNotFoundException {
-        fachada.deletarHistoricoEtapaInscricao(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
+//
+//    //    @PreAuthorize("hasRole('ADMINISTRADOR')")
+//    @DeleteMapping("/{id}")
+//    @Operation(summary = "Deletar Histórico de Etapa por ID", description = "Deleta o Histórico de Etapa pelo seu ID.")
+//    @ApiResponse(responseCode = "204", description = "Operação bem-sucedida. Histórico de Etapa deletado.")
+//    @ApiResponse(responseCode = "401", description = "Não autorizado. Falha na autenticação.", content = @Content(schema = @Schema(implementation = Void.class)))
+//    @ApiResponse(responseCode = "403", description = "Acesso negado. O usuário não tem permissão para acessar este recurso.", content = @Content(schema = @Schema(implementation = Void.class)))
+//    @ApiResponse(responseCode = "404", description = "Histórico de Etapa não encontrado.", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+//    @ApiResponse(responseCode = "500", description = "Erro interno do servidor.", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+//    public ResponseEntity<Void> deletar(@PathVariable Long id) throws HistoricoEtapaInscricaoNotFoundException {
+//        fachada.deletarHistoricoEtapaInscricao(id);
+//        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//    }
 }

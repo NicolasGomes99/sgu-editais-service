@@ -112,7 +112,6 @@ public class InscricaoController {
         return ResponseEntity.ok(response);
     }
 
-    // ... imports
 
     @GetMapping("/atual")
     @Operation(summary = "Listar Minhas Inscrições", description = "Retorna todas as inscrições do usuário autenticado.")

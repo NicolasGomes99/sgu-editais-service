@@ -8,6 +8,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -41,5 +42,15 @@ public class PermissaoEtapaService implements br.edu.ufape.sguEditaisService.ser
     public void deletarPermissaoEtapa(Long id) throws PermissaoEtapaNotFoundException {
         PermissaoEtapa entity = repository.findById(id).orElseThrow(() -> new PermissaoEtapaNotFoundException(id));
         repository.delete(entity);
+    }
+
+    @Override
+    public List<PermissaoEtapa> listarPermissoesPorEtapa(Long etapaId) {
+        return repository.findByEtapaId(etapaId);
+    }
+
+    @Override
+    public Optional<PermissaoEtapa> buscarPorEtapaEPerfil(Long etapaId, String perfil) {
+        return repository.findByEtapaIdAndPerfil(etapaId, perfil);
     }
 }

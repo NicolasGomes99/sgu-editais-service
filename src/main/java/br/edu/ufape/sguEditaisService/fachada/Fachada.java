@@ -2,6 +2,7 @@ package br.edu.ufape.sguEditaisService.fachada;
 
 import br.edu.ufape.sguEditaisService.comunicacao.dto.curso.CursoResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.inscricao.InscricaoResponse;
+import br.edu.ufape.sguEditaisService.comunicacao.dto.permissaoEtapa.PermissaoEtapaResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.usuario.UsuarioResponse;
 import br.edu.ufape.sguEditaisService.auth.AuthenticatedUserProvider;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.edital.EditalResponse;
@@ -23,8 +24,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -592,7 +596,19 @@ public class Fachada {
             logAvanco.setObservacao("Sistema: Avanço automático para a etapa '" + novaEtapa.getNome() + "' após aprovação.");
             historicoEtapaInscricaoService.salvarHistoricoEtapaInscricao(logAvanco);
         } else {
-            // Fim do fluxo. Opcional: Definir um status "Concluído" global.
+            StatusPersonalizado statusFinal = statusPersonalizadoService.listarStatusPersonalizados().stream()
+                    .filter(s -> s.getNome().equalsIgnoreCase("Aprovado"))
+                    .findFirst()
+                    .orElse(inscricao.getStatusAtual());
+
+            // Só atualiza se o status atual já não for o final (para evitar loops ou redundância)
+            if (!inscricao.getStatusAtual().getId().equals(statusFinal.getId())) {
+                inscricao.setStatusAtual(statusFinal);
+                inscricaoService.salvarInscricao(inscricao);
+
+                registrarHistorico(inscricao, inscricao.getEtapaAtual(), statusFinal,
+                        "Sistema: Processo seletivo concluído com sucesso. Candidato Aprovado.");
+            }
         }
     }
 
@@ -619,36 +635,67 @@ public class Fachada {
 
     // =================== PermissaoEtapa ===================
 
-    public PermissaoEtapa salvarPermissaoEtapa(PermissaoEtapa obj) {
-        if (obj.getEtapa() != null && obj.getEtapa().getId() != null) {
-            Etapa etapa = etapaService.buscarPorIdEtapa(obj.getEtapa().getId());
-            obj.setEtapa(etapa);
+//    public PermissaoEtapa salvarPermissaoEtapa(PermissaoEtapa obj) {
+//        if (obj.getEtapa() != null && obj.getEtapa().getId() != null) {
+//            Etapa etapa = etapaService.buscarPorIdEtapa(obj.getEtapa().getId());
+//            obj.setEtapa(etapa);
+//        }
+//        return permissaoEtapaService.salvarPermissaoEtapa(obj);
+//    }
+//
+//    public PermissaoEtapa buscarPorIdPermissaoEtapa(Long id) {
+//        return permissaoEtapaService.buscarPorIdPermissaoEtapa(id);
+//    }
+//
+//    public List<PermissaoEtapa> listarPermissaoEtapa() {
+//        return permissaoEtapaService.listarPermissaoEtapa();
+//    }
+//
+//    public PermissaoEtapa editarPermissaoEtapa(Long id, PermissaoEtapa obj) {
+//        PermissaoEtapa original = permissaoEtapaService.buscarPorIdPermissaoEtapa(id);
+//        modelMapper.map(obj, original);
+//
+//        if (obj.getEtapa() != null && obj.getEtapa().getId() != null) {
+//            Etapa etapa = etapaService.buscarPorIdEtapa(obj.getEtapa().getId());
+//            original.setEtapa(etapa);
+//        }
+//
+//        return permissaoEtapaService.salvarPermissaoEtapa(original);
+//    }
+//
+//    public void deletarPermissaoEtapa(Long id) {
+//        permissaoEtapaService.deletarPermissaoEtapa(id);
+//    }
+
+    public PermissaoEtapaResponse adicionarPermissaoEtapa(Long etapaId, String perfil) {
+        Etapa etapa = etapaService.buscarPorIdEtapa(etapaId);
+
+        if (permissaoEtapaService.buscarPorEtapaEPerfil(etapaId, perfil).isPresent()) {
+            throw new IllegalArgumentException("O perfil '" + perfil + "' já possui permissão nesta etapa.");
         }
-        return permissaoEtapaService.salvarPermissaoEtapa(obj);
+
+        PermissaoEtapa novaPermissao = new PermissaoEtapa();
+        novaPermissao.setEtapa(etapa);
+        novaPermissao.setPerfil(perfil.toUpperCase());
+
+        PermissaoEtapa salvo = permissaoEtapaService.salvarPermissaoEtapa(novaPermissao);
+        return new PermissaoEtapaResponse(salvo, modelMapper);
     }
 
-    public PermissaoEtapa buscarPorIdPermissaoEtapa(Long id) {
-        return permissaoEtapaService.buscarPorIdPermissaoEtapa(id);
+    public void removerPermissaoEtapa(Long etapaId, String perfil) {
+        PermissaoEtapa permissao = permissaoEtapaService.buscarPorEtapaEPerfil(etapaId, perfil)
+                .orElseThrow(() -> new IllegalArgumentException("Permissão não encontrada para o perfil '" + perfil + "' nesta etapa."));
+
+
+        permissaoEtapaService.deletarPermissaoEtapa(permissao.getId());
     }
 
-    public List<PermissaoEtapa> listarPermissaoEtapa() {
-        return permissaoEtapaService.listarPermissaoEtapa();
-    }
+    public List<PermissaoEtapaResponse> listarPermissoesDaEtapa(Long etapaId) {
+        etapaService.buscarPorIdEtapa(etapaId);
 
-    public PermissaoEtapa editarPermissaoEtapa(Long id, PermissaoEtapa obj) {
-        PermissaoEtapa original = permissaoEtapaService.buscarPorIdPermissaoEtapa(id);
-        modelMapper.map(obj, original);
-
-        if (obj.getEtapa() != null && obj.getEtapa().getId() != null) {
-            Etapa etapa = etapaService.buscarPorIdEtapa(obj.getEtapa().getId());
-            original.setEtapa(etapa);
-        }
-
-        return permissaoEtapaService.salvarPermissaoEtapa(original);
-    }
-
-    public void deletarPermissaoEtapa(Long id) {
-        permissaoEtapaService.deletarPermissaoEtapa(id);
+        return permissaoEtapaService.listarPermissoesPorEtapa(etapaId).stream()
+                .map(p -> new PermissaoEtapaResponse(p, modelMapper))
+                .collect(Collectors.toList());
     }
 
     // =================== TipoEdital ===================
@@ -724,11 +771,17 @@ public class Fachada {
         if (obj.getInscricao() != null && obj.getInscricao().getId() != null) {
             Inscricao inscricao = inscricaoService.buscarPorIdInscricao(obj.getInscricao().getId());
             obj.setInscricao(inscricao);
+
+            verificarDonoInscricao(inscricao);
         }
         if (obj.getCampoPersonalizado() != null && obj.getCampoPersonalizado().getId() != null) {
             CampoPersonalizado campo = campoPersonalizadoService.buscarPorIdCampoPersonalizado(obj.getCampoPersonalizado().getId());
             obj.setCampoPersonalizado(campo);
         }
+
+        validarConteudoDoCampo(obj);
+        // -------------------------
+
         return valorCampoService.salvarValorCampo(obj);
     }
 
@@ -742,6 +795,11 @@ public class Fachada {
 
     public ValorCampo editarValorCampo(Long id, ValorCampo obj) {
         ValorCampo original = valorCampoService.buscarPorIdValorCampo(id);
+
+        if (original.getInscricao() != null) {
+            verificarDonoInscricao(original.getInscricao());
+        }
+
         modelMapper.map(obj, original);
 
         if (obj.getInscricao() != null && obj.getInscricao().getId() != null) {
@@ -753,11 +811,75 @@ public class Fachada {
             original.setCampoPersonalizado(campo);
         }
 
+        validarConteudoDoCampo(original);
+
         return valorCampoService.salvarValorCampo(original);
     }
 
     public void deletarValorCampo(Long id) {
         valorCampoService.deletarValorCampo(id);
+    }
+
+    private void validarConteudoDoCampo(ValorCampo valorCampo) {
+        CampoPersonalizado campo = valorCampo.getCampoPersonalizado();
+
+        if (campo == null) {
+            throw new IllegalArgumentException("O ValorCampo deve estar associado a um CampoPersonalizado.");
+        }
+
+        String valor = valorCampo.getValor();
+        boolean isVazio = valor == null || valor.trim().isEmpty();
+
+        // 1. Validação de Obrigatoriedade
+        if (isVazio) {
+            if (campo.isObrigatorio()) {
+                throw new IllegalArgumentException("O campo '" + campo.getNome() + "' (" + campo.getRotulo() + ") é obrigatório.");
+            }
+            return; // Se está vazio e NÃO é obrigatório, está válido. Não validamos tipo de string vazia.
+        }
+
+        // 2. Validação de Tipo de Dado (Só executa se tiver valor)
+        try {
+            switch (campo.getTipoCampo()) {
+                case NUMERO_INTEIRO:
+                    Long.parseLong(valor);
+                    break;
+                case NUMERO_DECIMAL:
+                    // Substitui vírgula por ponto para aceitar formato PT-BR
+                    new BigDecimal(valor.replace(",", "."));
+                    break;
+                case BOOLEAN:
+                    if (!valor.equalsIgnoreCase("true") && !valor.equalsIgnoreCase("false")) {
+                        throw new IllegalArgumentException();
+                    }
+                    break;
+                case DATA:
+                    try {
+                        LocalDate.parse(valor); // Tenta ISO (yyyy-MM-dd)
+                    } catch (DateTimeParseException e) {
+                        LocalDate.parse(valor, DateTimeFormatter.ofPattern("dd/MM/yyyy")); // Tenta BR
+                    }
+                    break;
+                case DATA_HORA:
+                    try {
+                        LocalDateTime.parse(valor);
+                    } catch (DateTimeParseException e) {
+                        LocalDateTime.parse(valor, DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+                    }
+                    break;
+                case TEXTO_CURTO:
+                    if (valor.length() > 255) {
+                        throw new IllegalArgumentException("O texto excede o limite de 255 caracteres.");
+                    }
+                    break;
+                default:
+                    break; // TEXTO_LONGO aceita qualquer coisa
+            }
+        } catch (Exception e) {
+            // Captura erros de parse (NumberFormat, DateTimeParse) e lança msg amigável
+            throw new IllegalArgumentException("O valor informado '" + valor + "' não é válido para o campo '" +
+                    campo.getNome() + "' (Tipo: " + campo.getTipoCampo() + ").");
+        }
     }
 
     // =================== StatusPersonalizado ===================

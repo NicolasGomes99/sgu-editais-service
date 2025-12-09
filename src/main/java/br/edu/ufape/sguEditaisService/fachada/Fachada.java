@@ -1,5 +1,6 @@
 package br.edu.ufape.sguEditaisService.fachada;
 
+import br.edu.ufape.sguEditaisService.comunicacao.dto.curso.CursoResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.inscricao.InscricaoResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.usuario.UsuarioResponse;
 import br.edu.ufape.sguEditaisService.auth.AuthenticatedUserProvider;
@@ -228,6 +229,8 @@ public class Fachada {
             throw new GlobalAccessDeniedException("Você não tem permissão para Criar este edital.");
         }
 
+        validarCurso( obj.getCursoId());
+
         if (obj.getTipoEdital() != null && obj.getTipoEdital().getId() != null) {
             obj.setTipoEdital(tipoEditalService.buscarPorIdTipoEdital(obj.getTipoEdital().getId()));
         }
@@ -262,6 +265,9 @@ public class Fachada {
     public EditalResponse editarEdital(Long id, Edital obj) {
         Edital edital = editalService.buscarPorIdEdital(id);
         modelMapper.map(obj, edital);
+
+        validarCurso( obj.getCursoId());
+
         if (obj.getTipoEdital() != null && obj.getTipoEdital().getId() != null) {
             edital.setTipoEdital(tipoEditalService.buscarPorIdTipoEdital(obj.getTipoEdital().getId()));
         }
@@ -850,6 +856,15 @@ public class Fachada {
         UUID userId = authenticatedUserProvider.getUserId();
         if (!inscricao.getIdUsuario().equals(userId)) {
             throw new GlobalAccessDeniedException("Você não tem permissão para alterar esta inscrição.");
+        }
+    }
+
+    private void validarCurso(Long cursoId) {
+        if (cursoId != null) {
+            CursoResponse curso = authServiceHandler.buscarCursoPorId(cursoId);
+            if (curso == null) {
+                throw new IllegalArgumentException("O Curso informado (ID " + cursoId + ") não foi encontrado ou o serviço de validação está indisponível.");
+            }
         }
     }
 

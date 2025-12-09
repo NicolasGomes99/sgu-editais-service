@@ -1,5 +1,6 @@
 package br.edu.ufape.sguEditaisService.auth;
 
+import br.edu.ufape.sguEditaisService.comunicacao.dto.curso.CursoResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.usuario.UsuarioResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.unidadeAdministrativa.UnidadeAdministrativaResponse;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -26,4 +27,7 @@ public interface AuthServiceClient {
 
     @GetMapping("/unidade-administrativa/{id}/vinculo")
     boolean verificarVinculo(@PathVariable("id") Long id);
+
+    @GetMapping("curso/{id}")
+    CursoResponse buscarCursoPorId(@PathVariable("id") Long id);
 }

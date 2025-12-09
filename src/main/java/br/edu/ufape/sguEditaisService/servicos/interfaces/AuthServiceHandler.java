@@ -1,5 +1,6 @@
 package br.edu.ufape.sguEditaisService.servicos.interfaces;
 
+import br.edu.ufape.sguEditaisService.comunicacao.dto.curso.CursoResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.usuario.UsuarioResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.unidadeAdministrativa.UnidadeAdministrativaResponse;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -37,4 +38,8 @@ public interface AuthServiceHandler {
 
     boolean fallbackVerificarVinculo(Long unidadeId, Throwable t);
 
+    @CircuitBreaker(name = "authServiceClient", fallbackMethod = "fallbackBuscarCursoPorId")
+    CursoResponse buscarCursoPorId(Long id);
+
+    CursoResponse fallbackBuscarCursoPorId(Long id, Throwable t);
 }

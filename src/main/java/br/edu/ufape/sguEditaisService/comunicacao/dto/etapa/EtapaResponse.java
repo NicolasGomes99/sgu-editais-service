@@ -3,6 +3,7 @@ package br.edu.ufape.sguEditaisService.comunicacao.dto.etapa;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.campoPersonalizado.CampoPersonalizadoResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.statusPersonalizado.StatusPersonalizadoResponse;
 import br.edu.ufape.sguEditaisService.models.Etapa;
+import br.edu.ufape.sguEditaisService.models.PermissaoEtapa;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,6 +19,7 @@ public class EtapaResponse {
     private boolean obrigatoria;
     private int ordem;
     private StatusPersonalizadoResponse statusAtual;
+    private List<PermissaoEtapa> permissoesEtapa;
     private List<CampoPersonalizadoResponse> camposPersonalizados;
 
     public EtapaResponse(Etapa entity, ModelMapper modelMapper) {

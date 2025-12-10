@@ -242,7 +242,9 @@ public class Fachada {
 
     public EditalResponse salvarEdital(Edital obj) {
 
-        boolean temPermissao = authServiceHandler.verificarVinculo(obj.getIdUnidadeAdministrativa());
+        UUID userID = authenticatedUserProvider.getUserId();
+
+        boolean temPermissao = authServiceHandler.verificarVinculo(obj.getIdUnidadeAdministrativa(), userID);
         if (!temPermissao) {
             throw new GlobalAccessDeniedException("Você não tem permissão para Criar este edital.");
         }

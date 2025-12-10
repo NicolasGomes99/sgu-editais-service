@@ -34,9 +34,9 @@ public interface AuthServiceHandler {
     UsuarioResponse fallbackBuscarUsuarioPorId(UUID userId, Throwable t);
 
     @CircuitBreaker(name = "authServiceClient", fallbackMethod = "fallbackVerificarVinculo")
-    boolean verificarVinculo(Long unidadeId);
+    boolean verificarVinculo(Long unidadeId, UUID userId);
 
-    boolean fallbackVerificarVinculo(Long unidadeId, Throwable t);
+    boolean fallbackVerificarVinculo(Long unidadeId, UUID userId, Throwable t);
 
     @CircuitBreaker(name = "authServiceClient", fallbackMethod = "fallbackBuscarCursoPorId")
     CursoResponse buscarCursoPorId(Long id);

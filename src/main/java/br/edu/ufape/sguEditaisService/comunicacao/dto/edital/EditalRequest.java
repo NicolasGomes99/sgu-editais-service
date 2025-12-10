@@ -27,6 +27,8 @@ public class EditalRequest {
 
     private Long statusAtualId;
     private Long tipoEditalId;
+    private Long idUnidadeAdministrativa;
+    private Long cursoId;
 
     public Edital convertToEntity(EditalRequest request, ModelMapper modelMapper) {
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);

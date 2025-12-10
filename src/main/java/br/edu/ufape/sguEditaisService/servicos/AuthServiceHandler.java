@@ -70,12 +70,12 @@ public class AuthServiceHandler implements br.edu.ufape.sguEditaisService.servic
 
     @Override
     @CircuitBreaker(name = "authServiceClient", fallbackMethod = "fallbackVerificarVinculo")
-    public boolean verificarVinculo(Long unidadeId) {
-        return authServiceClient.verificarVinculo(unidadeId);
+    public boolean verificarVinculo(Long unidadeId, UUID userId) {
+        return authServiceClient.verificarVinculo(unidadeId, userId);
     }
 
     @Override
-    public boolean fallbackVerificarVinculo(Long unidadeId, Throwable t) {
+    public boolean fallbackVerificarVinculo(Long unidadeId, UUID userId, Throwable t) {
         log.warn("Não foi possível verificar vínculo com a unidade {} no AuthService. Bloqueando acesso por segurança.", unidadeId, t);
         return false;
     }

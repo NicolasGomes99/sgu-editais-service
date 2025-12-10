@@ -7,6 +7,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.UUID;
 
@@ -26,7 +27,7 @@ public interface AuthServiceClient {
     UsuarioResponse buscarUsuarioPorId(@PathVariable("userId") UUID userId);
 
     @GetMapping("/unidade-administrativa/{id}/vinculo")
-    boolean verificarVinculo(@PathVariable("id") Long id);
+    boolean verificarVinculo(@PathVariable("id") Long id, @RequestParam("userId") UUID userId);
 
     @GetMapping("curso/{id}")
     CursoResponse buscarCursoPorId(@PathVariable("id") Long id);

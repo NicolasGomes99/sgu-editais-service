@@ -17,9 +17,7 @@ public class EtapaResponse {
     private String descricao;
     private boolean obrigatoria;
     private int ordem;
-
     private StatusPersonalizadoResponse statusAtual;
-
     private List<CampoPersonalizadoResponse> camposPersonalizados;
 
     public EtapaResponse(Etapa entity, ModelMapper modelMapper) {

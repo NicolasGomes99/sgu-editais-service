@@ -4,6 +4,8 @@ import br.edu.ufape.sguEditaisService.comunicacao.dto.campoPersonalizado.CampoPe
 import br.edu.ufape.sguEditaisService.comunicacao.dto.etapa.EtapaReorderRequest;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.etapa.EtapaRequest;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.etapa.EtapaResponse;
+import br.edu.ufape.sguEditaisService.comunicacao.dto.permissaoEtapa.PermissaoEtapaRequest;
+import br.edu.ufape.sguEditaisService.comunicacao.dto.permissaoEtapa.PermissaoEtapaResponse;
 import br.edu.ufape.sguEditaisService.exceptions.ApiErrorResponse;
 import br.edu.ufape.sguEditaisService.exceptions.ApiValidationErrorResponse;
 import br.edu.ufape.sguEditaisService.exceptions.notFound.EtapaNotFoundException;
@@ -125,5 +127,28 @@ public class EtapaController {
     public ResponseEntity<Void> deletar(@PathVariable Long id) throws EtapaNotFoundException {
         fachada.deletarEtapa(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PostMapping("/{id}/permissao")
+    @Operation(summary = "Adicionar Permissão à Etapa", description = "Define que usuários com determinado perfil (Role) podem acessar/avaliar esta etapa.")
+    public PermissaoEtapaResponse adicionarPermissao(
+            @PathVariable Long id,
+            @Valid @RequestBody PermissaoEtapaRequest request) {
+        return fachada.adicionarPermissaoEtapa(id, request.getPerfil());
+    }
+
+    @DeleteMapping("/{id}/permissao/{perfil}")
+    @Operation(summary = "Remover Permissão da Etapa", description = "Remove o acesso de um perfil a esta etapa.")
+    public ResponseEntity<Void> removerPermissao(
+            @PathVariable Long id,
+            @PathVariable String perfil) {
+        fachada.removerPermissaoEtapa(id, perfil);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/permissao")
+    @Operation(summary = "Listar Permissões da Etapa", description = "Lista todos os perfis autorizados nesta etapa.")
+    public List<PermissaoEtapaResponse> listarPermissoes(@PathVariable Long id) {
+        return fachada.listarPermissoesDaEtapa(id);
     }
 }

@@ -2,6 +2,7 @@ package br.edu.ufape.sguEditaisService.comunicacao.controllers;
 
 import br.edu.ufape.sguEditaisService.comunicacao.dto.inscricao.InscricaoRequest;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.inscricao.InscricaoResponse;
+import br.edu.ufape.sguEditaisService.comunicacao.dto.inscricao.StatusInscricaoPatchRequest;
 import br.edu.ufape.sguEditaisService.exceptions.ApiErrorResponse;
 import br.edu.ufape.sguEditaisService.exceptions.ApiValidationErrorResponse;
 import br.edu.ufape.sguEditaisService.exceptions.notFound.InscricaoNotFoundException;
@@ -21,6 +22,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
@@ -96,5 +98,27 @@ public class InscricaoController {
     public ResponseEntity<Void> deletar(@PathVariable Long id) throws InscricaoNotFoundException {
         fachada.deletarInscricao(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PatchMapping("/{id}/status")
+    @Operation(summary = "Atualizar Status (Avaliação)", description = "Altera o status da inscrição. Se o status escolhido tiver a flag 'concluiEtapa', o sistema avança a inscrição automaticamente.")
+    @ApiResponse(responseCode = "200", description = "Status atualizado com sucesso.")
+    @ApiResponse(responseCode = "404", description = "Inscrição ou Status não encontrado.")
+    public ResponseEntity<InscricaoResponse> atualizarStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody StatusInscricaoPatchRequest request) {
+
+        InscricaoResponse response = fachada.atualizarStatusInscricao(id, request.getStatusId(), request.getObservacao());
+        return ResponseEntity.ok(response);
+    }
+
+
+    @GetMapping("/atual")
+    @Operation(summary = "Listar Minhas Inscrições", description = "Retorna todas as inscrições do usuário autenticado.")
+    @ApiResponse(responseCode = "200", description = "Lista de inscrições retornada com sucesso.")
+    @ApiResponse(responseCode = "401", description = "Não autorizado.")
+    public ResponseEntity<List<InscricaoResponse>> listarInscricoesUsuarioLogado() {
+        List<InscricaoResponse> response = fachada.listarInscricoesUsuarioLogado();
+        return ResponseEntity.ok(response);
     }
 }

@@ -2,6 +2,8 @@ package br.edu.ufape.sguEditaisService.comunicacao.dto.campoPersonalizado;
 
 import br.edu.ufape.sguEditaisService.comunicacao.dto.edital.EditalResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.etapa.EtapaResponse;
+import br.edu.ufape.sguEditaisService.comunicacao.dto.valorCampo.ValorCampoResponse;
+import br.edu.ufape.sguEditaisService.models.ValorCampo;
 import br.edu.ufape.sguEditaisService.models.enums.TipoCampo;
 import br.edu.ufape.sguEditaisService.models.CampoPersonalizado;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -20,8 +22,7 @@ public class CampoPersonalizadoResponse {
     private boolean obrigatorio;
     private TipoCampo tipoCampo;
     private String opcoes;
-//    private EtapaResponse etapa;
-//    private EditalResponse edital;
+    private List<ValorCampoResponse> valores;
 
     public CampoPersonalizadoResponse(CampoPersonalizado entity, ModelMapper modelMapper) {
         if (entity == null) throw new IllegalArgumentException("campoPersonalizado não pode ser nulo");

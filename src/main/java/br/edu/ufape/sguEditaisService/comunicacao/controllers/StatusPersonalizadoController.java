@@ -84,15 +84,15 @@ public class StatusPersonalizadoController {
         return ResponseEntity.ok(new StatusPersonalizadoResponse(atualizado, modelMapper));
     }
 
-    @DeleteMapping("/{id}")
-    @Operation(summary = "Deletar Status Personalizado por ID", description = "Deleta a Status Personalizado pelo seu ID.")
-    @ApiResponse(responseCode = "204", description = "Operação bem-sucedida. Status Personalizado deletada.")
-    @ApiResponse(responseCode = "401", description = "Não autorizado. Falha na autenticação.", content = @Content(schema = @Schema(implementation = Void.class)))
-    @ApiResponse(responseCode = "403", description = "Acesso negado. O usuário não tem permissão para acessar este recurso.", content = @Content(schema = @Schema(implementation = Void.class)))
-    @ApiResponse(responseCode = "404", description = "Status Personalizado não encontrada.", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
-    @ApiResponse(responseCode = "500", description = "Erro interno do servidor.", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
-    public ResponseEntity<Void> deletar(@PathVariable Long id) throws StatusPersonalizadoNotFoundException {
-        fachada.deletarStatusPersonalizado(id);
-        return ResponseEntity.noContent().build();
-    }
+//    @DeleteMapping("/{id}")
+//    @Operation(summary = "Deletar Status Personalizado por ID", description = "Deleta a Status Personalizado pelo seu ID.")
+//    @ApiResponse(responseCode = "204", description = "Operação bem-sucedida. Status Personalizado deletada.")
+//    @ApiResponse(responseCode = "401", description = "Não autorizado. Falha na autenticação.", content = @Content(schema = @Schema(implementation = Void.class)))
+//    @ApiResponse(responseCode = "403", description = "Acesso negado. O usuário não tem permissão para acessar este recurso.", content = @Content(schema = @Schema(implementation = Void.class)))
+//    @ApiResponse(responseCode = "404", description = "Status Personalizado não encontrada.", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+//    @ApiResponse(responseCode = "500", description = "Erro interno do servidor.", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+//    public ResponseEntity<Void> deletar(@PathVariable Long id) throws StatusPersonalizadoNotFoundException {
+//        fachada.deletarStatusPersonalizado(id);
+//        return ResponseEntity.noContent().build();
+//    }
 }

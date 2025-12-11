@@ -1,17 +1,21 @@
 package br.edu.ufape.sguEditaisService.fachada;
 
+import br.edu.ufape.sguEditaisService.comunicacao.dto.curso.CursoResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.inscricao.InscricaoResponse;
+import br.edu.ufape.sguEditaisService.comunicacao.dto.permissaoEtapa.PermissaoEtapaResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.usuario.UsuarioResponse;
 import br.edu.ufape.sguEditaisService.auth.AuthenticatedUserProvider;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.edital.EditalResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.tipoEdital.TipoEditalResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.unidadeAdministrativa.UnidadeAdministrativaResponse;
-import br.edu.ufape.sguEditaisService.dados.InscricaoRepository;
+import br.edu.ufape.sguEditaisService.exceptions.GlobalAccessDeniedException;
 import br.edu.ufape.sguEditaisService.exceptions.InscricaoDuplicadaException;
+import br.edu.ufape.sguEditaisService.exceptions.notFound.EtapaNotFoundException;
 import br.edu.ufape.sguEditaisService.exceptions.notFound.StatusPersonalizadoNotFoundException;
 import br.edu.ufape.sguEditaisService.models.*;
 import br.edu.ufape.sguEditaisService.servicos.interfaces.*;
 import feign.FeignException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -20,11 +24,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -46,7 +51,6 @@ public class Fachada {
     private final ValorCampoService valorCampoService;
     private final StatusPersonalizadoService statusPersonalizadoService;
     private final AuthenticatedUserProvider authenticatedUserProvider;
-    private final InscricaoRepository inscricaoRepository;
     private final AuthServiceHandler authServiceHandler;
 
     // =================== CampoPersonalizado ===================
@@ -55,7 +59,8 @@ public class Fachada {
         int parentCount = 0;
         if (campoPersonalizado.getEdital() != null && campoPersonalizado.getEdital().getId() != null) parentCount++;
         if (campoPersonalizado.getEtapa() != null && campoPersonalizado.getEtapa().getId() != null) parentCount++;
-        if (campoPersonalizado.getTipoEditalModelo() != null && campoPersonalizado.getTipoEditalModelo().getId() != null) parentCount++;
+        if (campoPersonalizado.getTipoEditalModelo() != null && campoPersonalizado.getTipoEditalModelo().getId() != null)
+            parentCount++;
 
         if (parentCount > 1) {
             throw new IllegalArgumentException("Um CampoPersonalizado só pode pertencer a um Edital, a uma Etapa ou a um TipoEdital (modelo), mas não a múltiplos.");
@@ -143,16 +148,30 @@ public class Fachada {
 
     // =================== Documento ===================
 
+    @Transactional
     public Documento salvarDocumento(Documento documento) {
+        if (documento.getInscricao() == null || documento.getInscricao().getId() == null) {
+            throw new IllegalArgumentException("O documento deve estar vinculado a uma inscrição.");
+        }
+        Inscricao inscricao = inscricaoService.buscarPorIdInscricao(documento.getInscricao().getId());
+        documento.setInscricao(inscricao);
+
+        verificarDonoInscricao(inscricao);
+
         if (documento.getEtapa() != null && documento.getEtapa().getId() != null) {
-            Etapa etapa = etapaService.buscarPorIdEtapa(documento.getEtapa().getId());
-            documento.setEtapa(etapa);
+            Etapa etapaSolicitada = etapaService.buscarPorIdEtapa(documento.getEtapa().getId());
+            // Opcional: Validar se a etapaSolicitada pertence ao Edital da inscrição
+            if (!etapaSolicitada.getEdital().getId().equals(inscricao.getEdital().getId()) &&
+                    (etapaSolicitada.getTipoEditalModelo() == null)) {
+            }
+            documento.setEtapa(etapaSolicitada);
+        } else {
+            // AUTO-BINDING: Vincula automaticamente à etapa onde o usuário está
+            documento.setEtapa(inscricao.getEtapaAtual());
         }
 
-        if (documento.getInscricao() != null && documento.getInscricao().getId() != null) {
-            Inscricao inscricao = inscricaoService.buscarPorIdInscricao(documento.getInscricao().getId());
-            documento.setInscricao(inscricao);
-        }
+        // 4. Valida se a etapa está vigente (opcional, mas recomendado)
+        dataEtapaService.validarVigencia(documento.getEtapa());
 
         return documentoService.salvarDocumento(documento);
     }
@@ -222,6 +241,16 @@ public class Fachada {
     // =================== Edital ===================
 
     public EditalResponse salvarEdital(Edital obj) {
+
+        UUID userID = authenticatedUserProvider.getUserId();
+
+        boolean temPermissao = authServiceHandler.verificarVinculo(obj.getIdUnidadeAdministrativa(), userID);
+        if (!temPermissao) {
+            throw new GlobalAccessDeniedException("Você não tem permissão para Criar este edital.");
+        }
+
+        validarCurso( obj.getCursoId());
+
         if (obj.getTipoEdital() != null && obj.getTipoEdital().getId() != null) {
             obj.setTipoEdital(tipoEditalService.buscarPorIdTipoEdital(obj.getTipoEdital().getId()));
         }
@@ -256,6 +285,9 @@ public class Fachada {
     public EditalResponse editarEdital(Long id, Edital obj) {
         Edital edital = editalService.buscarPorIdEdital(id);
         modelMapper.map(obj, edital);
+
+        validarCurso( obj.getCursoId());
+
         if (obj.getTipoEdital() != null && obj.getTipoEdital().getId() != null) {
             edital.setTipoEdital(tipoEditalService.buscarPorIdTipoEdital(obj.getTipoEdital().getId()));
         }
@@ -427,24 +459,45 @@ public class Fachada {
 
     // =================== Inscricao ===================
 
+    @Transactional
     public InscricaoResponse salvarInscricao(Inscricao obj) {
         UUID userId = authenticatedUserProvider.getUserId();
-        obj.setIdUsuario(userId);
 
-        if(inscricaoRepository.existsByIdUsuarioAndEditalId(userId, obj.getEdital().getId())){
+        if (obj.getEdital() == null || obj.getEdital().getId() == null) {
+            throw new IllegalArgumentException("O ID do Edital é obrigatório.");
+        }
+
+        if (inscricaoService.existeInscricao(userId, obj.getEdital().getId())) {
             throw new InscricaoDuplicadaException();
         }
 
-        if (obj.getEdital() != null && obj.getEdital().getId() != null) {
-            Edital edital = editalService.buscarPorIdEdital(obj.getEdital().getId());
-            obj.setEdital(edital);
-        }
-        if (obj.getStatusAtual() != null && obj.getStatusAtual().getId() != null) {
-            StatusPersonalizado status = statusPersonalizadoService.buscarPorIdStatusPersonalizado(obj.getStatusAtual().getId());
-            obj.setStatusAtual(status);
-        }
+        Edital edital = editalService.buscarPorIdEdital(obj.getEdital().getId());
+        obj.setEdital(edital);
+        obj.setIdUsuario(userId);
+
+        // 1. Define a Etapa Inicial (menor ordem)
+        Etapa etapaInicial = edital.getEtapas().stream()
+                .min(Comparator.comparingInt(Etapa::getOrdem))
+                .orElseThrow(() -> new EtapaNotFoundException("O edital não possui etapas configuradas."));
+
+        obj.setEtapaAtual(etapaInicial);
+        dataEtapaService.validarVigencia(etapaInicial);
+
+        // 2. Define o Status Inicial Padrão ("Em Análise" ou similar)
+        // Buscamos um status que NÃO conclua etapa por padrão para iniciar
+        StatusPersonalizado statusInicial = statusPersonalizadoService.listarStatusPersonalizados().stream()
+                .filter(s -> s.getNome().equalsIgnoreCase("Em Análise")) // Nome canônico do Seeder
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Status base 'Em Análise' não encontrado. Verifique o Seeder."));
+
+        obj.setStatusAtual(statusInicial);
+        obj.setDataInscricao(LocalDateTime.now());
 
         Inscricao inscricaoSalva = inscricaoService.salvarInscricao(obj);
+
+        // 3. Gera Histórico Inicial
+        registrarHistorico(inscricaoSalva, etapaInicial, statusInicial, "Inscrição realizada pelo candidato.");
+
         return mapToInscricaoResponse(inscricaoSalva);
     }
 
@@ -458,25 +511,117 @@ public class Fachada {
         return paginaInscricao.map(this::mapToInscricaoResponse);
     }
 
+    public List<InscricaoResponse> listarInscricoesUsuarioLogado() {
+        UUID userId = authenticatedUserProvider.getUserId();
+        List<Inscricao> inscricoes = inscricaoService.listarInscricoesPorUsuario(userId);
+
+        return inscricoes.stream()
+                .map(this::mapToInscricaoResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
     public InscricaoResponse editarInscricao(Long id, Inscricao obj) {
         Inscricao original = inscricaoService.buscarPorIdInscricao(id);
+
+        verificarDonoInscricao(original);
+        dataEtapaService.validarVigencia(original.getEtapaAtual());
+
+        // A edição de dados não muda o status automaticamente, mantém o atual
+        // a menos que seja explicitamente enviado um novo status (mas o ideal é usar a rota de status)
         modelMapper.map(obj, original);
 
-        if (obj.getEdital() != null && obj.getEdital().getId() != null) {
-            Edital edital = editalService.buscarPorIdEdital(obj.getEdital().getId());
-            original.setEdital(edital);
-        }
-        if (obj.getStatusAtual() != null && obj.getStatusAtual().getId() != null) {
-            StatusPersonalizado status = statusPersonalizadoService.buscarPorIdStatusPersonalizado(obj.getStatusAtual().getId());
-            original.setStatusAtual(status);
-        }
-
         Inscricao inscricaoSalva = inscricaoService.salvarInscricao(original);
+
+        registrarHistorico(inscricaoSalva, original.getEtapaAtual(), original.getStatusAtual(), "Dados da inscrição atualizados pelo candidato.");
+
         return mapToInscricaoResponse(inscricaoSalva);
     }
 
     public void deletarInscricao(Long id) {
         inscricaoService.deletarInscricao(id);
+    }
+
+    @Transactional
+    public InscricaoResponse atualizarStatusInscricao(Long id, Long novoStatusId, String observacao) {
+        Inscricao inscricao = inscricaoService.buscarPorIdInscricao(id);
+        StatusPersonalizado novoStatus = statusPersonalizadoService.buscarPorIdStatusPersonalizado(novoStatusId);
+
+        // 1. Atualiza Status e Salva
+        inscricao.setStatusAtual(novoStatus);
+        Inscricao inscricaoSalva = inscricaoService.salvarInscricao(inscricao);
+
+        // 2. Log de Auditoria (Historico)
+        HistoricoEtapaInscricao historico = new HistoricoEtapaInscricao();
+        historico.setInscricao(inscricaoSalva);
+        historico.setEtapa(inscricaoSalva.getEtapaAtual());
+        historico.setStatusPersonalizado(novoStatus);
+        historico.setDataAacao(LocalDateTime.now());
+        historico.setObservacao(observacao != null ? observacao : "Atualização de status manual.");
+        historicoEtapaInscricaoService.salvarHistoricoEtapaInscricao(historico);
+
+        // 3. O Motor de Decisão: Baseado na flag do banco!
+        if (novoStatus.isConcluiEtapa()) {
+            avancarParaProximaEtapa(inscricaoSalva);
+        }
+
+        return mapToInscricaoResponse(inscricaoSalva);
+    }
+
+    private void avancarParaProximaEtapa(Inscricao inscricao) {
+        Long editalId = inscricao.getEdital().getId();
+        int ordemAtual = inscricao.getEtapaAtual().getOrdem();
+
+        // Busca a próxima etapa
+        Optional<Etapa> proximaEtapa = etapaService.buscarProximaEtapa(editalId, ordemAtual);
+
+        if (proximaEtapa.isPresent()) {
+            Etapa novaEtapa = proximaEtapa.get();
+            inscricao.setEtapaAtual(novaEtapa);
+
+            // Busca o status "Em Análise" para ser o padrão da nova etapa
+            // Se não achar, mantém o status atual como fallback
+            StatusPersonalizado statusInicialNovaEtapa = statusPersonalizadoService.listarStatusPersonalizados().stream()
+                    .filter(s -> s.getNome().equalsIgnoreCase("Em Análise"))
+                    .findFirst()
+                    .orElse(inscricao.getStatusAtual());
+
+            inscricao.setStatusAtual(statusInicialNovaEtapa);
+            inscricaoService.salvarInscricao(inscricao);
+
+            // Log automático de entrada na nova etapa
+            HistoricoEtapaInscricao logAvanco = new HistoricoEtapaInscricao();
+            logAvanco.setInscricao(inscricao);
+            logAvanco.setEtapa(novaEtapa);
+            logAvanco.setStatusPersonalizado(statusInicialNovaEtapa);
+            logAvanco.setDataAacao(LocalDateTime.now());
+            logAvanco.setObservacao("Sistema: Avanço automático para a etapa '" + novaEtapa.getNome() + "' após aprovação.");
+            historicoEtapaInscricaoService.salvarHistoricoEtapaInscricao(logAvanco);
+        } else {
+            StatusPersonalizado statusFinal = statusPersonalizadoService.listarStatusPersonalizados().stream()
+                    .filter(s -> s.getNome().equalsIgnoreCase("Aprovado"))
+                    .findFirst()
+                    .orElse(inscricao.getStatusAtual());
+
+            // Só atualiza se o status atual já não for o final (para evitar loops ou redundância)
+            if (!inscricao.getStatusAtual().getId().equals(statusFinal.getId())) {
+                inscricao.setStatusAtual(statusFinal);
+                inscricaoService.salvarInscricao(inscricao);
+
+                registrarHistorico(inscricao, inscricao.getEtapaAtual(), statusFinal,
+                        "Sistema: Processo seletivo concluído com sucesso. Candidato Aprovado.");
+            }
+        }
+    }
+
+    private void registrarHistorico(Inscricao inscricao, Etapa etapa, StatusPersonalizado status, String obs) {
+        HistoricoEtapaInscricao historico = new HistoricoEtapaInscricao();
+        historico.setInscricao(inscricao);
+        historico.setEtapa(etapa);
+        historico.setStatusPersonalizado(status);
+        historico.setDataAacao(LocalDateTime.now());
+        historico.setObservacao(obs);
+        historicoEtapaInscricaoService.salvarHistoricoEtapaInscricao(historico);
     }
 
     private InscricaoResponse mapToInscricaoResponse(Inscricao inscricao) {
@@ -492,36 +637,67 @@ public class Fachada {
 
     // =================== PermissaoEtapa ===================
 
-    public PermissaoEtapa salvarPermissaoEtapa(PermissaoEtapa obj) {
-        if (obj.getEtapa() != null && obj.getEtapa().getId() != null) {
-            Etapa etapa = etapaService.buscarPorIdEtapa(obj.getEtapa().getId());
-            obj.setEtapa(etapa);
+//    public PermissaoEtapa salvarPermissaoEtapa(PermissaoEtapa obj) {
+//        if (obj.getEtapa() != null && obj.getEtapa().getId() != null) {
+//            Etapa etapa = etapaService.buscarPorIdEtapa(obj.getEtapa().getId());
+//            obj.setEtapa(etapa);
+//        }
+//        return permissaoEtapaService.salvarPermissaoEtapa(obj);
+//    }
+//
+//    public PermissaoEtapa buscarPorIdPermissaoEtapa(Long id) {
+//        return permissaoEtapaService.buscarPorIdPermissaoEtapa(id);
+//    }
+//
+//    public List<PermissaoEtapa> listarPermissaoEtapa() {
+//        return permissaoEtapaService.listarPermissaoEtapa();
+//    }
+//
+//    public PermissaoEtapa editarPermissaoEtapa(Long id, PermissaoEtapa obj) {
+//        PermissaoEtapa original = permissaoEtapaService.buscarPorIdPermissaoEtapa(id);
+//        modelMapper.map(obj, original);
+//
+//        if (obj.getEtapa() != null && obj.getEtapa().getId() != null) {
+//            Etapa etapa = etapaService.buscarPorIdEtapa(obj.getEtapa().getId());
+//            original.setEtapa(etapa);
+//        }
+//
+//        return permissaoEtapaService.salvarPermissaoEtapa(original);
+//    }
+//
+//    public void deletarPermissaoEtapa(Long id) {
+//        permissaoEtapaService.deletarPermissaoEtapa(id);
+//    }
+
+    public PermissaoEtapaResponse adicionarPermissaoEtapa(Long etapaId, String perfil) {
+        Etapa etapa = etapaService.buscarPorIdEtapa(etapaId);
+
+        if (permissaoEtapaService.buscarPorEtapaEPerfil(etapaId, perfil).isPresent()) {
+            throw new IllegalArgumentException("O perfil '" + perfil + "' já possui permissão nesta etapa.");
         }
-        return permissaoEtapaService.salvarPermissaoEtapa(obj);
+
+        PermissaoEtapa novaPermissao = new PermissaoEtapa();
+        novaPermissao.setEtapa(etapa);
+        novaPermissao.setPerfil(perfil.toUpperCase());
+
+        PermissaoEtapa salvo = permissaoEtapaService.salvarPermissaoEtapa(novaPermissao);
+        return new PermissaoEtapaResponse(salvo, modelMapper);
     }
 
-    public PermissaoEtapa buscarPorIdPermissaoEtapa(Long id) {
-        return permissaoEtapaService.buscarPorIdPermissaoEtapa(id);
+    public void removerPermissaoEtapa(Long etapaId, String perfil) {
+        PermissaoEtapa permissao = permissaoEtapaService.buscarPorEtapaEPerfil(etapaId, perfil)
+                .orElseThrow(() -> new IllegalArgumentException("Permissão não encontrada para o perfil '" + perfil + "' nesta etapa."));
+
+
+        permissaoEtapaService.deletarPermissaoEtapa(permissao.getId());
     }
 
-    public List<PermissaoEtapa> listarPermissaoEtapa() {
-        return permissaoEtapaService.listarPermissaoEtapa();
-    }
+    public List<PermissaoEtapaResponse> listarPermissoesDaEtapa(Long etapaId) {
+        etapaService.buscarPorIdEtapa(etapaId);
 
-    public PermissaoEtapa editarPermissaoEtapa(Long id, PermissaoEtapa obj) {
-        PermissaoEtapa original = permissaoEtapaService.buscarPorIdPermissaoEtapa(id);
-        modelMapper.map(obj, original);
-
-        if (obj.getEtapa() != null && obj.getEtapa().getId() != null) {
-            Etapa etapa = etapaService.buscarPorIdEtapa(obj.getEtapa().getId());
-            original.setEtapa(etapa);
-        }
-
-        return permissaoEtapaService.salvarPermissaoEtapa(original);
-    }
-
-    public void deletarPermissaoEtapa(Long id) {
-        permissaoEtapaService.deletarPermissaoEtapa(id);
+        return permissaoEtapaService.listarPermissoesPorEtapa(etapaId).stream()
+                .map(p -> new PermissaoEtapaResponse(p, modelMapper))
+                .collect(Collectors.toList());
     }
 
     // =================== TipoEdital ===================
@@ -597,11 +773,17 @@ public class Fachada {
         if (obj.getInscricao() != null && obj.getInscricao().getId() != null) {
             Inscricao inscricao = inscricaoService.buscarPorIdInscricao(obj.getInscricao().getId());
             obj.setInscricao(inscricao);
+
+            verificarDonoInscricao(inscricao);
         }
         if (obj.getCampoPersonalizado() != null && obj.getCampoPersonalizado().getId() != null) {
             CampoPersonalizado campo = campoPersonalizadoService.buscarPorIdCampoPersonalizado(obj.getCampoPersonalizado().getId());
             obj.setCampoPersonalizado(campo);
         }
+
+        validarConteudoDoCampo(obj);
+        // -------------------------
+
         return valorCampoService.salvarValorCampo(obj);
     }
 
@@ -615,6 +797,11 @@ public class Fachada {
 
     public ValorCampo editarValorCampo(Long id, ValorCampo obj) {
         ValorCampo original = valorCampoService.buscarPorIdValorCampo(id);
+
+        if (original.getInscricao() != null) {
+            verificarDonoInscricao(original.getInscricao());
+        }
+
         modelMapper.map(obj, original);
 
         if (obj.getInscricao() != null && obj.getInscricao().getId() != null) {
@@ -626,11 +813,75 @@ public class Fachada {
             original.setCampoPersonalizado(campo);
         }
 
+        validarConteudoDoCampo(original);
+
         return valorCampoService.salvarValorCampo(original);
     }
 
     public void deletarValorCampo(Long id) {
         valorCampoService.deletarValorCampo(id);
+    }
+
+    private void validarConteudoDoCampo(ValorCampo valorCampo) {
+        CampoPersonalizado campo = valorCampo.getCampoPersonalizado();
+
+        if (campo == null) {
+            throw new IllegalArgumentException("O ValorCampo deve estar associado a um CampoPersonalizado.");
+        }
+
+        String valor = valorCampo.getValor();
+        boolean isVazio = valor == null || valor.trim().isEmpty();
+
+        // 1. Validação de Obrigatoriedade
+        if (isVazio) {
+            if (campo.isObrigatorio()) {
+                throw new IllegalArgumentException("O campo '" + campo.getNome() + "' (" + campo.getRotulo() + ") é obrigatório.");
+            }
+            return; // Se está vazio e NÃO é obrigatório, está válido. Não validamos tipo de string vazia.
+        }
+
+        // 2. Validação de Tipo de Dado (Só executa se tiver valor)
+        try {
+            switch (campo.getTipoCampo()) {
+                case NUMERO_INTEIRO:
+                    Long.parseLong(valor);
+                    break;
+                case NUMERO_DECIMAL:
+                    // Substitui vírgula por ponto para aceitar formato PT-BR
+                    new BigDecimal(valor.replace(",", "."));
+                    break;
+                case BOOLEAN:
+                    if (!valor.equalsIgnoreCase("true") && !valor.equalsIgnoreCase("false")) {
+                        throw new IllegalArgumentException();
+                    }
+                    break;
+                case DATA:
+                    try {
+                        LocalDate.parse(valor); // Tenta ISO (yyyy-MM-dd)
+                    } catch (DateTimeParseException e) {
+                        LocalDate.parse(valor, DateTimeFormatter.ofPattern("dd/MM/yyyy")); // Tenta BR
+                    }
+                    break;
+                case DATA_HORA:
+                    try {
+                        LocalDateTime.parse(valor);
+                    } catch (DateTimeParseException e) {
+                        LocalDateTime.parse(valor, DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+                    }
+                    break;
+                case TEXTO_CURTO:
+                    if (valor.length() > 255) {
+                        throw new IllegalArgumentException("O texto excede o limite de 255 caracteres.");
+                    }
+                    break;
+                default:
+                    break; // TEXTO_LONGO aceita qualquer coisa
+            }
+        } catch (Exception e) {
+            // Captura erros de parse (NumberFormat, DateTimeParse) e lança msg amigável
+            throw new IllegalArgumentException("O valor informado '" + valor + "' não é válido para o campo '" +
+                    campo.getNome() + "' (Tipo: " + campo.getTipoCampo() + ").");
+        }
     }
 
     // =================== StatusPersonalizado ===================
@@ -724,9 +975,9 @@ public class Fachada {
     }
 
     private void validarConsistenciaTemporal(DataEtapa dataEtapaSendoSalva, Edital edital) {
-        if (edital.getInicioInscricao() != null && LocalDateTime.now().isAfter(edital.getInicioInscricao())) {
-            throw new IllegalStateException("Não é possível modificar as datas das etapas de um edital com inscrições já iniciadas.");
-        }
+//        if (edital.getInicioInscricao() != null && LocalDateTime.now().isAfter(edital.getInicioInscricao())) {
+//            throw new IllegalStateException("Não é possível modificar as datas das etapas de um edital com inscrições já iniciadas.");
+//        }
 
         List<Etapa> etapasOrdenadas = etapaService.listarEtapasPorEdital(edital.getId());
         if (etapasOrdenadas.isEmpty()) {
@@ -782,6 +1033,24 @@ public class Fachada {
         if (ultimaData != null && ultimaData.getDataFim() != null && edital.getFimIncricao() != null &&
                 ultimaData.getDataFim().isAfter(edital.getFimIncricao())) {
             throw new IllegalStateException("A data de fim da última etapa ('" + ultimaData.getEtapa().getNome() + "') não pode ser posterior ao fim das inscrições do edital.");
+        }
+    }
+
+    // =================== Auth ===================
+
+    private void verificarDonoInscricao(Inscricao inscricao) {
+        UUID userId = authenticatedUserProvider.getUserId();
+        if (!inscricao.getIdUsuario().equals(userId)) {
+            throw new GlobalAccessDeniedException("Você não tem permissão para alterar esta inscrição.");
+        }
+    }
+
+    private void validarCurso(Long cursoId) {
+        if (cursoId != null) {
+            CursoResponse curso = authServiceHandler.buscarCursoPorId(cursoId);
+            if (curso == null) {
+                throw new IllegalArgumentException("O Curso informado (ID " + cursoId + ") não foi encontrado ou o serviço de validação está indisponível.");
+            }
         }
     }
 

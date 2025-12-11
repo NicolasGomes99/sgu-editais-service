@@ -1,7 +1,9 @@
 package br.edu.ufape.sguEditaisService.servicos;
 
 
+import br.edu.ufape.sguEditaisService.comunicacao.dto.curso.CursoResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.usuario.UsuarioResponse;
+import feign.FeignException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import br.edu.ufape.sguEditaisService.auth.AuthServiceClient;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.unidadeAdministrativa.UnidadeAdministrativaResponse;
@@ -64,5 +66,35 @@ public class AuthServiceHandler implements br.edu.ufape.sguEditaisService.servic
     public UsuarioResponse fallbackBuscarUsuarioPorId(UUID userId, Throwable t) {
         log.warn("AVISO: Falha ao buscar dados do USUÁRIO com ID {}. O serviço de autenticação pode estar indisponível. Erro: {}", userId, t.getMessage());
         return new UsuarioResponse();
+    }
+
+    @Override
+    @CircuitBreaker(name = "authServiceClient", fallbackMethod = "fallbackVerificarVinculo")
+    public boolean verificarVinculo(Long unidadeId, UUID userId) {
+        return authServiceClient.verificarVinculo(unidadeId, userId);
+    }
+
+    @Override
+    public boolean fallbackVerificarVinculo(Long unidadeId, UUID userId, Throwable t) {
+        log.warn("Não foi possível verificar vínculo com a unidade {} no AuthService. Bloqueando acesso por segurança.", unidadeId, t);
+        return false;
+    }
+
+    @Override
+    @CircuitBreaker(name = "authServiceClient", fallbackMethod = "fallbackBuscarCursoPorId")
+    public CursoResponse buscarCursoPorId(Long id) {
+        return authServiceClient.buscarCursoPorId(id);
+    }
+
+    @Override
+    public CursoResponse fallbackBuscarCursoPorId(Long id, Throwable t) {
+        if (t instanceof FeignException.NotFound) {
+            log.warn("Curso com ID {} não encontrado no Auth Service.", id);
+            return null;
+        }
+
+
+        log.error("ERRO CRÍTICO: Falha ao validar Curso ID {}. O Auth Service pode estar indisponível. Erro: {}", id, t.getMessage());
+        return null; // Retornar null aqui vai bloquear a criação do edital por segurança
     }
 }

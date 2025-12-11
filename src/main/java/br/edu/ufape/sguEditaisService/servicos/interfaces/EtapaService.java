@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface EtapaService {
     Etapa salvarEtapa(Etapa entity);
@@ -23,4 +24,6 @@ public interface EtapaService {
     List<Etapa> listarEtapasPorTipoEdital(Long tipoEditalId);
 
     void atualizarOrdemEtapas(List<Long> idsEtapasEmOrdem);
+
+    Optional<Etapa> buscarProximaEtapa(Long editalId, int ordemAtual);
 }

@@ -75,4 +75,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         );
         return new ResponseEntity<>(body, status);
     }
+
+    @ExceptionHandler(GlobalAccessDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> handleGlobalAccessDeniedException(GlobalAccessDeniedException ex, HttpServletRequest request) {
+        ApiErrorResponse apiError = new ApiErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.FORBIDDEN.value(),
+                HttpStatus.FORBIDDEN.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(apiError);
+    }
 }

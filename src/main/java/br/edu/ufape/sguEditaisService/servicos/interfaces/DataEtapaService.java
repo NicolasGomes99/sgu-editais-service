@@ -1,6 +1,8 @@
 package br.edu.ufape.sguEditaisService.servicos.interfaces;
 
 import br.edu.ufape.sguEditaisService.models.DataEtapa;
+import br.edu.ufape.sguEditaisService.models.Etapa;
+
 import java.util.List;
 
 public interface DataEtapaService {
@@ -10,4 +12,5 @@ public interface DataEtapaService {
     List<DataEtapa> listarDatasEtapasPorEditalId(Long editalId);
     DataEtapa editarDataEtapa(Long id, DataEtapa dataEtapa);
     void deletarDataEtapa(Long id);
+    void validarVigencia(Etapa etapa);
 }

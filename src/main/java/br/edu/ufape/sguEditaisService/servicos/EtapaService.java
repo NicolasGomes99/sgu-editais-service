@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -37,7 +38,7 @@ public class EtapaService implements br.edu.ufape.sguEditaisService.servicos.int
 
     @Override
     public Etapa salvarEtapa(Etapa entity) {
-        verificarSeEditalEstaCongelado(entity);
+//        verificarSeEditalEstaCongelado(entity);
         return etapaRepository.save(entity);
     }
 
@@ -116,4 +117,16 @@ public class EtapaService implements br.edu.ufape.sguEditaisService.servicos.int
             etapaRepository.save(etapaParaAtualizar);
         }
     }
+
+    @Override
+    public Optional<Etapa> buscarProximaEtapa(Long editalId, int ordemAtual) {
+        // Busca todas as etapas do edital ordenadas
+        List<Etapa> etapas = etapaRepository.findByEditalIdOrderByOrdemAsc(editalId);
+
+        // Filtra as que tem ordem maior que a atual e pega a primeira
+        return etapas.stream()
+                .filter(e -> e.getOrdem() > ordemAtual)
+                .findFirst();
+    }
+
 }

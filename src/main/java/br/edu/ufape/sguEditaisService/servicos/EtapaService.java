@@ -38,7 +38,7 @@ public class EtapaService implements br.edu.ufape.sguEditaisService.servicos.int
 
     @Override
     public Etapa salvarEtapa(Etapa entity) {
-        verificarSeEditalEstaCongelado(entity);
+//        verificarSeEditalEstaCongelado(entity);
         return etapaRepository.save(entity);
     }
 

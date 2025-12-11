@@ -975,9 +975,9 @@ public class Fachada {
     }
 
     private void validarConsistenciaTemporal(DataEtapa dataEtapaSendoSalva, Edital edital) {
-        if (edital.getInicioInscricao() != null && LocalDateTime.now().isAfter(edital.getInicioInscricao())) {
-            throw new IllegalStateException("Não é possível modificar as datas das etapas de um edital com inscrições já iniciadas.");
-        }
+//        if (edital.getInicioInscricao() != null && LocalDateTime.now().isAfter(edital.getInicioInscricao())) {
+//            throw new IllegalStateException("Não é possível modificar as datas das etapas de um edital com inscrições já iniciadas.");
+//        }
 
         List<Etapa> etapasOrdenadas = etapaService.listarEtapasPorEdital(edital.getId());
         if (etapasOrdenadas.isEmpty()) {

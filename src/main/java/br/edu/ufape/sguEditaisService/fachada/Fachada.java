@@ -403,7 +403,7 @@ public class Fachada {
     // ================== INSCRIÇÃO E FLUXO DO CANDIDATO ================== //
 
     @Transactional
-    public InscricaoResponse processarInscricao(InscricaoRequest request, MultipartFile[] arquivos) throws IOException {
+    public InscricaoResponse processarInscricao(InscricaoRequest request, MultipartFile[] arquivos, UUID userIdLogado) throws IOException {
 
         // --- 1. TRAVA DE TEMPO MANTIDA INTACTA ---
         Edital edital = editalService.buscar(request.getEditalId());
@@ -434,7 +434,7 @@ public class Fachada {
             inscricao.getValoresCampos().clear();
         } else {
             inscricao = new Inscricao();
-            inscricao.setUserId(request.getUserId());
+            inscricao.setUserId(userIdLogado);
             inscricao.setEdital(edital);
             inscricao.setDataInscricao(LocalDateTime.now()); // Regista a data de criação
         }
@@ -475,7 +475,7 @@ public class Fachada {
             HistoricoEtapaInscricao historico = HistoricoEtapaInscricao.builder()
                     .dataMudanca(LocalDateTime.now())
                     .statusNovo(statusAtual) // AGORA TEM A GARANTIA DO OBJETO REAL DO BANCO!
-                    .responsavelId(request.getUserId())
+                    .responsavelId(userIdLogado)
                     .parecer("Inscrição registada com o status: " + statusAtual.getNome())
                     .build();
 

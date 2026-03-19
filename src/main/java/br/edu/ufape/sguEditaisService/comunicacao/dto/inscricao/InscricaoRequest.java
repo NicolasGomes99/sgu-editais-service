@@ -13,10 +13,7 @@ import java.util.UUID;
 @Getter @Setter @NoArgsConstructor
 public class InscricaoRequest {
 
-    private Long id; // Se for null, é nova. Se tiver ID, é atualização de RASCUNHO.
-
-    @NotNull(message = "O ID do utilizador é obrigatório.")
-    private UUID userId;
+    private Long id;
 
     @NotNull(message = "O ID do edital é obrigatório.")
     private Long editalId;

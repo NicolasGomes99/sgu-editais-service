@@ -152,16 +152,17 @@ public class InscricaoController {
     private final Fachada fachada;
     private final ObjectMapper objectMapper;
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<InscricaoResponse> submeterInscricao(
-            @RequestPart("inscricao") String inscricaoJson,
-            @RequestPart(value = "arquivos", required = false) MultipartFile[] arquivos) throws IOException {
+            @Valid @RequestPart(value = "inscricao", required = false) InscricaoRequest request,
+            @RequestPart(value = "arquivos", required = false) MultipartFile[] arquivos,
+            @AuthenticationPrincipal Jwt jwt
+    ) throws IOException {
 
-        // Converte a string JSON para o nosso DTO
-        InscricaoRequest request = objectMapper.readValue(inscricaoJson, InscricaoRequest.class);
+        UUID userIdLogado = UUID.fromString(jwt.getSubject());
 
-        InscricaoResponse response = fachada.processarInscricao(request, arquivos);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        InscricaoResponse response = fachada.processarInscricao(request, arquivos, userIdLogado);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/{id}")

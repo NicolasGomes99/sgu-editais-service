@@ -1,40 +1,34 @@
 package br.edu.ufape.sguEditaisService.comunicacao.dto.historicoEtapaInscricao;
 
-import br.edu.ufape.sguEditaisService.comunicacao.dto.etapa.EtapaResponse;
-import br.edu.ufape.sguEditaisService.comunicacao.dto.inscricao.InscricaoResponse;
-import br.edu.ufape.sguEditaisService.comunicacao.dto.statusPersonalizado.StatusPersonalizadoResponse;
 import br.edu.ufape.sguEditaisService.models.HistoricoEtapaInscricao;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.*;
+import br.edu.ufape.sguEditaisService.comunicacao.dto.statusPersonalizado.StatusPersonalizadoResponse;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.modelmapper.ModelMapper;
-
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
+import java.util.UUID;
 
 @Getter @Setter @NoArgsConstructor
 public class HistoricoEtapaInscricaoResponse {
     private Long id;
-    private String observacao;
+    private LocalDateTime dataMudanca;
+    private UUID responsavelId;
+    private String parecer;
+    private StatusPersonalizadoResponse statusAnterior;
+    private StatusPersonalizadoResponse statusNovo;
 
-    @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
-    private LocalDateTime dataAcao;
+    public HistoricoEtapaInscricaoResponse(HistoricoEtapaInscricao historico, ModelMapper modelMapper) {
+        this.id = historico.getId();
+        this.dataMudanca = historico.getDataMudanca();
+        this.responsavelId = historico.getResponsavelId();
+        this.parecer = historico.getParecer();
 
-    private EtapaResponse etapa;
-    private InscricaoResponse inscricao;
-    private StatusPersonalizadoResponse status;
-
-    public HistoricoEtapaInscricaoResponse(HistoricoEtapaInscricao entity, ModelMapper modelMapper) {
-        if (entity == null) throw new IllegalArgumentException("HistoricoEtapaInscricao não pode ser nulo");
-        else modelMapper.map(entity, this);
-
-        if (entity.getStatusPersonalizado() != null) {
-            this.status = new StatusPersonalizadoResponse(entity.getStatusPersonalizado(), modelMapper);
+        if (historico.getStatusAnterior() != null) {
+            this.statusAnterior = new StatusPersonalizadoResponse(historico.getStatusAnterior(), modelMapper);
         }
-
-        this.dataAcao = entity.getDataAacao()
-                .atZone(ZoneId.of("UTC"))
-                .withZoneSameInstant(ZoneId.of("America/Sao_Paulo"))
-                .toLocalDateTime();
+        if (historico.getStatusNovo() != null) {
+            this.statusNovo = new StatusPersonalizadoResponse(historico.getStatusNovo(), modelMapper);
+        }
     }
 }

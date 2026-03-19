@@ -2,24 +2,15 @@ package br.edu.ufape.sguEditaisService.servicos.interfaces;
 
 import br.edu.ufape.sguEditaisService.models.Inscricao;
 import br.edu.ufape.sguEditaisService.exceptions.notFound.InscricaoNotFoundException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-
-import java.util.UUID;
 import java.util.List;
+import java.util.UUID;
 
 public interface InscricaoService {
-    Inscricao salvarInscricao(Inscricao entity);
-
-    Inscricao buscarPorIdInscricao(Long id) throws InscricaoNotFoundException;
-
-    Page<Inscricao> listarInscricao(Pageable pageable);
-
-    Inscricao editarInscricao(Long id, Inscricao entity) throws InscricaoNotFoundException;
-
-    void deletarInscricao(Long id) throws InscricaoNotFoundException;
-
-    boolean existeInscricao(UUID userId, Long editalId);
-
-    List<Inscricao> listarInscricoesPorUsuario(UUID idUsuario);
+    Inscricao salvar(Inscricao inscricao);
+    Inscricao buscar(Long id) throws InscricaoNotFoundException;
+    List<Inscricao> listarPorUsuario(UUID userId);
+    List<Inscricao> listarPorEdital(Long editalId);
+    Inscricao buscarPorProtocolo(String numeroProtocolo) throws InscricaoNotFoundException;
+    Inscricao editar(Long id, Inscricao inscricao) throws InscricaoNotFoundException;
+    void deletar(Long id) throws InscricaoNotFoundException;
 }

@@ -2,13 +2,10 @@ package br.edu.ufape.sguEditaisService.dados;
 
 import br.edu.ufape.sguEditaisService.models.CampoPersonalizado;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 import java.util.List;
 
+@Repository
 public interface CampoPersonalizadoRepository extends JpaRepository<CampoPersonalizado, Long> {
-
-    List<CampoPersonalizado> findByEditalIdAndEtapaIdIsNull(Long editalId);
-
-    List<CampoPersonalizado> findByTipoEditalModeloIdAndEtapaIdIsNull(Long tipoEditalModeloId);
-
-    List<CampoPersonalizado> findByEtapaId(Long etapaId);
+    List<CampoPersonalizado> findByTipoEditalId(Long tipoEditalId);
 }

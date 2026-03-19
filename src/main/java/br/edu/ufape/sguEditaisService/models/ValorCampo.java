@@ -1,28 +1,24 @@
 package br.edu.ufape.sguEditaisService.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
-@Getter @Setter @AllArgsConstructor @NoArgsConstructor
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class ValorCampo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Guarda o texto digitado OU o caminho do arquivo (se for TipoCampo.ARQUIVO)
+    @Column(columnDefinition = "TEXT")
     private String valor;
 
-
-    @ManyToOne
-    @JsonIgnore
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "inscricao_id", nullable = false)
     private Inscricao inscricao;
 
-    @ManyToOne
-    @JsonIgnore
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "campo_id", nullable = false)
     private CampoPersonalizado campoPersonalizado;
-
 }

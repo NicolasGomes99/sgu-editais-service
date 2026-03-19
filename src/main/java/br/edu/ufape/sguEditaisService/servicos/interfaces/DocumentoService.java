@@ -1,18 +1,10 @@
 package br.edu.ufape.sguEditaisService.servicos.interfaces;
 
-import br.edu.ufape.sguEditaisService.exceptions.notFound.DocumentoNotFoundException;
 import br.edu.ufape.sguEditaisService.models.Documento;
-
-import java.util.List;
+import br.edu.ufape.sguEditaisService.exceptions.notFound.DocumentoNotFoundException;
 
 public interface DocumentoService {
-     Documento salvarDocumento(Documento entity);
-
-     Documento buscarPorIdDocumento(Long id) throws DocumentoNotFoundException;
-
-     List<Documento> listarDocumento();
-
-     Documento editarDocumento(Long id, Documento entity) throws DocumentoNotFoundException;
-
-     void deletarDocumento(Long id) throws DocumentoNotFoundException;
+    Documento salvar(Documento documento);
+    Documento buscar(Long id) throws DocumentoNotFoundException;
+    void deletar(Long id) throws DocumentoNotFoundException;
 }

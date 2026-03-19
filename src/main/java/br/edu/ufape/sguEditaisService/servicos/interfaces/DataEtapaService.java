@@ -1,16 +1,13 @@
 package br.edu.ufape.sguEditaisService.servicos.interfaces;
 
 import br.edu.ufape.sguEditaisService.models.DataEtapa;
-import br.edu.ufape.sguEditaisService.models.Etapa;
-
+import br.edu.ufape.sguEditaisService.exceptions.notFound.NotFoundException; // ou crie DataEtapaNotFoundException
 import java.util.List;
 
 public interface DataEtapaService {
-    DataEtapa salvarDataEtapa(DataEtapa dataEtapa);
-    DataEtapa buscarDataEtapaPorId(Long id);
-    List<DataEtapa> listarDatasEtapas();
-    List<DataEtapa> listarDatasEtapasPorEditalId(Long editalId);
-    DataEtapa editarDataEtapa(Long id, DataEtapa dataEtapa);
-    void deletarDataEtapa(Long id);
-    void validarVigencia(Etapa etapa);
+    DataEtapa salvar(DataEtapa dataEtapa);
+    DataEtapa buscar(Long id) throws NotFoundException;
+    List<DataEtapa> listarPorEdital(Long editalId);
+    DataEtapa editar(Long id, DataEtapa dataEtapa) throws NotFoundException;
+    void deletar(Long id) throws NotFoundException;
 }

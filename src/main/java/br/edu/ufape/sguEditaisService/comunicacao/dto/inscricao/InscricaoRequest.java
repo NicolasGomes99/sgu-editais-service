@@ -1,37 +1,29 @@
 package br.edu.ufape.sguEditaisService.comunicacao.dto.inscricao;
 
-import br.edu.ufape.sguEditaisService.models.Edital;
-import br.edu.ufape.sguEditaisService.models.Inscricao;
-import br.edu.ufape.sguEditaisService.models.StatusPersonalizado;
+import br.edu.ufape.sguEditaisService.comunicacao.dto.valorCampo.ValorCampoRequest;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
-
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
-@Getter @Setter @AllArgsConstructor @NoArgsConstructor
+@Getter @Setter @NoArgsConstructor
 public class InscricaoRequest {
 
+    private Long id; // Se for null, é nova. Se tiver ID, é atualização de RASCUNHO.
+
+    @NotNull(message = "O ID do utilizador é obrigatório.")
+    private UUID userId;
+
+    @NotNull(message = "O ID do edital é obrigatório.")
     private Long editalId;
-    private Long statusAtualId;
 
-    public Inscricao convertToEntity(InscricaoRequest request, ModelMapper modelMapper) {
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-        Inscricao entity = modelMapper.map(request, Inscricao.class);
+    @NotNull(message = "O ID do status da inscrição é obrigatório.")
+    private Long statusId;
 
-        if (request.getEditalId() != null) {
-            Edital edital = new Edital();
-            edital.setId(request.getEditalId());
-            entity.setEdital(edital);
-        }
-
-        if (request.getStatusAtualId() != null) {
-            StatusPersonalizado status = new StatusPersonalizado();
-            status.setId(request.getStatusAtualId());
-            entity.setStatusAtual(status);
-        }
-
-        return entity;
-    }
+    @Valid
+    private List<ValorCampoRequest> valores = new ArrayList<>();
 }

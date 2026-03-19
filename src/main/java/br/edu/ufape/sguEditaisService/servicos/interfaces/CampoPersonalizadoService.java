@@ -1,28 +1,13 @@
 package br.edu.ufape.sguEditaisService.servicos.interfaces;
 
-import br.edu.ufape.sguEditaisService.exceptions.notFound.CampoPersonalizadoNotFoundException;
 import br.edu.ufape.sguEditaisService.models.CampoPersonalizado;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-
+import br.edu.ufape.sguEditaisService.exceptions.notFound.CampoPersonalizadoNotFoundException;
 import java.util.List;
 
 public interface CampoPersonalizadoService {
-    CampoPersonalizado salvarCampoPersonalizado(CampoPersonalizado entity);
-
-    CampoPersonalizado buscarPorIdCampoPersonalizado(Long id) throws CampoPersonalizadoNotFoundException;
-
-    Page<CampoPersonalizado> listarCampoPersonalizado(Pageable pageable);
-
-    CampoPersonalizado editarCampoPersonalizado(Long id, CampoPersonalizado entity) throws CampoPersonalizadoNotFoundException;
-
-    void deletarCampoPersonalizado(Long id) throws CampoPersonalizadoNotFoundException;
-
-    List<CampoPersonalizado> listarCamposPorEdital(Long editalId);
-
-    List<CampoPersonalizado> listarCamposPorTipoEdital(Long tipoEditalModeloId);
-
-    List<CampoPersonalizado> listarCamposPorEtapa(Long etapaId);
-
-    CampoPersonalizado alternarObrigatoriedade(Long campoPersonalizadoId);
+    CampoPersonalizado salvar(CampoPersonalizado campo);
+    CampoPersonalizado buscar(Long id) throws CampoPersonalizadoNotFoundException;
+    List<CampoPersonalizado> listarPorTipoEdital(Long tipoEditalId);
+    CampoPersonalizado editar(Long id, CampoPersonalizado campo) throws CampoPersonalizadoNotFoundException;
+    void deletar(Long id) throws CampoPersonalizadoNotFoundException;
 }

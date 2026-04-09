@@ -16,6 +16,7 @@ public class Edital {
     @Column(nullable = false)
     private String titulo;
 
+    @Column(name = "curso_id")
     private Long cursoId;
 
     private LocalDateTime dataInicio;

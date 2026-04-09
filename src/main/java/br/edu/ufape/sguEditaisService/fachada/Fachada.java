@@ -290,10 +290,22 @@ public class Fachada {
         edital.setTipoEdital(tipoEditalService.buscar(request.getTipoEditalId()));
         edital.setStatus(statusPersonalizadoService.buscar(request.getStatusId()));
 
-        // 1. Salva a casca para gerar o ID do Edital
+        // --- 1. VALIDAÇÃO DO CURSO NO AUTH SERVICE ANTES DE SALVAR ---
+        if (request.getCursoId() != null) {
+            try {
+                // Tenta buscar o curso para garantir que ele existe
+                authServiceHandler.buscarCursoPorId(request.getCursoId());
+                edital.setCursoId(request.getCursoId());
+            } catch (Exception e) {
+                // Se der 404 Not Found ou erro de comunicação, barramos a criação
+                throw new IllegalArgumentException("O ID do curso informado não existe ou não está acessível no Auth Service.");
+            }
+        }
+
+        // 2. Salva a casca para gerar o ID do Edital
         edital = editalService.salvar(edital);
 
-        // 2. Processa o Snapshot das Etapas + Cronograma (Tudo junto!)
+        // 3. Processa o Snapshot das Etapas + Cronograma (Tudo junto!)
         if (request.getEtapas() != null) {
             for (EtapaEditalRequest etapaReq : request.getEtapas()) {
 
@@ -319,7 +331,7 @@ public class Fachada {
             }
         }
 
-        // 3. Processa o Snapshot dos Campos Personalizados
+        // 4. Processa o Snapshot dos Campos Personalizados
         if (request.getCampos() != null) {
             for (CampoPersonalizadoRequest campoReq : request.getCampos()) {
                 CampoPersonalizado novoCampo = campoReq.converterParaEntidade(modelMapper);
@@ -329,21 +341,23 @@ public class Fachada {
             }
         }
 
-        // 4. Gera o PDF Dinâmico com as regras definitivas deste Edital
+        // 5. Gera o PDF Dinâmico com as regras definitivas deste Edital
         Documento pdfGerado = geradorEditalPdfService.gerarESalvarPdf(edital);
         edital.setDocumentoEdital(pdfGerado);
         edital = editalService.salvar(edital);
 
-        return new EditalResponse(edital, modelMapper);
+        // 6. Retorna a resposta já enriquecida
+        return enriquecerEditalComCurso(edital);
     }
 
     public EditalResponse buscarEdital(Long id) {
-        return new EditalResponse(editalService.buscar(id), modelMapper);
+        Edital edital = editalService.buscar(id);
+        return enriquecerEditalComCurso(edital);
     }
 
     public List<EditalResponse> listarEditais() {
         return editalService.listar().stream()
-                .map(e -> new EditalResponse(e, modelMapper))
+                .map(this::enriquecerEditalComCurso)
                 .collect(Collectors.toList());
     }
 
@@ -526,7 +540,7 @@ public class Fachada {
         return new DataEtapaResponse(salvo, modelMapper);
     }
 
-    // ================== AVALIAÇÃO DA COMISSÃO ================== //
+    // ================== AVALIAÇÃO DA Inscrição ================== //
 
     @Transactional
     public InscricaoResponse avaliarInscricao(Long inscricaoId, AvaliacaoInscricaoRequest request, UUID avaliadorId) {
@@ -561,5 +575,25 @@ public class Fachada {
         inscricao = inscricaoService.salvar(inscricao);
 
         return new InscricaoResponse(inscricao, modelMapper);
+    }
+
+    // =========================================================
+    // AUXILIAR DE ENRIQUECIMENTO (API COMPOSITION)
+    // =========================================================
+    private EditalResponse enriquecerEditalComCurso(Edital edital) {
+        EditalResponse response = new EditalResponse(edital, modelMapper);
+
+        if (edital.getCursoId() != null) {
+            try {
+                // Busca os dados ricos do curso e anexa à resposta
+                response.setCurso(authServiceHandler.buscarCursoPorId(edital.getCursoId()));
+            } catch (Exception e) {
+                // Resiliência: Se o Auth Service estiver fora do ar durante um GET,
+                // devolvemos o Edital sem quebrar a tela do usuário.
+                // O objeto "curso" no JSON ficará null temporariamente.
+            }
+        }
+
+        return response;
     }
 }

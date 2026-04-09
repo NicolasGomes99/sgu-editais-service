@@ -22,6 +22,10 @@ public class HistoricoEtapaInscricao {
     @JoinColumn(name = "status_novo_id", nullable = false)
     private StatusPersonalizado statusNovo;
 
+    @ManyToOne
+    @JoinColumn(name = "etapa_id")
+    private Etapa etapa;
+
     private UUID responsavelId; // Quem mudou? (Candidato ou Comissão de avaliação)
 
     @Column(columnDefinition = "TEXT")

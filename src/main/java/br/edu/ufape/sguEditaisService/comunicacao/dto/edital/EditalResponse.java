@@ -1,10 +1,11 @@
 package br.edu.ufape.sguEditaisService.comunicacao.dto.edital;
 
 import br.edu.ufape.sguEditaisService.comunicacao.dto.campoPersonalizado.CampoPersonalizadoResponse;
+import br.edu.ufape.sguEditaisService.comunicacao.dto.curso.CursoResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.etapa.EtapaResponse;
 import br.edu.ufape.sguEditaisService.models.Edital;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.dataEtapa.DataEtapaResponse;
-import br.edu.ufape.sguEditaisService.comunicacao.dto.documento.DocumentoResponse; // Do Auth/Armazenamento
+import br.edu.ufape.sguEditaisService.comunicacao.dto.documento.DocumentoResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.statusPersonalizado.StatusPersonalizadoResponse;
 import br.edu.ufape.sguEditaisService.comunicacao.dto.tipoEdital.TipoEditalResponse;
 import lombok.Getter;
@@ -19,7 +20,9 @@ import java.util.stream.Collectors;
 public class EditalResponse {
     private Long id;
     private String titulo;
-    private Long cursoId;
+
+    private CursoResponse curso;
+
     private LocalDateTime dataInicio;
     private LocalDateTime dataFim;
     private boolean ativo;
@@ -33,13 +36,11 @@ public class EditalResponse {
     public EditalResponse(Edital edital, ModelMapper modelMapper) {
         this.id = edital.getId();
         this.titulo = edital.getTitulo();
-        this.cursoId = edital.getCursoId();
         this.dataInicio = edital.getDataInicio();
         this.dataFim = edital.getDataFim();
         this.ativo = edital.isAtivo();
 
         if (edital.getDocumentoEdital() != null) {
-            // Nota: Se usar a conversão Base64 do ArmazenamentoService, isto pode ser ajustado depois
             this.documentoEdital = new DocumentoResponse(edital.getDocumentoEdital().getNome(), "");
         }
         if (edital.getStatus() != null) {

@@ -1,47 +1,29 @@
 package br.edu.ufape.sguEditaisService.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-import java.time.LocalDateTime;
-import java.util.List;
+import lombok.*;
 
 @Entity
-@Getter @Setter @AllArgsConstructor @NoArgsConstructor
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class Etapa {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String nome;
+
     private String descricao;
-    private boolean obrigatoria;
-    private int ordem;
 
+    private Integer ordem;
+
+    // Se pertencer ao Molde (TipoEdital), preenche isto:
     @ManyToOne
-    private StatusPersonalizado statusAtual;
+    @JoinColumn(name = "tipo_edital_id")
+    private TipoEdital tipoEdital;
 
-    @OneToMany(mappedBy = "etapa", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Documento> documentos;
-
-    @OneToMany(mappedBy = "etapa", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CampoPersonalizado> camposPersonalizados;
-
+    // Se for o Snapshot de um Edital real, preenche isto:
     @ManyToOne
-    @JsonIgnore
+    @JoinColumn(name = "edital_id")
     private Edital edital;
-
-    @ManyToOne
-    @JsonIgnore
-    private TipoEdital tipoEditalModelo;
-
-    @OneToMany(mappedBy = "etapa", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PermissaoEtapa> permissaoEtapa;
-
-    @OneToMany(mappedBy = "etapa", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<HistoricoEtapaInscricao> historicoEtapaInscricao;
 }

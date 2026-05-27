@@ -7,5 +7,6 @@ public enum TipoCampo {
     NUMERO_DECIMAL,
     DATA_HORA,
     DATA,
-    BOOLEAN
+    BOOLEAN,
+    ARQUIVO
 }

@@ -1,47 +1,46 @@
 package br.edu.ufape.sguEditaisService.comunicacao.dto.inscricao;
 
-import br.edu.ufape.sguEditaisService.comunicacao.dto.documento.DocumentoResponse;
-import br.edu.ufape.sguEditaisService.comunicacao.dto.edital.EditalResponse;
-import br.edu.ufape.sguEditaisService.comunicacao.dto.statusPersonalizado.StatusPersonalizadoResponse;
-import br.edu.ufape.sguEditaisService.comunicacao.dto.usuario.UsuarioResponse;
 import br.edu.ufape.sguEditaisService.models.Inscricao;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.*;
+import br.edu.ufape.sguEditaisService.comunicacao.dto.valorCampo.ValorCampoResponse;
+import br.edu.ufape.sguEditaisService.comunicacao.dto.historicoEtapaInscricao.HistoricoEtapaInscricaoResponse;
+import br.edu.ufape.sguEditaisService.comunicacao.dto.statusPersonalizado.StatusPersonalizadoResponse;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.modelmapper.ModelMapper;
-
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Getter @Setter @NoArgsConstructor
 public class InscricaoResponse {
     private Long id;
-    private UsuarioResponse usuario;
+    private UUID userId;
+    private String numeroProtocolo;
     private LocalDateTime dataInscricao;
-    private EditalResponse edital;
-    private List<DocumentoResponse> documentos;
-    private StatusPersonalizadoResponse statusAtual;
+    private StatusPersonalizadoResponse statusPersonalizado;
+    private List<ValorCampoResponse> valoresCampos;
+    private List<HistoricoEtapaInscricaoResponse> historico;
 
-    public InscricaoResponse(Inscricao entity, ModelMapper modelMapper) {
-        if (entity == null) throw new IllegalArgumentException("inscricao não pode ser nulo");
-        modelMapper.map(entity, this);
+    public InscricaoResponse(Inscricao inscricao, ModelMapper modelMapper) {
+        this.id = inscricao.getId();
+        this.userId = inscricao.getUserId();
+        this.numeroProtocolo = inscricao.getNumeroProtocolo();
+        this.dataInscricao = inscricao.getDataInscricao();
 
-        if (entity.getDocumentos() != null) {
-            this.documentos = entity.getDocumentos().stream()
-                    .map(doc -> new DocumentoResponse(doc, modelMapper))
+        if (inscricao.getStatusPersonalizado() != null) {
+            this.statusPersonalizado = new StatusPersonalizadoResponse(inscricao.getStatusPersonalizado(), modelMapper);
+        }
+        if (inscricao.getValoresCampos() != null) {
+            this.valoresCampos = inscricao.getValoresCampos().stream()
+                    .map(v -> new ValorCampoResponse(v, modelMapper))
                     .collect(Collectors.toList());
         }
-    }
-
-    @JsonFormat(pattern = "dd/MM/yyyy HH:mm")
-    public LocalDateTime getDataInscricao() {
-        if (this.dataInscricao == null) {
-            return null;
+        if (inscricao.getHistorico() != null) {
+            this.historico = inscricao.getHistorico().stream()
+                    .map(h -> new HistoricoEtapaInscricaoResponse(h, modelMapper))
+                    .collect(Collectors.toList());
         }
-        return this.dataInscricao
-                .atZone(ZoneId.of("UTC"))
-                .withZoneSameInstant(ZoneId.of("America/Sao_Paulo"))
-                .toLocalDateTime();
     }
 }

@@ -1,27 +1,27 @@
 package br.edu.ufape.sguEditaisService.models;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
+import lombok.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Getter @Setter @AllArgsConstructor @NoArgsConstructor
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class TipoEdital {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true)
     private String nome;
+
     private String descricao;
-    private Long idUnidadeAdministrativa;
 
-    @OneToMany(mappedBy = "tipoEditalModelo", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Etapa> etapasModelo;
+    // As etapas canônicas que todo edital desse tipo DEVE ter
+    @OneToMany(mappedBy = "tipoEdital", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Etapa> etapas = new ArrayList<>();
 
-    @OneToMany(mappedBy = "tipoEditalModelo", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CampoPersonalizado> camposPersonalizadosModelo;
+    // O formulário padrão para esse tipo de edital
+    @OneToMany(mappedBy = "tipoEdital", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CampoPersonalizado> campos = new ArrayList<>();
 }

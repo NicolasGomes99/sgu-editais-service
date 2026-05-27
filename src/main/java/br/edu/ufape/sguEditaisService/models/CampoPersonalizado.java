@@ -1,47 +1,31 @@
 package br.edu.ufape.sguEditaisService.models;
 
 import br.edu.ufape.sguEditaisService.models.enums.TipoCampo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-
-import java.util.List;
+import lombok.*;
 
 @Entity
-@Getter @Setter @AllArgsConstructor @NoArgsConstructor
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class CampoPersonalizado {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String nome;
-    private String rotulo;
-    private boolean obrigatorio;
+    @Column(nullable = false)
+    private String titulo;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private TipoCampo tipoCampo;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
-    private String opcoes;
-
-    @OneToMany(mappedBy = "campoPersonalizado", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ValorCampo> valoresCampo;
+    private boolean obrigatorio = true;
 
     @ManyToOne
-    @JsonIgnore
-    private Etapa etapa;
+    @JoinColumn(name = "tipo_edital_id")
+    private TipoEdital tipoEdital;
 
+    // Vínculo do Snapshot
     @ManyToOne
-    @JsonIgnore
+    @JoinColumn(name = "edital_id")
     private Edital edital;
-
-    @ManyToOne
-    @JsonIgnore
-    private TipoEdital tipoEditalModelo;
 }

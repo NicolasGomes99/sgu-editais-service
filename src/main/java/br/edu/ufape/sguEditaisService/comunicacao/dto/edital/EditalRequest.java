@@ -1,52 +1,47 @@
 package br.edu.ufape.sguEditaisService.comunicacao.dto.edital;
 
-import br.edu.ufape.sguEditaisService.comunicacao.annotations.DatasConsistentes;
-import br.edu.ufape.sguEditaisService.models.*;
-import jakarta.validation.constraints.*;
-import lombok.*;
+import br.edu.ufape.sguEditaisService.comunicacao.dto.campoPersonalizado.CampoPersonalizadoRequest;
+import br.edu.ufape.sguEditaisService.models.Edital;
+import br.edu.ufape.sguEditaisService.comunicacao.dto.dataEtapa.DataEtapaRequest;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
-
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
-@Getter @Setter @AllArgsConstructor @NoArgsConstructor @DatasConsistentes
+@Getter @Setter @NoArgsConstructor
 public class EditalRequest {
-    @NotBlank(message = "O título é obrigatório")
+    @NotBlank(message = "O título do edital é obrigatório.")
     private String titulo;
 
-    @NotBlank(message = "A descrição é obrigatória")
-    private String descricao;
+    private Long cursoId; // Opcional, para editais vinculados a cursos do Auth Service
 
-    private LocalDateTime dataPublicacao;
+    private LocalDateTime dataInicio;
+    private LocalDateTime dataFim;
 
-    @NotNull(message = "A data de início de inscrição é obrigatória")
-    private LocalDateTime inicioInscricao;
+    private boolean ativo = true;
 
-    @NotNull(message = "A data de fim de inscrição é obrigatória")
-    private LocalDateTime fimIncricao;
-
-    private Long statusAtualId;
+    @NotNull(message = "O modelo (TipoEdital) é obrigatório.")
     private Long tipoEditalId;
-    private Long idUnidadeAdministrativa;
-    private Long cursoId;
 
-    public Edital convertToEntity(EditalRequest request, ModelMapper modelMapper) {
-        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-        Edital entity = modelMapper.map(request, Edital.class);
+    @NotNull(message = "O ID do status inicial do edital é obrigatório.")
+    private Long statusId;
 
-        if (request.getStatusAtualId() != null) {
-            StatusPersonalizado status = new StatusPersonalizado();
-            status.setId(request.getStatusAtualId());
-            entity.setStatusAtual(status);
-        }
+    @Valid
+    private List<DataEtapaRequest> cronograma = new ArrayList<>();
 
-        if (request.getTipoEditalId() != null) {
-            TipoEdital tipoEdital = new TipoEdital();
-            tipoEdital.setId(request.getTipoEditalId());
-            entity.setTipoEdital(tipoEdital);
-        }
+    @Valid
+    private List<EtapaEditalRequest> etapas = new ArrayList<>();
 
-        return entity;
+    @Valid
+    private List<CampoPersonalizadoRequest> campos = new ArrayList<>();
+
+    public Edital converterParaEntidade(ModelMapper modelMapper) {
+        return modelMapper.map(this, Edital.class);
     }
 }
-

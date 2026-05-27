@@ -1,46 +1,63 @@
 package br.edu.ufape.sguEditaisService.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
+import lombok.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Getter @Setter @AllArgsConstructor @NoArgsConstructor
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class Inscricao {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // A âncora do candidato (independente de ser aluno UFAPE ou externo via Extra SiSU)
     @Column(nullable = false)
-    private UUID idUsuario;
+    private UUID userId;
 
+    // Só recebe valor na hora que o candidato clica em "Enviar" definitivamente
+    @Column(unique = true)
+    private String numeroProtocolo;
+
+    // Data da submissão final
     private LocalDateTime dataInscricao;
 
-    @ManyToOne
-    //@JsonIgnore
-    private StatusPersonalizado statusAtual;
+//    // Status do motor do sistema (Controla as engrenagens: se é RASCUNHO, não processa)
+//    @Enumerated(EnumType.STRING)
+//    @Column(nullable = false)
+//    private SituacaoInscricao situacao = SituacaoInscricao.RASCUNHO;
 
-    @OneToMany(mappedBy = "inscricao", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Documento> documentos;
+    // Status Dinâmico (Para a comissão dar feedback customizado ao candidato, ex: "Falta RG")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "status_personalizado_id", nullable = false)
+    private StatusPersonalizado statusPersonalizado;
 
-    @OneToMany(mappedBy = "inscricao", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ValorCampo> valoresCampo;
-
-    @ManyToOne
-    @JsonIgnore
+    // A qual edital essa inscrição pertence
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "edital_id", nullable = false)
     private Edital edital;
 
-    @ManyToOne
-    @JoinColumn(name = "etapa_atual_id")
-    private Etapa etapaAtual;
-
+    // Respostas do formulário (Blindadas: Apagou inscrição, apaga as respostas)
     @OneToMany(mappedBy = "inscricao", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<HistoricoEtapaInscricao> historicoEtapaInscricao;
+    private List<ValorCampo> valoresCampos = new ArrayList<>();
+
+    // Auditoria (Blindada: Apagou inscrição, apaga o rastro dela)
+    @OneToMany(mappedBy = "inscricao", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<HistoricoEtapaInscricao> historico = new ArrayList<>();
+
+    // ================== MÉTODOS AUXILIARES ================== //
+
+    public void adicionarValorCampo(ValorCampo valorCampo) {
+        valorCampo.setInscricao(this);
+        this.valoresCampos.add(valorCampo);
+    }
+
+    public void adicionarHistorico(HistoricoEtapaInscricao historicoEtapa) {
+        historicoEtapa.setInscricao(this);
+        this.historico.add(historicoEtapa);
+    }
 }

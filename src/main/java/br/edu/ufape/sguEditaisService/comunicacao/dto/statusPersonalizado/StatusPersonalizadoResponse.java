@@ -1,6 +1,6 @@
 package br.edu.ufape.sguEditaisService.comunicacao.dto.statusPersonalizado;
 
-import br.edu.ufape.sguEditaisService.models.*;
+import br.edu.ufape.sguEditaisService.models.StatusPersonalizado;
 import br.edu.ufape.sguEditaisService.models.enums.TipoStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,11 +11,10 @@ import org.modelmapper.ModelMapper;
 public class StatusPersonalizadoResponse {
     private Long id;
     private String nome;
+    private String descricao;
     private TipoStatus tipoStatus;
-    private boolean concluiEtapa;
 
-    public StatusPersonalizadoResponse(StatusPersonalizado entity, ModelMapper modelMapper) {
-        if (entity == null) throw new IllegalArgumentException("StatusPersonalizado não pode ser nulo");
-        else modelMapper.map(entity, this);
+    public StatusPersonalizadoResponse(StatusPersonalizado status, ModelMapper modelMapper) {
+        modelMapper.map(status, this);
     }
 }

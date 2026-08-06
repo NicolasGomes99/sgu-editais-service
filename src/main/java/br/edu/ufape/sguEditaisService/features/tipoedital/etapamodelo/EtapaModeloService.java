@@ -1,4 +1,4 @@
-/*package br.edu.ufape.sguEditaisService.features.tipoedital.etapamodelo;
+package br.edu.ufape.sguEditaisService.features.tipoedital.etapamodelo;
 
 import br.edu.ufape.sguEditaisService.exceptions.business.RegraNegocioException;
 import br.edu.ufape.sguEditaisService.exceptions.notFound.ResourceNotFoundException;
@@ -92,5 +92,3 @@ public class EtapaModeloService {
         }
     }
 }
-
- */

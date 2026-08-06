@@ -1,4 +1,4 @@
-/*package br.edu.ufape.sguEditaisService.features.tipoedital.etapamodelo;
+package br.edu.ufape.sguEditaisService.features.tipoedital.etapamodelo;
 
 import br.edu.ufape.sguEditaisService.features.tipoedital.TipoEdital;
 import br.edu.ufape.sguEditaisService.features.tipoedital.etapamodelo.campoetapa.CampoEtapa;
@@ -89,5 +89,3 @@ public class EtapaModelo {
         campo.desvincular();
     }
 }
-
- */

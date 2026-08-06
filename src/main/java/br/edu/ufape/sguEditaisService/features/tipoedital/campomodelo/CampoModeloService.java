@@ -1,4 +1,4 @@
-/*package br.edu.ufape.sguEditaisService.features.tipoedital.campomodelo;
+package br.edu.ufape.sguEditaisService.features.tipoedital.campomodelo;
 
 import br.edu.ufape.sguEditaisService.exceptions.business.RegraNegocioException;
 import br.edu.ufape.sguEditaisService.exceptions.notFound.ResourceNotFoundException;
@@ -55,4 +55,3 @@ public class CampoModeloService {
         repository.delete(campo); // Hard Delete
     }
 }
-*/

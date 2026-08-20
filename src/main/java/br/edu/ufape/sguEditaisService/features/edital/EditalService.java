@@ -3,8 +3,7 @@ package br.edu.ufape.sguEditaisService.features.edital;
 import br.edu.ufape.sguEditaisService.exceptions.business.RegraNegocioException;
 import br.edu.ufape.sguEditaisService.exceptions.notFound.ResourceNotFoundException;
 import br.edu.ufape.sguEditaisService.features.edital.campoedital.CampoEdital;
-import br.edu.ufape.sguEditaisService.features.edital.dto.EditalResponse;
-import br.edu.ufape.sguEditaisService.features.edital.dto.InstanciarEditalRequest;
+import br.edu.ufape.sguEditaisService.features.edital.dto.*;
 import br.edu.ufape.sguEditaisService.features.edital.etapainstancia.EtapaInstancia;
 import br.edu.ufape.sguEditaisService.features.edital.etapainstancia.campoetapainstancia.CampoEtapaInstancia;
 import br.edu.ufape.sguEditaisService.features.tipoedital.EstadoModelo;
@@ -13,6 +12,8 @@ import br.edu.ufape.sguEditaisService.features.tipoedital.TipoEditalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -85,5 +86,76 @@ public class EditalService {
     public EditalResponse buscarPorId(Long id) {
         Edital edital = buscarEntidade(id);
         return EditalResponse.from(edital);
+    }
+
+    @Transactional
+    public EditalResponse adicionarEtapaExclusiva(Long editalId, CriarEtapaInstanciaRequest request) {
+        Edital edital = buscarEntidade(editalId);
+        edital.checarPermissaoEdicao();
+
+        EtapaInstancia novaEtapa = EtapaInstancia.clonarDe(
+                request.nome(), request.descricao(), request.ordem(), request.configuracoes()
+        );
+
+        edital.adicionarEtapa(novaEtapa);
+        return EditalResponse.from(editalRepository.save(edital));
+    }
+
+    @Transactional
+    public EditalResponse adicionarCampoGlobalExclusivo(Long editalId, br.edu.ufape.sguEditaisService.features.tipoedital.dto.CriarCampoRequest request) {
+        Edital edital = buscarEntidade(editalId);
+        edital.checarPermissaoEdicao();
+
+        CampoEdital novoCampo = CampoEdital.clonarDe(
+                request.titulo(), request.tipoCampo(), request.obrigatorio(), request.configuracoes()
+        );
+
+        edital.adicionarCampoGlobal(novoCampo);
+        return EditalResponse.from(editalRepository.save(edital));
+    }
+
+    @Transactional
+    public EditalResponse adicionarCampoNaEtapaExclusiva(Long editalId, Long etapaId, br.edu.ufape.sguEditaisService.features.tipoedital.dto.CriarCampoRequest request) {
+        Edital edital = buscarEntidade(editalId);
+        edital.checarPermissaoEdicao();
+
+        EtapaInstancia etapa = edital.getEtapas().stream()
+                .filter(e -> e.getId().equals(etapaId))
+                .findFirst()
+                .orElseThrow(() -> new RegraNegocioException("Etapa não encontrada neste edital."));
+
+        CampoEtapaInstancia novoCampo = CampoEtapaInstancia.clonarDe(
+                request.titulo(), request.tipoCampo(), request.obrigatorio(), request.configuracoes()
+        );
+
+        etapa.adicionarCampo(novoCampo);
+        return EditalResponse.from(editalRepository.save(edital));
+    }
+
+    @Transactional
+    public EditalResponse salvarCronograma(Long editalId, SalvarCronogramaRequest request) {
+        Edital edital = buscarEntidade(editalId);
+
+        List<Edital.PrazoEtapa> prazosDominio = request.prazos().stream()
+                .map(p -> new Edital.PrazoEtapa(p.etapaId(), p.dataInicio(), p.dataFim()))
+                .toList();
+
+        edital.salvarCronograma(prazosDominio);
+        return EditalResponse.from(editalRepository.save(edital));
+    }
+
+    @Transactional
+    public EditalResponse publicarEdital(Long editalId) {
+        Edital edital = buscarEntidade(editalId);
+        edital.publicar(); // Valida se tudo está preenchido e muda o status
+        return EditalResponse.from(editalRepository.save(edital));
+    }
+
+    @Transactional(readOnly = true)
+    public List<EditalResponse> listarTodos() {
+        return editalRepository.findAll()
+                .stream()
+                .map(EditalResponse::from)
+                .toList();
     }
 }

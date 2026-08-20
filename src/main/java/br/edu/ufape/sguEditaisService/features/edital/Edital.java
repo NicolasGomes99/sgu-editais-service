@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,5 +81,71 @@ public class Edital {
         if (this.situacao != SituacaoEdital.PLANEJAMENTO) {
             throw new RegraNegocioException("Editais só podem ter sua estrutura alterada enquanto estiverem em PLANEJAMENTO.");
         }
+    }
+
+    // Record interno
+    public record PrazoEtapa(Long etapaId, LocalDateTime dataInicio, LocalDateTime dataFim) {}
+
+    // AÇÃO A: Salva o rascunho do cronograma validando o que já foi preenchido
+    public void salvarCronograma(List<PrazoEtapa> prazosRecebidos) {
+        this.checarPermissaoEdicao(); // Garante que está em PLANEJAMENTO
+
+        // 1. Aplica as datas enviadas
+        for (PrazoEtapa prazo : prazosRecebidos) {
+            EtapaInstancia etapa = this.etapas.stream()
+                    .filter(e -> e.getId().equals(prazo.etapaId()))
+                    .findFirst()
+                    .orElseThrow(() -> new RegraNegocioException("Etapa ID " + prazo.etapaId() + " não pertence a este edital."));
+
+            if (prazo.dataInicio() != null && prazo.dataFim() != null && prazo.dataInicio().isAfter(prazo.dataFim())) {
+                throw new RegraNegocioException("Na etapa '" + etapa.getNome() + "', a data de início não pode ser posterior à data de fim.");
+            }
+            etapa.definirDatas(prazo.dataInicio(), prazo.dataFim());
+        }
+
+        // 2. Validação Cronológica Inteligente (ignora as etapas que ainda não têm data)
+        List<EtapaInstancia> etapasOrdenadas = new ArrayList<>(this.etapas);
+        etapasOrdenadas.sort((e1, e2) -> e1.getOrdem().compareTo(e2.getOrdem()));
+
+        EtapaInstancia etapaAnteriorComData = null;
+        for (EtapaInstancia etapaAtual : etapasOrdenadas) {
+            if (etapaAtual.getDataInicio() == null) continue; // Pula as que estão "em branco"
+
+            if (etapaAnteriorComData != null && etapaAtual.getDataInicio().isBefore(etapaAnteriorComData.getDataInicio())) {
+                throw new RegraNegocioException(
+                        "Conflito Cronológico: A etapa '" + etapaAtual.getNome() + "' (Ordem " + etapaAtual.getOrdem() +
+                                ") não pode começar antes da etapa '" + etapaAnteriorComData.getNome() + "' (Ordem " + etapaAnteriorComData.getOrdem() + ")."
+                );
+            }
+            etapaAnteriorComData = etapaAtual;
+        }
+    }
+
+    // AÇÃO B: O Guardião da Publicação Final
+    public void publicar() {
+        this.checarPermissaoEdicao();
+
+        if (this.etapas.isEmpty()) {
+            throw new RegraNegocioException("Não é possível publicar um edital sem etapas.");
+        }
+
+        // Exige rigorosamente que nada esteja vazio
+        for (EtapaInstancia etapa : this.etapas) {
+            if (etapa.getDataInicio() == null || etapa.getDataFim() == null) {
+                throw new RegraNegocioException("Falha na publicação: A etapa '" + etapa.getNome() + "' está sem datas definidas.");
+            }
+        }
+
+        this.situacao = SituacaoEdital.PUBLICADO;
+    }
+
+    public EtapaInstancia obterEtapaVigente() {
+        LocalDateTime agora = LocalDateTime.now();
+
+        return this.etapas.stream()
+                .filter(e -> e.getDataInicio() != null && e.getDataFim() != null) // Ignora etapas não agendadas
+                .filter(e -> !agora.isBefore(e.getDataInicio()) && !agora.isAfter(e.getDataFim())) // Checa a intersecção do tempo
+                .findFirst()
+                .orElse(null);
     }
 }

@@ -68,4 +68,9 @@ public class EtapaInstancia {
         this.campos.add(campo);
         campo.vincularAEtapa(this);
     }
+
+    public void definirDatas(LocalDateTime inicio, LocalDateTime fim) {
+        this.dataInicio = inicio;
+        this.dataFim = fim;
+    }
 }

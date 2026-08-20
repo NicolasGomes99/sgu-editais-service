@@ -12,6 +12,7 @@ public record EditalResponse(
         Long cursoId,
         SituacaoEdital situacao,
         Long tipoEditalOrigemId,
+        Long etapaVigenteId,
         List<EtapaInstanciaResponse> etapas,
         List<CampoEditalResponse> camposGlobais
 ) {
@@ -23,6 +24,7 @@ public record EditalResponse(
                 edital.getCursoId(),
                 edital.getSituacao(),
                 edital.getTipoEditalOrigem().getId(),
+                edital.obterEtapaVigente() != null ? edital.obterEtapaVigente().getId() : null,
                 edital.getEtapas().stream().map(EtapaInstanciaResponse::from).toList(),
                 edital.getCamposGlobais().stream().map(CampoEditalResponse::from).toList()
         );

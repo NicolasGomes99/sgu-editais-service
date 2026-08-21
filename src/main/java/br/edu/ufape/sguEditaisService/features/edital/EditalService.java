@@ -43,6 +43,7 @@ public class EditalService {
                     campoMolde.isObrigatorio(),
                     campoMolde.getConfiguracoes()
             );
+            campoClone.marcarComoHerdado();
             editalInstanciado.adicionarCampoGlobal(campoClone);
         });
 
@@ -54,6 +55,7 @@ public class EditalService {
                     etapaMolde.getOrdem(),
                     etapaMolde.getConfiguracoes()
             );
+            etapaClone.marcarComoHerdado();
 
             // Laço interno: clonar os campos específicos desta etapa
             etapaMolde.getCamposEtapa().forEach(campoEtapaMolde -> {
@@ -63,6 +65,7 @@ public class EditalService {
                         campoEtapaMolde.isObrigatorio(),
                         campoEtapaMolde.getConfiguracoes()
                 );
+                campoEtapaClone.marcarComoHerdado();
                 etapaClone.adicionarCampo(campoEtapaClone);
             });
 
@@ -158,4 +161,64 @@ public class EditalService {
                 .map(EditalResponse::from)
                 .toList();
     }
+
+    @Transactional
+    public EditalResponse deletarEtapaExclusiva(Long editalId, Long etapaId) {
+        Edital edital = buscarEntidade(editalId);
+        edital.checarPermissaoEdicao();
+
+        EtapaInstancia etapa = edital.getEtapas().stream()
+                .filter(e -> e.getId().equals(etapaId))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("EtapaInstancia", etapaId));
+
+        if (etapa.isHerdadoDoModelo()) {
+            throw new RegraNegocioException("Não é permitido excluir uma etapa que faz parte da estrutura obrigatória do modelo.");
+        }
+
+        edital.getEtapas().remove(etapa);
+        return EditalResponse.from(editalRepository.save(edital));
+    }
+
+    @Transactional
+    public EditalResponse deletarCampoGlobalExclusivo(Long editalId, Long campoId) {
+        Edital edital = buscarEntidade(editalId);
+        edital.checarPermissaoEdicao();
+
+        CampoEdital campo = edital.getCamposGlobais().stream()
+                .filter(c -> c.getId().equals(campoId))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("CampoEdital", campoId));
+
+        if (campo.isHerdadoDoModelo()) {
+            throw new RegraNegocioException("Não é permitido excluir um campo que faz parte da estrutura obrigatória do modelo.");
+        }
+
+        edital.getCamposGlobais().remove(campo);
+        return EditalResponse.from(editalRepository.save(edital));
+    }
+
+    @Transactional
+    public EditalResponse deletarCampoNaEtapaExclusiva(Long editalId, Long etapaId, Long campoId) {
+        Edital edital = buscarEntidade(editalId);
+        edital.checarPermissaoEdicao();
+
+        EtapaInstancia etapa = edital.getEtapas().stream()
+                .filter(e -> e.getId().equals(etapaId))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("EtapaInstancia", etapaId));
+
+        CampoEtapaInstancia campo = etapa.getCampos().stream()
+                .filter(c -> c.getId().equals(campoId))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("CampoEtapaInstancia", campoId));
+
+        if (campo.isHerdadoDoModelo()) {
+            throw new RegraNegocioException("Não é permitido excluir um campo que faz parte da estrutura obrigatória do modelo.");
+        }
+
+        etapa.getCampos().remove(campo);
+        return EditalResponse.from(editalRepository.save(edital));
+    }
+
 }

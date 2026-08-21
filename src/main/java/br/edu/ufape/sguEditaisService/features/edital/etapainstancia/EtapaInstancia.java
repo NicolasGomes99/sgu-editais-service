@@ -40,6 +40,9 @@ public class EtapaInstancia {
     private LocalDateTime dataInicio;
     private LocalDateTime dataFim;
 
+    @Column(nullable = false)
+    private boolean herdadoDoModelo = false;
+
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private String configuracoes;
@@ -73,4 +76,9 @@ public class EtapaInstancia {
         this.dataInicio = inicio;
         this.dataFim = fim;
     }
+
+    public void marcarComoHerdado() {
+        this.herdadoDoModelo = true;
+    }
+
 }

@@ -8,6 +8,7 @@ public record CampoEtapaInstanciaResponse(
         String titulo,
         TipoCampo tipoCampo,
         boolean obrigatorio,
+        boolean herdadoDoModelo,
         String configuracoes
 ) {
     public static CampoEtapaInstanciaResponse from(CampoEtapaInstancia campo) {
@@ -16,6 +17,7 @@ public record CampoEtapaInstanciaResponse(
                 campo.getTitulo(),
                 campo.getTipoCampo(),
                 campo.isObrigatorio(),
+                campo.isHerdadoDoModelo(),
                 campo.getConfiguracoes()
         );
     }

@@ -8,6 +8,7 @@ public record CampoEditalResponse(
         String titulo,
         TipoCampo tipoCampo,
         boolean obrigatorio,
+        boolean herdadoDoModelo,
         String configuracoes
 ) {
     public static CampoEditalResponse from(CampoEdital campo) {
@@ -16,6 +17,7 @@ public record CampoEditalResponse(
                 campo.getTitulo(),
                 campo.getTipoCampo(),
                 campo.isObrigatorio(),
+                campo.isHerdadoDoModelo(),
                 campo.getConfiguracoes()
         );
     }

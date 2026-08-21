@@ -66,4 +66,27 @@ public class EditalController {
     public ResponseEntity<List<EditalResponse>> listarTodos() {
         return ResponseEntity.ok(editalService.listarTodos());
     }
+
+    @DeleteMapping("/{id}/etapas/{etapaId}")
+    public ResponseEntity<EditalResponse> deletarEtapaExclusiva(
+            @PathVariable Long id,
+            @PathVariable Long etapaId) {
+        return ResponseEntity.ok(editalService.deletarEtapaExclusiva(id, etapaId));
+    }
+
+    @DeleteMapping("/{id}/campos/{campoId}")
+    public ResponseEntity<EditalResponse> deletarCampoGlobalExclusivo(
+            @PathVariable Long id,
+            @PathVariable Long campoId) {
+        return ResponseEntity.ok(editalService.deletarCampoGlobalExclusivo(id, campoId));
+    }
+
+    @DeleteMapping("/{id}/etapas/{etapaId}/campos/{campoId}")
+    public ResponseEntity<EditalResponse> deletarCampoNaEtapaExclusiva(
+            @PathVariable Long id,
+            @PathVariable Long etapaId,
+            @PathVariable Long campoId) {
+        return ResponseEntity.ok(editalService.deletarCampoNaEtapaExclusiva(id, etapaId, campoId));
+    }
+
 }

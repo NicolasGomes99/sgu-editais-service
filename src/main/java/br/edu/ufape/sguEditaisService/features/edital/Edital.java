@@ -51,6 +51,9 @@ public class Edital {
     @JoinColumn(name = "tipo_edital_id", nullable = false, updatable = false)
     private TipoEdital tipoEditalOrigem;
 
+    @Column(nullable = false)
+    private boolean herdadoDoModelo = false;
+
     @OneToMany(mappedBy = "edital", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<EtapaInstancia> etapas = new ArrayList<>();
 
@@ -148,4 +151,9 @@ public class Edital {
                 .findFirst()
                 .orElse(null);
     }
+
+    public void marcarComoHerdado() {
+        this.herdadoDoModelo = true;
+    }
+
 }

@@ -17,6 +17,9 @@ public class CampoEtapaInstancia extends CampoPersonalizado {
     @JoinColumn(name = "etapa_instancia_id", nullable = false)
     private EtapaInstancia etapaInstancia;
 
+    @Column(nullable = false)
+    private boolean herdadoDoModelo = false;
+
     private CampoEtapaInstancia(String titulo, TipoCampo tipoCampo, boolean obrigatorio, String configuracoes) {
         super(titulo, tipoCampo, obrigatorio, configuracoes);
     }
@@ -28,4 +31,9 @@ public class CampoEtapaInstancia extends CampoPersonalizado {
     public void vincularAEtapa(EtapaInstancia etapa) {
         this.etapaInstancia = etapa;
     }
+
+    public void marcarComoHerdado() {
+        this.herdadoDoModelo = true;
+    }
+
 }

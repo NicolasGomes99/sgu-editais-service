@@ -12,6 +12,7 @@ public record EtapaInstanciaResponse(
         Integer ordem,
         LocalDateTime dataInicio,
         LocalDateTime dataFim,
+        boolean herdadoDoModelo,
         String configuracoes,
         List<CampoEtapaInstanciaResponse> campos
 ) {
@@ -23,6 +24,7 @@ public record EtapaInstanciaResponse(
                 etapa.getOrdem(),
                 etapa.getDataInicio(),
                 etapa.getDataFim(),
+                etapa.isHerdadoDoModelo(),
                 etapa.getConfiguracoes(),
                 etapa.getCampos().stream().map(CampoEtapaInstanciaResponse::from).toList()
         );
